@@ -6,7 +6,10 @@ that play nice with the Cinema 4D Python API. The most important tools are the
 automated resource parser and self-contained library importer.
 
 The `c4dtools` library is throughly documented and fullfills most of the rules
-defined in PEP8.
+defined in PEP8. The library is fast as well. The resource-symbol loading will
+be cached by default (resulting in a file called c4d_symbols.cache, encoded
+in JSON format) to speed-up loading of the symbols. If the original c4d_symbols.h
+file is changed, the cache is rebuilt.
 
 For the beginning:
 
@@ -56,5 +59,3 @@ For the beginning:
     # on the main-run of the python-plugin.
     if __name__ == '__main__':
         c4dtools.plugins.main()
-
-
