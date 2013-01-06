@@ -35,8 +35,8 @@ For the beginning:
         def InitValues(self):
             # Load strings from the `res/strings_xx/c4d_strings.str` file
             # via `res.string`.
-            string_1 = res.string.IDC_MYSTRING()
-            string_2 = res.string.IDC_MYSTRING_WITHPARAMS("Peter")
+            string_1 = res.string.IDC_MYSTRING_1()
+            string_2 = res.string.IDC_MYSTRING_2("Peter")
 
             self.SetString(res.EDT_STRING1, string_1)
             self.SetString(res.EDT_STRING2, string_2)
