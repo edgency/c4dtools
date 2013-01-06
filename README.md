@@ -11,6 +11,8 @@ be cached by default (resulting in a file called c4d_symbols.cache, encoded
 in JSON format) to speed-up loading of the symbols. If the original c4d_symbols.h
 file is changed, the cache is rebuilt.
 
+The [XPAT][1] plugin relies heavily on this library.
+
 For the beginning:
 
     import c4d
@@ -59,3 +61,5 @@ For the beginning:
     # on the main-run of the python-plugin.
     if __name__ == '__main__':
         c4dtools.plugins.main()
+
+  [1]: https://github.com/NiklasRosenstein/XPAT
