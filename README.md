@@ -1,5 +1,6 @@
-c4dtools - Utilities for the Cinema 4D Python API
-=================================================
+
+c4dtools - Scriptint Utilities for the Cinema 4D Python API
+===========================================================
 
 `c4dtools` is a lightweight library providing convenient classes and functions
 that play nice with the Cinema 4D Python API. The most important tools are the
@@ -11,9 +12,29 @@ be cached by default (resulting in a file called c4d_symbols.cache, encoded
 in JSON format) to speed-up loading of the symbols. If the original c4d_symbols.h
 file is changed, the cache is rebuilt.
 
-The [XPAT][1] plugin relies heavily on this library.
+## For Cinema 4D User
 
-For the beginning:
+The `c4dtools` library is **not a plugin**. But it may be required by a plugin,
+that is why you might need to install it.
+
+## Installation
+
+The `c4dtools` library is casual Python package. For the Python interpreter
+embedded into Cinema 4D to find it, you need to install it into the preferences
+folder of your Cinema 4D installation.
+
+1. Download and unpack the `c4dtools` library from github.
+2. Goto the Cinema 4D preferences and press the "Open Preferences Folder..."
+   button in the bottom left.
+3. From the folder that has opened, navigat to `library > python > packages`.
+   The next folder you select depends on your OS.
+4. Copy the `c4dtools`, the one containing all the `*.py` files, directly into
+   the folder specific to your OS.
+
+To install a new version of the library, simply delete the old `c4dtools` folder
+and paste the new one.
+
+## Example Code
 
 ```python
 import c4d
@@ -65,3 +86,5 @@ if __name__ == '__main__':
 ```
 
   [1]: https://github.com/NiklasRosenstein/XPAT
+
+
