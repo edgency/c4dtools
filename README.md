@@ -13,10 +13,9 @@ file is changed, the cache is rebuilt.
 
 ## For Cinema 4D User
 
-The `c4dtools` library is **not a plugin**. It is a code library that can be used
-to make things easier when writing plugins. Just like a plugin makes your life easier,
-this library makes the life of the developer easier. A plugin that relies on this
-library requires you to install it before the actual plugin can be used.
+The `c4dtools` is **not a plugin**. It is "add on" code that can be used by devlopers
+to make their life easier. A plugin that relies on this library requires you to install
+`c4dtools` before it can be used (the plugin will not even register to Cinema4D).
 
 ## Installation
 
