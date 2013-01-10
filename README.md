@@ -1,5 +1,4 @@
-
-c4dtools - Scriptint Utilities for the Cinema 4D Python API
+c4dtools - Scripting Utilities for the Cinema 4D Python API
 ===========================================================
 
 `c4dtools` is a lightweight library providing convenient classes and functions
@@ -14,8 +13,9 @@ file is changed, the cache is rebuilt.
 
 ## For Cinema 4D User
 
-The `c4dtools` library is **not a plugin**. But it may be required by a plugin,
-that is why you might need to install it.
+The `c4dtools` library is **not a plugin**. It is a code library that can be used
+to make things easier when writing plugins. A plugom that relies on this library
+requires you to install the it before the plugin can be used.
 
 ## Installation
 
@@ -33,6 +33,12 @@ folder of your Cinema 4D installation.
 
 To install a new version of the library, simply delete the old `c4dtools` folder
 and paste the new one.
+
+## Alternative Installation
+
+Add a directory to the `PYTHONPATH` environment variable where you put in the
+`c4dtools` library folder. Again, the library folder is *only* the one containing
+all the `*.py` files.
 
 ## Example Code
 
