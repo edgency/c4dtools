@@ -1,6 +1,11 @@
 # coding: utf-8
 #
 # Copyright (C) 2012, Niklas Rosenstein
+# Licensed under the GNU General Public License
+r"""
+c4dtools.resource
+~~~~~~~~~~~~~~~~~
+"""
 
 import os
 import re
@@ -25,9 +30,9 @@ def load(filename, use_cache=True, cache_suffix='cache'):
     The advantage of caching the symbols in a seperate file is the
     improved speed of reading in the symbols.
 
-    Returns: A dictionary of the loaded symbols.
-    Raises:  OSError if *filename* does not exist or does not point to a
-             file.
+    :Returns: A dictionary of the loaded symbols.
+    :Raises:  OSError if *filename* does not exist or does not point to a
+              file.
     """
 
     if not os.path.isfile(filename):
@@ -51,6 +56,12 @@ def load(filename, use_cache=True, cache_suffix='cache'):
             fp.close()
 
         if isinstance(data, dict):
+            # Convert every key in the dictionary from unicode to
+            # a string.
+            for key, value in data.items():
+                del data[key]
+                data[key.encode('utf-8')] = value
+
             load_from_source = False
             symbols = data
         elif data is not None:
@@ -127,20 +138,45 @@ class Resource(object):
         return self.symbols[name]
 
     def get(self, name):
+        r"""
+        Returns the value of the symbol with the passed name, or raises
+        KeyError if no symbol was found.
+        """
         return self.symbols[name]
 
-    def file(self, filename):
+    def file(self, *path_parts):
         r"""
         Concatenate the resource folders path with the passed filename.
         """
+        return os.path.join(self.dirname, *path_parts)
 
-        return os.path.join(self.dirname, filename)
+    def add_symbols(self, symbols):
+        r"""
+        Add the dictionary *symbols* to the resources symbols.
+
+        Raises: TypeError if *symbols* is not a dict instance.
+                KeyError if a key in *symbols* is already defined in the
+                resource and their value differs.
+        """
+
+        if not isinstance(symbols, dict):
+            raise TypeError('expected dict, got %s' %
+                            symbols.__class__.__name__)
+
+        res_symbols = self.symbols
+        for key, value in symbols.iteritems():
+            if key in res_symbols and res_symbols[key] != value:
+                msg = 'key %r already defined in the resource and ' \
+                      'the value differs from the updating symbols.'
+                raise KeyError(msg % key)
+
+        res_symbols.update(symbols)
 
 class StringLoader(object):
     r"""
-    This class is used to conveniently loading string from the
+    This class is used for conveniently loading strings from the
     c4d_strings.str file. It is basically a wrapper for the
-    `c4d.plugin.GeLoadString` function. Accessing an attribute on
+    ``c4d.plugin.GeLoadString`` function. Accessing an attribute on
     an instance of this class will return a callable object accepting
     the same parameters as the previously mentioned API call, but with
     the symbol-id already passed.

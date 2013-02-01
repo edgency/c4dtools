@@ -1,15 +1,22 @@
 # coding: utf-8
 #
 # Copyright (C) 2012, Niklas Rosenstein
+# Licensed under the GNU General Public License
+r"""
+c4dtools.plugins
+~~~~~~~~~~~~~~~~
+"""
 
+import os
+import sys
 import c4d
 
 class Command(c4d.plugins.CommandData):
     r"""
     This class is wrapping the CommandData class to make the
     registration of plugins of this kind easier. Subclasses are
-    automatically registered on `c4dtools.plugins.main()` unless
-    `autoregister` evaluates to False.
+    automatically registered on ``c4dtools.plugins.main()`` unless
+    ``autoregister`` evaluates to False.
 
     An instance of a subclass of this class must provide the following
     attributes to be successfully registered:
@@ -23,6 +30,7 @@ class Command(c4d.plugins.CommandData):
 
     # This attribute is set from `c4dtools.plugins.main()`.
     detected = False
+    is_registered = False
     autoregister = True
 
     PLUGIN_INFO = c4d.PLUGINFLAG_COMMAND_HOTKEY
@@ -36,11 +44,11 @@ class Command(c4d.plugins.CommandData):
         """
 
         if self.PLUGIN_ICON:
-            if not isinstance(self.PLUGIN_ICON, c4d.bitmaps.BaseBitmap):
+            if isinstance(self.PLUGIN_ICON, c4d.bitmaps.BaseBitmap):
+                icon = self.PLUGIN_ICON
+            else:
                 icon = c4d.bitmaps.BaseBitmap()
                 icon.InitWith(self.PLUGIN_ICON)
-            else:
-                icon = self.PLUGIN_ICON
         else:
             icon = None
 
@@ -49,7 +57,7 @@ class Command(c4d.plugins.CommandData):
             self.PLUGIN_HELP, self)
 
         if result:
-            self.__class__.is_registered = True
+            self.is_registered = True
         return result
 
 def gather_subclasses(clazz):

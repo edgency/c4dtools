@@ -1,64 +1,14 @@
 # coding: utf-8
 #
 # Copyright (C) 2012, Niklas Rosenstein
+# Licensed under the GNU General Public License
+r"""
+c4dtools.helpers
+~~~~~~~~~~~~~~~~
 
-import os
-import sys
-import imp
-
-class Importer(object):
-    r"""
-    Use this class to enable importing modules from specific
-    directories independent from `sys.path`.
-    """
-
-    def __init__(self):
-        super(Importer, self).__init__()
-        self.path = []
-
-    def add(self, *paths):
-        r"""
-        Add the passed strings to the search-path for importing
-        modules. Raises TypeError if non-string object was passed.
-        Passed paths are automatically expanded.
-        """
-
-        new_paths = []
-        for path in paths:
-            if not isinstance(path, basestring):
-                raise TypeError('passed argument must be string.')
-            path = os.path.expanduser(path)
-            new_paths.append(path)
-
-        self.path.extend(new_paths)
-
-    def import_(self, name, load_globally=False):
-        r"""
-        Import the module with the given name from the directories
-        added to the Importer. The loaded module will not be inserted
-        into `sys.modules` unless `load_globally` is True.
-        """
-
-        prev_module = None
-        if name in sys.modules and not load_globally:
-            prev_module = sys.modules[name]
-            del sys.modules[name]
-
-        data = imp.find_module(name, self.path)
-        try:
-            return imp.load_module(name, *data)
-        except:
-            data[0].close()
-            raise
-        finally:
-            # Restore the old module or remove the module that was just
-            # loaded from `sys.modules` only if we do not load the module
-            # globally.
-            if not load_globally:
-                if prev_module:
-                    sys.modules[name] = prev_module
-                else:
-                    del sys.modules[name]
+This module defines content that has a rather generic purpose, unlike
+the contents of the :mod:`c4dtools.utils` module.
+"""
 
 class Attributor(object):
     r"""
@@ -96,3 +46,9 @@ class Attributor(object):
             raise TypeError('expected dictionary.')
 
         self.dict_.update(another_dict)
+
+    def __copy__(self):
+        return Attributor(copy.copy(self.dict_))
+
+    def __deepcopy__(self):
+        return Attributor(copy.deepcopy(self.dict_))
