@@ -1,0 +1,715 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to the c4dtools documentation! &mdash; c4dtools 1.01 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.01',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="c4dtools 1.01 documentation" href="#" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">c4dtools 1.01 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-c4dtools">
+<span id="welcome-to-the-c4dtools-documentation"></span><h1>Welcome to the <tt class="docutils literal"><span class="pre">c4dtools</span></tt> documentation!<a class="headerlink" href="#module-c4dtools" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="c4dtools-a-utility-library-for-the-cinema-4d-python-api">
+<h2>c4dtools - A utility library for the Cinema 4D Python API<a class="headerlink" href="#c4dtools-a-utility-library-for-the-cinema-4d-python-api" title="Permalink to this headline">¶</a></h2>
+<p>The <tt class="docutils literal"><span class="pre">c4dtools</span></tt> module is a thin Python library created by Niklas Rosenstein.
+It provides functions and classes for the everyday work with Python in
+Cinema 4D. The most significant feature is the cached parsing of dialog
+symbols, see <a class="reference internal" href="#c4dtools.prepare" title="c4dtools.prepare"><tt class="xref py py-func docutils literal"><span class="pre">c4dtools.prepare()</span></tt></a>.</p>
+<dl class="function">
+<dt id="c4dtools.prepare">
+<tt class="descclassname">c4dtools.</tt><tt class="descname">prepare</tt><big>(</big><em>filename</em>, <em>cache_symbols=True</em>, <em>libfolder_name='lib'</em>, <em>resfolder_name='res'</em>, <em>parse_descriptions=False</em><big>)</big><a class="reference internal" href="_modules/c4dtools.html#prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call this function from a Cinema 4D python plugin-file (*.pyp) to
+set up convenient data that can be used from the plugin.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><ul class="first simple">
+<li>filename: Just pass the <tt class="docutils literal"><span class="pre">__file__</span></tt> variable from the plugins
+global scope.</li>
+<li>cache_symbols: True by default. Defines wether the resource
+symbols will be cached.</li>
+<li>libfolder_name: The name of the folder the plugin related
+libraries are stored. The returned Importer instance will
+be able to load python modules and packages from this
+directory.</li>
+<li>resfolder_name: The name of the plugins resource folder. This
+usually does not need to be changed as the name of this folder
+is defined by Cinema 4D.</li>
+<li>parse_descriptions: False by default. When True, description
+resource symbols will parsed additionally to the dialog
+resource symbols. Note that strings can <em>not</em> be loaded from
+symbols of description resources.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first">A tuple of two elements.</p>
+<ol class="last arabic simple" start="0">
+<li><a class="reference internal" href="#c4dtools.resource.Resource" title="c4dtools.resource.Resource"><tt class="xref py py-class docutils literal"><span class="pre">c4dtools.resource.Resource</span></tt></a> instance.</li>
+<li><a class="reference internal" href="#c4dtools.utils.Importer" title="c4dtools.utils.Importer"><tt class="xref py py-class docutils literal"><span class="pre">c4dtools.utils.Importer</span></tt></a> instance.</li>
+</ol>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<span class="target" id="module-c4dtools.utils"></span><div class="section" id="c4dtools-utils">
+<h2>c4dtools.utils<a class="headerlink" href="#c4dtools-utils" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="c4dtools.utils.FileChangedChecker">
+<em class="property">class </em><tt class="descclassname">c4dtools.utils.</tt><tt class="descname">FileChangedChecker</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#FileChangedChecker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.FileChangedChecker" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class keeps track of a file on the local filesystem and tell
+you if the specific file has changed since the last time the
+FileChangedChecker was asked this question.</p>
+<p>It can run in two modes: pushing or pulling. With pulling, we mean
+to request the information whether the file has changed or not.
+With pushing, we mean to get notified when the file has changed.
+Pushing comes in connection with threading. Only one thread can be
+run from on FileChangedChecker instance.</p>
+<p>Example for pulling:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">f</span> <span class="o">=</span> <span class="n">FileChangedChecker</span><span class="p">(</span><span class="n">my_filename</span><span class="p">)</span>
+<span class="c"># ...</span>
+<span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">has_changed</span><span class="p">():</span>
+    <span class="k">print</span> <span class="p">(</span><span class="s">&quot;File </span><span class="si">%s</span><span class="s"> has changed since `f` has been created.&quot;</span> <span class="o">%</span>
+           <span class="n">f</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Example for pushing:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">f</span> <span class="o">=</span> <span class="n">FileChangedChecker</span><span class="p">(</span><span class="n">my_filename</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">worker</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="k">print</span> <span class="p">(</span><span class="s">&quot;File </span><span class="si">%s</span><span class="s"> has changed since `f` has been created.&quot;</span> <span class="o">%</span>
+           <span class="n">f</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">run_in_background</span><span class="p">(</span><span class="n">worker</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="c4dtools.utils.FileChangedChecker.Worker">
+<em class="property">class </em><tt class="descname">Worker</tt><big>(</big><em>checker</em>, <em>callback</em>, <em>period</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#FileChangedChecker.Worker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.FileChangedChecker.Worker" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the worker class instantiated by the FileChangedChecker
+to run in the background.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.utils.FileChangedChecker.has_changed">
+<tt class="descclassname">FileChangedChecker.</tt><tt class="descname">has_changed</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#FileChangedChecker.has_changed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.FileChangedChecker.has_changed" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns True when file pointed to by the stored
+filename has changed since the last time the FileChangedChecker
+was asked for.</p>
+<dl class="docutils">
+<dt>Note: When the file has not changed since the initialization</dt>
+<dd>of the FileChangedChecker instance, this method will
+return False (i.e. the first call to this function will
+tell you the file has <em>not</em> changed).</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.utils.FileChangedChecker.run_in_background">
+<tt class="descclassname">FileChangedChecker.</tt><tt class="descname">run_in_background</tt><big>(</big><em>callback</em>, <em>period=0.5</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#FileChangedChecker.run_in_background"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.FileChangedChecker.run_in_background" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start a new thread invoking the callable <em>callback</em> passing
+the FileChangedChecker instance when the file it points to
+has changed. <em>period</em> defines the time in seconds that passes
+until the next time the thread checks for the change.</p>
+<dl class="docutils">
+<dt>Raises: RuntimeError when a thread is still running for this</dt>
+<dd>instance.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.utils.FileChangedChecker.stop_background">
+<tt class="descclassname">FileChangedChecker.</tt><tt class="descname">stop_background</tt><big>(</big><em>join=False</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#FileChangedChecker.stop_background"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.FileChangedChecker.stop_background" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stops the background operation started with
+<tt class="docutils literal"><span class="pre">run_in_background()</span></tt>. When <em>join</em> evaluates to True, this
+method will wait until the thread has stopped working before
+terminating.</p>
+<p>Raises: RuntimeError when no thread has been started yet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.utils.FileChangedChecker.worker_ended">
+<tt class="descclassname">FileChangedChecker.</tt><tt class="descname">worker_ended</tt><big>(</big><em>worker</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#FileChangedChecker.worker_ended"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.FileChangedChecker.worker_ended" title="Permalink to this definition">¶</a></dt>
+<dd><p>Not public. This method is called by a FileChangedChecker.Worker
+instance to dispose the worker from the list of not yet
+disposed workers.</p>
+<dl class="docutils">
+<dt>Raises: RuntimeError if <em>worker</em> is not in the list of not yet</dt>
+<dd>disposed workers.
+TypeError if <em>worker</em> is not an instance of
+FileChangedChecker.Worker.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="c4dtools.utils.Filename">
+<em class="property">class </em><tt class="descclassname">c4dtools.utils.</tt><tt class="descname">Filename</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#Filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>A wrapper class for the os.path module.</p>
+<dl class="method">
+<dt id="c4dtools.utils.Filename.iglob">
+<tt class="descname">iglob</tt><big>(</big><em>*glob_exts</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#Filename.iglob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Filename.iglob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a generator yielding all filenames that were found
+by globbing the filename joined with the passed <em>*glob_exts</em>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.utils.Filename.suffix">
+<tt class="descname">suffix</tt><big>(</big><em>new_suffix=None</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#Filename.suffix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Filename.suffix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called with no arguments, this method returns the suffix of the
+filename. When passing a string, the suffix will be exchanged
+to the passed suffix.</p>
+<p>Raises: TypeError when <em>new_suffix</em> is not None and not a string.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="c4dtools.utils.Importer">
+<em class="property">class </em><tt class="descclassname">c4dtools.utils.</tt><tt class="descname">Importer</tt><a class="reference internal" href="_modules/c4dtools/utils.html#Importer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Importer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use this class to enable importing modules from specific
+directories independent from <tt class="docutils literal"><span class="pre">sys.path</span></tt>.</p>
+<dl class="method">
+<dt id="c4dtools.utils.Importer.add">
+<tt class="descname">add</tt><big>(</big><em>*paths</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#Importer.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Importer.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the passed strings to the search-path for importing
+modules. Raises TypeError if non-string object was passed.
+Passed paths are automatically expanded.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.utils.Importer.import_">
+<tt class="descname">import_</tt><big>(</big><em>name</em>, <em>load_globally=False</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#Importer.import_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Importer.import_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import the module with the given name from the directories
+added to the Importer. The loaded module will not be inserted
+into <cite>sys.modules</cite> unless <tt class="docutils literal"><span class="pre">load_globall</span></tt> is True.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="c4dtools.utils.Watch">
+<em class="property">class </em><tt class="descclassname">c4dtools.utils.</tt><tt class="descname">Watch</tt><a class="reference internal" href="_modules/c4dtools/utils.html#Watch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Watch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Utility class for measuring execution-time of code-blocks
+implementing the with-interface.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">Watch</span><span class="p">()</span> <span class="k">as</span> <span class="n">w</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">time_intensive_code</span><span class="p">()</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">w</span><span class="o">.</span><span class="n">delta</span>
+<span class="go">4.32521002</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="c4dtools.utils.Watch.delta">
+<tt class="descname">delta</tt><a class="reference internal" href="_modules/c4dtools/utils.html#Watch.delta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Watch.delta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the difference between the time Watch.start() has been
+and Watch.stop() has been called. If Watch.stop() has not yet
+been invoked, the current time is used.</p>
+<dl class="docutils">
+<dt>Raises: RuntimeError when Watch.start() has not been called</dt>
+<dd>before.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.utils.Watch.reset">
+<tt class="descname">reset</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#Watch.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Watch.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the information and return the Watch into a state where
+time measuring has not been started yet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.utils.Watch.start">
+<tt class="descname">start</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#Watch.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Watch.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the time measuring.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="c4dtools.utils.Watch.started">
+<tt class="descname">started</tt><a class="reference internal" href="_modules/c4dtools/utils.html#Watch.started"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Watch.started" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True when the Watch has been started.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.utils.Watch.stop">
+<tt class="descname">stop</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#Watch.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Watch.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop the time measuring.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises :</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">RuntimeError</span></tt> when <a class="reference internal" href="#c4dtools.utils.Watch.start" title="c4dtools.utils.Watch.start"><tt class="xref py py-func docutils literal"><span class="pre">Watch.start()</span></tt></a> was not
+called before.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="c4dtools.utils.Watch.stopped">
+<tt class="descname">stopped</tt><a class="reference internal" href="_modules/c4dtools/utils.html#Watch.stopped"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Watch.stopped" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True when the Watch has been stopped.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.utils.candidates">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">candidates</tt><big>(</big><em>value</em>, <em>obj</em>, <em>callback=&lt;function &lt;lambda&gt; at 0x035D37F0&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#candidates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.candidates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Searches for <em>value</em> in <em>obj</em> and returns a list of all keys where
+the callback returns True, being passed <em>value</em> as first argument,
+the value to compare it with as the second argument and the name
+of the attribute as the third.</p>
+<p>Returns: list of str</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.utils.change_suffix">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">change_suffix</tt><big>(</big><em>filename</em>, <em>new_suffix</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#change_suffix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.change_suffix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replaces the suffix of the passed filename with <em>new_suffix</em>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.utils.clsname">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">clsname</tt><big>(</big><em>obj</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#clsname"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.clsname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the name of the class of the passed object. This is a shortcut
+for <tt class="docutils literal"><span class="pre">obj.__class__.__name__</span></tt>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.utils.current_state_to_object">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">current_state_to_object</tt><big>(</big><em>op</em>, <em>container=&lt;c4d.BaseContainer object at 0x03937ED0&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#current_state_to_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.current_state_to_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes the passed <cite>c4d.BaseObject</cite> instance an editable object by
+applieng a modeling command on it. The returned object&#8217;s hierarchy
+will consist of Null-Objects and editable objects only.</p>
+<p><em>container</em> is an argument assigned a new c4d.BaseContainer to
+optimize speed and memory usage, but you can pass your own
+c4d.BaseContainer in case you want to pass any additional
+information to the c4d.utils.SendModelingCommand function.</p>
+<p>Example code for the Script Manager:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">c4dtools</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">c4dtools</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">current_state_to_object</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">InsertObject</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="n">c4d</span><span class="o">.</span><span class="n">EventAdd</span><span class="p">()</span>
+
+<span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Raises: TypeError if <em>op</em> is not a c4d.BaseObject instance.
+Returns: c4d.BaseObject</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.utils.file_changed">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">file_changed</tt><big>(</big><em>original</em>, <em>copy</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#file_changed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.file_changed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True when the filename pointed by <em>original</em> was modified
+before the last time <em>copy</em> was modified, False otherwise.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.utils.flush_console">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">flush_console</tt><big>(</big><em>id=13957</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#flush_console"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.flush_console" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flushes the Cinema 4D console.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.utils.iter_container">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">iter_container</tt><big>(</big><em>container</em>, <em>callback=None</em>, <em>level=0</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#iter_container"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.iter_container" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over the passed <em>container</em> being a <tt class="xref py py-class docutils literal"><span class="pre">c4d.BaseContainer</span></tt>
+instance recursively. The <em>callback</em> will be called for each key-value
+pair. The default callback will print out the values in the container.</p>
+<p>The <em>callback</em> is passed the containers key, value and stack-level.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns :</th><td class="field-body">None</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body">TypeError when <em>callback</em> is not callable.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.utils.vbbmid">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">vbbmid</tt><big>(</big><em>vectors</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#vbbmid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.vbbmid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the mid-point of the bounding box spanned by the list
+of vectors. This is different to the arithmetic middle of the
+points.</p>
+<p>Returns: <tt class="xref py py-class docutils literal"><span class="pre">c4d.Vector</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.utils.vmax">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">vmax</tt><big>(</big><em>dest</em>, <em>test</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#vmax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.vmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each component of the vectors <em>dest</em> and <em>test</em>, this function
+writes the upper value of each pairs into the respective component
+of <em>dest</em>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.utils.vmin">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">vmin</tt><big>(</big><em>dest</em>, <em>test</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#vmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.vmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>For each component of the vectors <em>dest</em> and <em>test</em>, this function
+writes the lower value of each pairs into the respective component
+of <em>dest</em>.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-c4dtools.helpers"></span><div class="section" id="c4dtools-helpers">
+<h2>c4dtools.helpers<a class="headerlink" href="#c4dtools-helpers" title="Permalink to this headline">¶</a></h2>
+<p>This module defines content that has a rather generic purpose, unlike
+the contents of the <a class="reference internal" href="#module-c4dtools.utils" title="c4dtools.utils"><tt class="xref py py-mod docutils literal"><span class="pre">c4dtools.utils</span></tt></a> module.</p>
+<dl class="class">
+<dt id="c4dtools.helpers.Attributor">
+<em class="property">class </em><tt class="descclassname">c4dtools.helpers.</tt><tt class="descname">Attributor</tt><big>(</big><em>dict_=None</em><big>)</big><a class="reference internal" href="_modules/c4dtools/helpers.html#Attributor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.helpers.Attributor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instances of this class will allow setting and getting any value
+from the dictionary passed on construction. The dictionary is
+stored in the <cite>dict_</cite> slot of the instance.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-c4dtools.plugins"></span><div class="section" id="c4dtools-plugins">
+<h2>c4dtools.plugins<a class="headerlink" href="#c4dtools-plugins" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="c4dtools.plugins.Command">
+<em class="property">class </em><tt class="descclassname">c4dtools.plugins.</tt><tt class="descname">Command</tt><a class="reference internal" href="_modules/c4dtools/plugins.html#Command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.plugins.Command" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is wrapping the CommandData class to make the
+registration of plugins of this kind easier. Subclasses are
+automatically registered on <tt class="docutils literal"><span class="pre">c4dtools.plugins.main()</span></tt> unless
+<tt class="docutils literal"><span class="pre">autoregister</span></tt> evaluates to False.</p>
+<p>An instance of a subclass of this class must provide the following
+attributes to be successfully registered:</p>
+<ul class="simple">
+<li>PLUGIN_ID</li>
+<li>PLUGIN_NAME</li>
+<li>PLUGIN_HELP</li>
+<li>PLUGIN_INFO [optional]</li>
+<li>PLUGIN_ICON [optional]</li>
+</ul>
+<dl class="method">
+<dt id="c4dtools.plugins.Command.register">
+<tt class="descname">register</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/c4dtools/plugins.html#Command.register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.plugins.Command.register" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method registers the plugin to Cinema 4D by using the data
+set in the instances attributes. See the class-documentation
+for more information.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.plugins.gather_subclasses">
+<tt class="descclassname">c4dtools.plugins.</tt><tt class="descname">gather_subclasses</tt><big>(</big><em>clazz</em><big>)</big><a class="reference internal" href="_modules/c4dtools/plugins.html#gather_subclasses"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.plugins.gather_subclasses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all subclasses that require to be registered.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.plugins.main">
+<tt class="descclassname">c4dtools.plugins.</tt><tt class="descname">main</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/c4dtools/plugins.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.plugins.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gathers all subclasses of the plugin classes in this module and
+registers them to Cinema 4D unless <cite>autoregister</cite> evaluates to
+False.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-c4dtools.library"></span><div class="section" id="c4dtools-library">
+<h2>c4dtools.library<a class="headerlink" href="#c4dtools-library" title="Permalink to this headline">¶</a></h2>
+<p>This module implements functionality for making it possible for
+plugins to interface with each other, i.e. one plugin may depend
+on the functionality of another plugin (even developed from different
+developers).</p>
+<p>A Python plugin may create a Library class that will be (automatically)
+registered to the c4dtools.library mmodule. This library can then be
+loaded from another plugin to establish a Python-level communication
+between these plugins. As the plugin initialization order can not be
+controlled from Python, and there may also exist a circular reference
+to libraries of two or more plugins, references to libraries are always
+lazy and loaded on-request.</p>
+<p>Example library:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">c4dtools</span>
+
+<span class="k">class</span> <span class="nc">MyLibrary</span><span class="p">(</span><span class="n">c4dtools</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">Library</span><span class="p">):</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="c"># Here comes meta information.</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">on_create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&quot;MyLibrary has been created.&quot;</span>
+
+    <span class="k">def</span> <span class="nf">on_install</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">print</span> <span class="s">&quot;MyLibrary has been installed under the name </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="n">name</span>
+
+    <span class="k">def</span> <span class="nf">get_stuff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;This is from MyLibrary!&quot;</span>
+</pre></div>
+</div>
+<p>Nothing more needs to be done. The library is automatically registered
+with the name <tt class="docutils literal"><span class="pre">'MyLibrary'</span></tt>. The name the library is registered with
+can be changed by defining <cite>name=&#8217;libname&#8217;</cite> in the Meta section. When
+registration should be prevented, one needs to define <tt class="docutils literal"><span class="pre">abstract=True</span></tt>
+in the Meta section.</p>
+<p>This library can now be loaded from another Python unit.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">c4dtools</span>
+<span class="n">MyLibrary</span> <span class="o">=</span> <span class="n">c4dtools</span><span class="o">.</span><span class="n">load_library</span><span class="p">(</span><span class="s">&#39;MyLibrary&#39;</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">MyLibrary</span><span class="o">.</span><span class="n">get_stuff</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="c4dtools.library.LazyLibrary">
+<em class="property">class </em><tt class="descclassname">c4dtools.library.</tt><tt class="descname">LazyLibrary</tt><big>(</big><em>libname</em><big>)</big><a class="reference internal" href="_modules/c4dtools/library.html#LazyLibrary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.library.LazyLibrary" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is representing a lazy reference to a library. The actual
+library will be loaded on the first request.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="c4dtools.library.Library">
+<em class="property">class </em><tt class="descclassname">c4dtools.library.</tt><tt class="descname">Library</tt><a class="reference internal" href="_modules/c4dtools/library.html#Library"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.library.Library" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the base class for library objects. It&#8217;s metaclass
+<tt class="docutils literal"><span class="pre">LibraryMeta</span></tt> will automatically turn methods into classmethods
+and will disallow the instantiaton of the class.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="c4dtools.library.LibraryMeta">
+<em class="property">class </em><tt class="descclassname">c4dtools.library.</tt><tt class="descname">LibraryMeta</tt><a class="reference internal" href="_modules/c4dtools/library.html#LibraryMeta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.library.LibraryMeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the meta-class of the Library class. It implements
+automatically registering the Library when the class is
+created, except it is marked as abstract.</p>
+<p>One can mark a Library as abstract when defining a meta-object
+on class-level that contains an attribute <tt class="docutils literal"><span class="pre">abstract</span></tt> that
+evaluates to True. A library must be marked abstract explicitly.
+An abstract library will <em>not</em> be registered.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyLibrary</span><span class="p">(</span><span class="n">Library</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">abstract</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="c"># ...</span>
+</pre></div>
+</div>
+<dl class="classmethod">
+<dt id="c4dtools.library.LibraryMeta.get_library">
+<em class="property">classmethod </em><tt class="descname">get_library</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/c4dtools/library.html#LibraryMeta.get_library"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.library.LibraryMeta.get_library" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds and returns an installed library with the passed name.</p>
+<dl class="docutils">
+<dt>Raises: LibraryNotFound when there is not library with this</dt>
+<dd>name installed.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.library.LibraryMeta.on_create">
+<tt class="descname">on_create</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/c4dtools/library.html#LibraryMeta.on_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.library.LibraryMeta.on_create" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class method is called when the library class instance
+was created.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.library.LibraryMeta.on_install">
+<tt class="descname">on_install</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/c4dtools/library.html#LibraryMeta.on_install"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.library.LibraryMeta.on_install" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class method is called when the library is installed.
+This method will not be called when the library is marked as
+abstract.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="c4dtools.library.LibraryNotFound">
+<em class="property">exception </em><tt class="descclassname">c4dtools.library.</tt><tt class="descname">LibraryNotFound</tt><a class="reference internal" href="_modules/c4dtools/library.html#LibraryNotFound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.library.LibraryNotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>This exception is thrown when a requested library was not found.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-c4dtools.resource"></span><div class="section" id="c4dtools-resource">
+<h2>c4dtools.resource<a class="headerlink" href="#c4dtools-resource" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="c4dtools.resource.Resource">
+<em class="property">class </em><tt class="descclassname">c4dtools.resource.</tt><tt class="descname">Resource</tt><big>(</big><em>dirname</em>, <em>symbols</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#Resource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.Resource" title="Permalink to this definition">¶</a></dt>
+<dd><p>An instance of this class is used to store the symbols of a
+C4D symbols file and several other information to work with
+the resource of a plugin, such as easily grabbing files from
+that folder, etc.</p>
+<dl class="method">
+<dt id="c4dtools.resource.Resource.add_symbols">
+<tt class="descname">add_symbols</tt><big>(</big><em>symbols</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#Resource.add_symbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.Resource.add_symbols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the dictionary <em>symbols</em> to the resources symbols.</p>
+<dl class="docutils">
+<dt>Raises: TypeError if <em>symbols</em> is not a dict instance.</dt>
+<dd>KeyError if a key in <em>symbols</em> is already defined in the
+resource and their value differs.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.resource.Resource.file">
+<tt class="descname">file</tt><big>(</big><em>*path_parts</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#Resource.file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.Resource.file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenate the resource folders path with the passed filename.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.resource.Resource.get">
+<tt class="descname">get</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#Resource.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.Resource.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the value of the symbol with the passed name, or raises
+KeyError if no symbol was found.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="c4dtools.resource.StringLoader">
+<em class="property">class </em><tt class="descclassname">c4dtools.resource.</tt><tt class="descname">StringLoader</tt><big>(</big><em>resource</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#StringLoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.StringLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is used for conveniently loading strings from the
+c4d_strings.str file. It is basically a wrapper for the
+<tt class="docutils literal"><span class="pre">c4d.plugin.GeLoadString</span></tt> function. Accessing an attribute on
+an instance of this class will return a callable object accepting
+the same parameters as the previously mentioned API call, but with
+the symbol-id already passed.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.resource.load">
+<tt class="descclassname">c4dtools.resource.</tt><tt class="descname">load</tt><big>(</big><em>filename</em>, <em>use_cache=True</em>, <em>cache_suffix='cache'</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the symbols of a Cinema 4D resource file. The symbols will be
+loaded directly from the symbols file when <em>use_cache</em> is False. In
+the other case, the symbols are loaded from the cached symbols if
+the symbols haven&#8217;t changed since the cache has been generated. If
+the cache is not available, it will be generated when <em>use_cache</em>
+is True.</p>
+<p>The advantage of caching the symbols in a seperate file is the
+improved speed of reading in the symbols.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns :</th><td class="field-body">A dictionary of the loaded symbols.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body">OSError if <em>filename</em> does not exist or does not point to a
+file.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.resource.parse_symbols">
+<tt class="descclassname">c4dtools.resource.</tt><tt class="descname">parse_symbols</tt><big>(</big><em>string</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#parse_symbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.parse_symbols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse symbols from the passed string containing the enumerations
+to load.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to the <tt class="docutils literal"><span class="pre">c4dtools</span></tt> documentation!</a><ul>
+<li><a class="reference internal" href="#c4dtools-a-utility-library-for-the-cinema-4d-python-api">c4dtools - A utility library for the Cinema 4D Python API</a></li>
+<li><a class="reference internal" href="#c4dtools-utils">c4dtools.utils</a></li>
+<li><a class="reference internal" href="#c4dtools-helpers">c4dtools.helpers</a></li>
+<li><a class="reference internal" href="#c4dtools-plugins">c4dtools.plugins</a></li>
+<li><a class="reference internal" href="#c4dtools-library">c4dtools.library</a></li>
+<li><a class="reference internal" href="#c4dtools-resource">c4dtools.resource</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">c4dtools 1.01 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Niklas Rosenstein.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

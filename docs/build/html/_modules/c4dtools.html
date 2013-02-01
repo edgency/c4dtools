@@ -1,0 +1,177 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>c4dtools &mdash; c4dtools 1.01 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.01',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="c4dtools 1.01 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">c4dtools 1.01 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for c4dtools</h1><div class="highlight"><pre>
+<span class="c"># coding: utf-8</span>
+<span class="c">#</span>
+<span class="c"># Copyright (C) 2012, Niklas Rosenstein</span>
+<span class="c"># Licensed under the GNU General Public License</span>
+<span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">c4dtools - A utility library for the Cinema 4D Python API</span>
+<span class="sd">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="sd">The ``c4dtools`` module is a thin Python library created by Niklas Rosenstein.</span>
+<span class="sd">It provides functions and classes for the everyday work with Python in</span>
+<span class="sd">Cinema 4D. The most significant feature is the cached parsing of dialog</span>
+<span class="sd">symbols, see :func:`c4dtools.prepare`.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;Niklas Rosenstein&#39;</span><span class="p">,</span>
+              <span class="s">&#39;email&#39;</span><span class="p">:</span> <span class="s">&#39;rosensteinniklas@gmail.com&#39;</span><span class="p">}</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+
+<span class="kn">from</span> <span class="nn">c4dtools</span> <span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">resource</span><span class="p">,</span> <span class="n">helpers</span><span class="p">,</span> <span class="n">plugins</span><span class="p">,</span> <span class="n">library</span>
+<span class="kn">from</span> <span class="nn">c4dtools.library</span> <span class="kn">import</span> <span class="n">load_library</span>
+
+<div class="viewcode-block" id="prepare"><a class="viewcode-back" href="../index.html#c4dtools.prepare">[docs]</a><span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">cache_symbols</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">libfolder_name</span><span class="o">=</span><span class="s">&#39;lib&#39;</span><span class="p">,</span>
+            <span class="n">resfolder_name</span><span class="o">=</span><span class="s">&#39;res&#39;</span><span class="p">,</span> <span class="n">parse_descriptions</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Call this function from a Cinema 4D python plugin-file (\*.pyp) to</span>
+<span class="sd">    set up convenient data that can be used from the plugin.</span>
+
+<span class="sd">    :Parameters:</span>
+<span class="sd">        - filename: Just pass the ``__file__`` variable from the plugins</span>
+<span class="sd">          global scope.</span>
+<span class="sd">        - cache_symbols: True by default. Defines wether the resource</span>
+<span class="sd">          symbols will be cached.</span>
+<span class="sd">        - libfolder_name: The name of the folder the plugin related</span>
+<span class="sd">          libraries are stored. The returned Importer instance will</span>
+<span class="sd">          be able to load python modules and packages from this</span>
+<span class="sd">          directory.</span>
+<span class="sd">        - resfolder_name: The name of the plugins resource folder. This</span>
+<span class="sd">          usually does not need to be changed as the name of this folder</span>
+<span class="sd">          is defined by Cinema 4D.</span>
+<span class="sd">        - parse_descriptions: False by default. When True, description</span>
+<span class="sd">          resource symbols will parsed additionally to the dialog</span>
+<span class="sd">          resource symbols. Note that strings can *not* be loaded from</span>
+<span class="sd">          symbols of description resources.</span>
+<span class="sd">    :Returns: A tuple of two elements.</span>
+
+<span class="sd">             0. :class:`c4dtools.resource.Resource` instance.</span>
+<span class="sd">             1. :class:`c4dtools.utils.Importer` instance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">path</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">Attributor</span><span class="p">()</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">res</span> <span class="o">=</span> <span class="n">resfolder_name</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">lib</span> <span class="o">=</span> <span class="n">libfolder_name</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">res</span><span class="p">):</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">res</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">res</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">lib</span><span class="p">):</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">lib</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">lib</span><span class="p">)</span>
+
+    <span class="n">path</span><span class="o">.</span><span class="n">c4d_symbols</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">res</span><span class="p">,</span> <span class="s">&#39;c4d_symbols.h&#39;</span><span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">res</span><span class="p">,</span> <span class="s">&#39;description&#39;</span><span class="p">)</span>
+
+    <span class="n">importer</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Importer</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">lib</span><span class="p">):</span>
+        <span class="n">importer</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">lib</span><span class="p">)</span>
+
+    <span class="n">symbols_container</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">Resource</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">res</span><span class="p">,</span> <span class="p">{})</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">c4d_symbols</span><span class="p">):</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">c4d_symbols</span><span class="p">,</span> <span class="n">cache_symbols</span><span class="p">)</span>
+        <span class="n">symbols_container</span><span class="o">.</span><span class="n">add_symbols</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">parse_descriptions</span><span class="p">:</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="s">&#39;*.h&#39;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">symbols</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">cache_symbols</span><span class="p">)</span>
+            <span class="n">symbols_container</span><span class="o">.</span><span class="n">add_symbols</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">symbols_container</span><span class="p">,</span> <span class="n">importer</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">c4dtools 1.01 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Niklas Rosenstein.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

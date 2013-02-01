@@ -1,0 +1,719 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>c4dtools.utils &mdash; c4dtools 1.01 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.01',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="c4dtools 1.01 documentation" href="../../index.html" />
+    <link rel="up" title="c4dtools" href="../c4dtools.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">c4dtools 1.01 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../c4dtools.html" accesskey="U">c4dtools</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for c4dtools.utils</h1><div class="highlight"><pre>
+<span class="c"># coding: utf-8</span>
+<span class="c">#</span>
+<span class="c"># Copyright (C) 2012, Niklas Rosenstein</span>
+<span class="c"># Licensed under the GNU General Public License</span>
+<span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">c4dtools.utils</span>
+<span class="sd">~~~~~~~~~~~~~~</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">imp</span>
+<span class="kn">import</span> <span class="nn">c4d</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="c"># Path operations</span>
+
+<div class="viewcode-block" id="change_suffix"><a class="viewcode-back" href="../../index.html#c4dtools.utils.change_suffix">[docs]</a><span class="k">def</span> <span class="nf">change_suffix</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">new_suffix</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Replaces the suffix of the passed filename with *new_suffix*.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">index</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="p">[:</span><span class="n">index</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">new_suffix</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="file_changed"><a class="viewcode-back" href="../../index.html#c4dtools.utils.file_changed">[docs]</a><span class="k">def</span> <span class="nf">file_changed</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="n">copy</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Returns True when the filename pointed by *original* was modified</span>
+<span class="sd">    before the last time *copy* was modified, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">original</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">copy</span><span class="p">)</span>
+
+<span class="c"># Vector operations</span>
+</div>
+<div class="viewcode-block" id="vmin"><a class="viewcode-back" href="../../index.html#c4dtools.utils.vmin">[docs]</a><span class="k">def</span> <span class="nf">vmin</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">test</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    For each component of the vectors *dest* and *test*, this function</span>
+<span class="sd">    writes the lower value of each pairs into the respective component</span>
+<span class="sd">    of *dest*.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">test</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">dest</span><span class="o">.</span><span class="n">x</span><span class="p">:</span> <span class="n">dest</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">x</span>
+    <span class="k">if</span> <span class="n">test</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">dest</span><span class="o">.</span><span class="n">y</span><span class="p">:</span> <span class="n">dest</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">y</span>
+    <span class="k">if</span> <span class="n">test</span><span class="o">.</span><span class="n">z</span> <span class="o">&lt;</span> <span class="n">dest</span><span class="o">.</span><span class="n">z</span><span class="p">:</span> <span class="n">dest</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">z</span>
+</div>
+<div class="viewcode-block" id="vmax"><a class="viewcode-back" href="../../index.html#c4dtools.utils.vmax">[docs]</a><span class="k">def</span> <span class="nf">vmax</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">test</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    For each component of the vectors *dest* and *test*, this function</span>
+<span class="sd">    writes the upper value of each pairs into the respective component</span>
+<span class="sd">    of *dest*.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">test</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">dest</span><span class="o">.</span><span class="n">x</span><span class="p">:</span> <span class="n">dest</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">x</span>
+    <span class="k">if</span> <span class="n">test</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">dest</span><span class="o">.</span><span class="n">y</span><span class="p">:</span> <span class="n">dest</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">y</span>
+    <span class="k">if</span> <span class="n">test</span><span class="o">.</span><span class="n">z</span> <span class="o">&gt;</span> <span class="n">dest</span><span class="o">.</span><span class="n">z</span><span class="p">:</span> <span class="n">dest</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">z</span>
+</div>
+<div class="viewcode-block" id="vbbmid"><a class="viewcode-back" href="../../index.html#c4dtools.utils.vbbmid">[docs]</a><span class="k">def</span> <span class="nf">vbbmid</span><span class="p">(</span><span class="n">vectors</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Returns the mid-point of the bounding box spanned by the list</span>
+<span class="sd">    of vectors. This is different to the arithmetic middle of the</span>
+<span class="sd">    points.</span>
+
+<span class="sd">    Returns: :class:`c4d.Vector`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">vectors</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">c4d</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="nb">min</span> <span class="o">=</span> <span class="n">c4d</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="n">vectors</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="nb">max</span> <span class="o">=</span> <span class="n">c4d</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="nb">min</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vectors</span><span class="p">:</span>
+        <span class="n">vmin</span><span class="p">(</span><span class="nb">min</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="n">vmax</span><span class="p">(</span><span class="nb">max</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="nb">min</span> <span class="o">+</span> <span class="nb">max</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+
+<span class="c"># Several utilities</span>
+</div>
+<div class="viewcode-block" id="clsname"><a class="viewcode-back" href="../../index.html#c4dtools.utils.clsname">[docs]</a><span class="k">def</span> <span class="nf">clsname</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Return the name of the class of the passed object. This is a shortcut</span>
+<span class="sd">    for ``obj.__class__.__name__``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+</div>
+<div class="viewcode-block" id="candidates"><a class="viewcode-back" href="../../index.html#c4dtools.utils.candidates">[docs]</a><span class="k">def</span> <span class="nf">candidates</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="k">lambda</span> <span class="n">vref</span><span class="p">,</span> <span class="n">vcmp</span><span class="p">,</span> <span class="n">kcmp</span><span class="p">:</span> <span class="n">vref</span> <span class="o">==</span> <span class="n">vcmp</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Searches for *value* in *obj* and returns a list of all keys where</span>
+<span class="sd">    the callback returns True, being passed *value* as first argument,</span>
+<span class="sd">    the value to compare it with as the second argument and the name</span>
+<span class="sd">    of the attribute as the third.</span>
+
+<span class="sd">    Returns: list of str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">callback</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">results</span>
+</div>
+<div class="viewcode-block" id="flush_console"><a class="viewcode-back" href="../../index.html#c4dtools.utils.flush_console">[docs]</a><span class="k">def</span> <span class="nf">flush_console</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="mi">13957</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Flushes the Cinema 4D console.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">c4d</span><span class="o">.</span><span class="n">CallCommand</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="iter_container"><a class="viewcode-back" href="../../index.html#c4dtools.utils.iter_container">[docs]</a><span class="k">def</span> <span class="nf">iter_container</span><span class="p">(</span><span class="n">container</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Iterate over the passed *container* being a :class:`c4d.BaseContainer`</span>
+<span class="sd">    instance recursively. The *callback* will be called for each key-value</span>
+<span class="sd">    pair. The default callback will print out the values in the container.</span>
+
+<span class="sd">    The *callback* is passed the containers key, value and stack-level.</span>
+
+<span class="sd">    :Returns: None</span>
+<span class="sd">    :Raises:  TypeError when *callback* is not callable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">callback</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">level</span> <span class="o">*</span> <span class="s">&#39;    &#39;</span><span class="p">)</span>
+            <span class="k">print</span> <span class="n">key</span><span class="p">,</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">c4d</span><span class="o">.</span><span class="n">BaseContainer</span><span class="p">):</span>
+                <span class="k">print</span> <span class="s">&quot;Container:&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;:&quot;</span><span class="p">,</span> <span class="n">value</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Callable</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;expected callback to be a callable instance.&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">container</span><span class="p">:</span>
+        <span class="n">callback</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">c4d</span><span class="o">.</span><span class="n">BaseContainer</span><span class="p">):</span>
+            <span class="n">print_container</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="current_state_to_object"><a class="viewcode-back" href="../../index.html#c4dtools.utils.current_state_to_object">[docs]</a><span class="k">def</span> <span class="nf">current_state_to_object</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">container</span><span class="o">=</span><span class="n">c4d</span><span class="o">.</span><span class="n">BaseContainer</span><span class="p">()):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Makes the passed `c4d.BaseObject` instance an editable object by</span>
+<span class="sd">    applieng a modeling command on it. The returned object&#39;s hierarchy</span>
+<span class="sd">    will consist of Null-Objects and editable objects only.</span>
+
+<span class="sd">    *container* is an argument assigned a new c4d.BaseContainer to</span>
+<span class="sd">    optimize speed and memory usage, but you can pass your own</span>
+<span class="sd">    c4d.BaseContainer in case you want to pass any additional</span>
+<span class="sd">    information to the c4d.utils.SendModelingCommand function.</span>
+
+<span class="sd">    Example code for the Script Manager:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        import c4dtools</span>
+
+<span class="sd">        def main():</span>
+<span class="sd">            obj = c4dtools.utils.current_state_to_object(op)</span>
+<span class="sd">            doc.InsertObject(obj)</span>
+<span class="sd">            c4d.EventAdd()</span>
+
+<span class="sd">        main()</span>
+
+<span class="sd">    Raises: TypeError if *op* is not a c4d.BaseObject instance.</span>
+<span class="sd">    Returns: c4d.BaseObject</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">c4d</span><span class="o">.</span><span class="n">BaseObject</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;expected c4d.BaseObject, got </span><span class="si">%s</span><span class="s">.&#39;</span> <span class="o">%</span>
+                        <span class="n">op</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">GetDocument</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">doc</span><span class="p">:</span>
+        <span class="n">csto_doc</span> <span class="o">=</span> <span class="n">c4d</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">BaseDocument</span><span class="p">()</span>
+        <span class="n">csto_doc</span><span class="o">.</span><span class="n">InsertObject</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">csto_doc</span> <span class="o">=</span> <span class="n">doc</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">c4d</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">SendModelingCommand</span><span class="p">(</span>
+        <span class="n">c4d</span><span class="o">.</span><span class="n">MCOMMAND_CURRENTSTATETOOBJECT</span><span class="p">,</span> <span class="p">[</span><span class="n">op</span><span class="p">],</span> <span class="n">c4d</span><span class="o">.</span><span class="n">MODELINGCOMMANDMODE_ALL</span><span class="p">,</span>
+        <span class="n">container</span><span class="p">,</span> <span class="n">csto_doc</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">doc</span><span class="p">:</span>
+        <span class="n">op</span><span class="o">.</span><span class="n">Remove</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+
+<span class="c"># Utility classes</span>
+</div>
+<div class="viewcode-block" id="Importer"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Importer">[docs]</a><span class="k">class</span> <span class="nc">Importer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Use this class to enable importing modules from specific</span>
+<span class="sd">    directories independent from ``sys.path``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Importer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="Importer.add"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Importer.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">paths</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Add the passed strings to the search-path for importing</span>
+<span class="sd">        modules. Raises TypeError if non-string object was passed.</span>
+<span class="sd">        Passed paths are automatically expanded.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">new_paths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;passed argument must be string.&#39;</span><span class="p">)</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">new_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">new_paths</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Importer.import_"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Importer.import_">[docs]</a>    <span class="k">def</span> <span class="nf">import_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">load_globally</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Import the module with the given name from the directories</span>
+<span class="sd">        added to the Importer. The loaded module will not be inserted</span>
+<span class="sd">        into `sys.modules` unless ``load_globall`` is True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">prev_module</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">load_globally</span><span class="p">:</span>
+            <span class="n">prev_module</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">find_module</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">imp</span><span class="o">.</span><span class="n">load_module</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">raise</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c"># Restore the old module or remove the module that was just</span>
+            <span class="c"># loaded from ``sys.modules`` only if we do not load the module</span>
+            <span class="c"># globally.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">load_globally</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">prev_module</span><span class="p">:</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">prev_module</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+</div></div>
+<div class="viewcode-block" id="Watch"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Watch">[docs]</a><span class="k">class</span> <span class="nc">Watch</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Utility class for measuring execution-time of code-blocks</span>
+<span class="sd">    implementing the with-interface.</span>
+
+<span class="sd">        &gt;&gt;&gt; with Watch() as w:</span>
+<span class="sd">        ...     time_intensive_code()</span>
+<span class="sd">        ...</span>
+<span class="sd">        &gt;&gt;&gt; w.delta</span>
+<span class="sd">        4.32521002</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Watch</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_watch_not_started</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Watch must be started before action &quot;</span><span class="si">%s</span><span class="s">&quot;.&#39;</span> <span class="o">%</span>
+                           <span class="n">action</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Watch.start"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Watch.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Start the time measuring.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+</div>
+<div class="viewcode-block" id="Watch.stop"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Watch.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Stop the time measuring.</span>
+
+<span class="sd">        :Raises: :class:`RuntimeError` when :func:`Watch.start` was not</span>
+<span class="sd">                 called before.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_watch_not_started</span><span class="p">(</span><span class="s">&#39;stop&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Watch.reset"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Watch.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Reset the information and return the Watch into a state where</span>
+<span class="sd">        time measuring has not been started yet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Watch.delta"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Watch.delta">[docs]</a>    <span class="k">def</span> <span class="nf">delta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Returns the difference between the time Watch.start() has been</span>
+<span class="sd">        and Watch.stop() has been called. If Watch.stop() has not yet</span>
+<span class="sd">        been invoked, the current time is used.</span>
+
+<span class="sd">        Raises: RuntimeError when Watch.start() has not been called</span>
+<span class="sd">                before.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_watch_not_started</span><span class="p">(</span><span class="s">&#39;delta&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">stop</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span>
+
+        <span class="k">return</span> <span class="n">stop</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Watch.started"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Watch.started">[docs]</a>    <span class="k">def</span> <span class="nf">started</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Returns True when the Watch has been started.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Watch.stopped"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Watch.stopped">[docs]</a>    <span class="k">def</span> <span class="nf">stopped</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Returns True when the Watch has been stopped.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+</div></div>
+<div class="viewcode-block" id="FileChangedChecker"><a class="viewcode-back" href="../../index.html#c4dtools.utils.FileChangedChecker">[docs]</a><span class="k">class</span> <span class="nc">FileChangedChecker</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    This class keeps track of a file on the local filesystem and tell</span>
+<span class="sd">    you if the specific file has changed since the last time the</span>
+<span class="sd">    FileChangedChecker was asked this question.</span>
+
+<span class="sd">    It can run in two modes: pushing or pulling. With pulling, we mean</span>
+<span class="sd">    to request the information whether the file has changed or not.</span>
+<span class="sd">    With pushing, we mean to get notified when the file has changed.</span>
+<span class="sd">    Pushing comes in connection with threading. Only one thread can be</span>
+<span class="sd">    run from on FileChangedChecker instance.</span>
+
+<span class="sd">    Example for pulling:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        f = FileChangedChecker(my_filename)</span>
+<span class="sd">        # ...</span>
+<span class="sd">        if f.has_changed():</span>
+<span class="sd">            print (&quot;File %s has changed since `f` has been created.&quot; %</span>
+<span class="sd">                   f.filename)</span>
+
+<span class="sd">    Example for pushing:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        f = FileChangedChecker(my_filename)</span>
+<span class="sd">        def worker(f):</span>
+<span class="sd">            print (&quot;File %s has changed since `f` has been created.&quot; %</span>
+<span class="sd">                   f.filename)</span>
+<span class="sd">        f.run_in_background(worker)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FileChangedChecker.Worker"><a class="viewcode-back" href="../../index.html#c4dtools.utils.FileChangedChecker.Worker">[docs]</a>    <span class="k">class</span> <span class="nc">Worker</span><span class="p">(</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        This is the worker class instantiated by the FileChangedChecker</span>
+<span class="sd">        to run in the background.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checker</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">period</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">FileChangedChecker</span><span class="o">.</span><span class="n">Worker</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span> <span class="o">=</span> <span class="n">checker</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">callback</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">period</span> <span class="o">=</span> <span class="n">period</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">terminated</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="c"># threading.Thread</span>
+
+        <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">terminated</span> <span class="o">=</span> <span class="bp">False</span>
+
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">has_changed</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="p">)</span>
+
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">terminated</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checker</span><span class="o">.</span><span class="n">worker_ended</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the instance with a valid filename.</span>
+
+<span class="sd">        Raises: OSError if the passed filename does not point to a</span>
+<span class="sd">                valid file on the local filesystem.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FileChangedChecker</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">active_worker</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disposing_workers</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_worker</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stop_background</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">filename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span>
+
+    <span class="nd">@filename.setter</span>
+    <span class="k">def</span> <span class="nf">filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;the passed filename does not point to an existing file.&#39;</span>
+            <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span> <span class="o">=</span> <span class="n">filename</span>
+
+<div class="viewcode-block" id="FileChangedChecker.has_changed"><a class="viewcode-back" href="../../index.html#c4dtools.utils.FileChangedChecker.has_changed">[docs]</a>    <span class="k">def</span> <span class="nf">has_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        This method returns True when file pointed to by the stored</span>
+<span class="sd">        filename has changed since the last time the FileChangedChecker</span>
+<span class="sd">        was asked for.</span>
+
+<span class="sd">        Note: When the file has not changed since the initialization</span>
+<span class="sd">              of the FileChangedChecker instance, this method will</span>
+<span class="sd">              return False (i.e. the first call to this function will</span>
+<span class="sd">              tell you the file has *not* changed).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">new_time</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">new_time</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_time</span> <span class="o">=</span> <span class="n">new_time</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+<div class="viewcode-block" id="FileChangedChecker.run_in_background"><a class="viewcode-back" href="../../index.html#c4dtools.utils.FileChangedChecker.run_in_background">[docs]</a>    <span class="k">def</span> <span class="nf">run_in_background</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Start a new thread invoking the callable *callback* passing</span>
+<span class="sd">        the FileChangedChecker instance when the file it points to</span>
+<span class="sd">        has changed. *period* defines the time in seconds that passes</span>
+<span class="sd">        until the next time the thread checks for the change.</span>
+
+<span class="sd">        Raises: RuntimeError when a thread is still running for this</span>
+<span class="sd">                instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_worker</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;cannot start multiple threads for &#39;</span>
+                               <span class="s">&#39;FileChangedChecker instance.&#39;</span><span class="p">)</span>
+
+        <span class="n">worker</span> <span class="o">=</span> <span class="n">FileChangedChecker</span><span class="o">.</span><span class="n">Worker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">period</span><span class="p">)</span>
+        <span class="n">worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">active_worker</span> <span class="o">=</span> <span class="n">worker</span>
+</div>
+<div class="viewcode-block" id="FileChangedChecker.stop_background"><a class="viewcode-back" href="../../index.html#c4dtools.utils.FileChangedChecker.stop_background">[docs]</a>    <span class="k">def</span> <span class="nf">stop_background</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">join</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Stops the background operation started with</span>
+<span class="sd">        ``run_in_background()``. When *join* evaluates to True, this</span>
+<span class="sd">        method will wait until the thread has stopped working before</span>
+<span class="sd">        terminating.</span>
+
+<span class="sd">        Raises: RuntimeError when no thread has been started yet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_worker</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;no running thread to stop.&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">disposing_workers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_worker</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">active_worker</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">active_worker</span> <span class="o">=</span> <span class="bp">None</span>
+</div>
+<div class="viewcode-block" id="FileChangedChecker.worker_ended"><a class="viewcode-back" href="../../index.html#c4dtools.utils.FileChangedChecker.worker_ended">[docs]</a>    <span class="k">def</span> <span class="nf">worker_ended</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">worker</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Not public. This method is called by a FileChangedChecker.Worker</span>
+<span class="sd">        instance to dispose the worker from the list of not yet</span>
+<span class="sd">        disposed workers.</span>
+
+<span class="sd">        Raises: RuntimeError if *worker* is not in the list of not yet</span>
+<span class="sd">                disposed workers.</span>
+<span class="sd">                TypeError if *worker* is not an instance of</span>
+<span class="sd">                FileChangedChecker.Worker.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">worker</span><span class="p">,</span> <span class="n">FileChangedChecker</span><span class="o">.</span><span class="n">Worker</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;expected FileChangedChecker.Worker instance.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">worker</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">disposing_workers</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;worker not found, could not be removed.&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">disposing_workers</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">worker</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="Filename"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Filename">[docs]</a><span class="k">class</span> <span class="nc">Filename</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    A wrapper class for the os.path module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Filename</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;Filename(&quot;</span><span class="si">%s</span><span class="s">&quot;)&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Filename</span><span class="p">):</span>
+            <span class="n">other</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">filename</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Filename</span><span class="p">):</span>
+            <span class="n">other</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">filename</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_instance</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Filename</span><span class="p">):</span>
+            <span class="n">other</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">filename</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">samefile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">new_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">parts</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_instance</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="o">*</span><span class="n">parts</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">dirname</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_instance</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_instance</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_instance</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">splitdrive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitdrive</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_instance</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_instance</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">basename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_instance</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">exists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">lexists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">lexists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">isfile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">isdir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">isabs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">islink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">ismount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">ismount</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Filename.suffix"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Filename.suffix">[docs]</a>    <span class="k">def</span> <span class="nf">suffix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_suffix</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Called with no arguments, this method returns the suffix of the</span>
+<span class="sd">        filename. When passing a string, the suffix will be exchanged</span>
+<span class="sd">        to the passed suffix.</span>
+
+<span class="sd">        Raises: TypeError when *new_suffix* is not None and not a string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">new_suffix</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_suffix</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;expected str, got </span><span class="si">%s</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="n">clsname</span><span class="p">(</span><span class="n">new_suffix</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">change_suffix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">new_suffix</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s">&#39;&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
+</div>
+    <span class="k">def</span> <span class="nf">getatime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getatime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">getmtime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">getctime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getctime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">getsize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Filename.iglob"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Filename.iglob">[docs]</a>    <span class="k">def</span> <span class="nf">iglob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">glob_exts</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Returns a generator yielding all filenames that were found</span>
+<span class="sd">        by globbing the filename joined with the passed *\*glob_exts*.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">glob_exts</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">iglob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">ext</span><span class="p">)):</span>
+                <span class="k">yield</span> <span class="n">filename</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">c4dtools 1.01 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../c4dtools.html" >c4dtools</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Niklas Rosenstein.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>
