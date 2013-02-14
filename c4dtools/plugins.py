@@ -58,6 +58,7 @@ class Command(c4d.plugins.CommandData):
     # This attribute is set from `c4dtools.plugins.main()`.
     detected = False
     is_registered = False
+    tried_register = False
     autoregister = True
 
     PLUGIN_INFO = c4d.PLUGINFLAG_COMMAND_HOTKEY
@@ -69,6 +70,12 @@ class Command(c4d.plugins.CommandData):
         set in the instances attributes. See the class-documentation
         for more information.
         """
+
+        cls = self.__class__
+
+        # Do not register if already tried or is already registered.
+        if cls.tried_register or cls.is_registered:
+            return self.is_registered
 
         if self.PLUGIN_ICON:
             if isinstance(self.PLUGIN_ICON, c4d.bitmaps.BaseBitmap):
@@ -84,7 +91,8 @@ class Command(c4d.plugins.CommandData):
             self.PLUGIN_HELP, self)
 
         if result:
-            self.is_registered = True
+            cls.is_registered = True
+        cls.tried_register = True
         return result
 
 def gather_subclasses(clazz):
