@@ -46,7 +46,7 @@ all the `*.py` files.
 import c4d
 import c4dtools
 
-res, importer = c4dtools.prepare(__file__)
+res, importer = c4dtools.prepare(__file__, __res__)
 
 # Import libraries from the `lib` folder relative to the plugins
 # directory, 100% self-contained and independent from `sys.path`.
@@ -90,6 +90,11 @@ class MyCommand(c4dtools.plugins.Command):
 if __name__ == '__main__':
     c4dtools.plugins.main()
 ```
+
+## License
+
+The `c4dtools` library is licensed under the Simplified BSD License since
+version 1.1.0. It was licensed under the GNU General Public License before.
 
   [1]: https://github.com/NiklasRosenstein/XPAT
 
