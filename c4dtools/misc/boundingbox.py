@@ -1,7 +1,41 @@
-# coding: utf-8
-#
-# Copyright (C) 2012, Niklas Rosenstein
-# Licensed under the GNU General Public License
+# Copyright (c) 2012-2013, Niklas Rosenstein
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met: 
+# 
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer. 
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution. 
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+# 
+# The views and conclusions contained in the software and
+# documentation are those of the authors and should not be interpreted
+# as representing official policies,  either expressed or implied, of
+# the FreeBSD Project.
+r"""
+c4dtools.misc.boundingbox
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Utility for computing the bounding-box spanned by a couple of vectors
+or by :class:`c4d.BaseObject` instances.
+"""
 
 import c4d
 import copy
@@ -14,6 +48,8 @@ class AABB(object):
 
     Example for Script Manager:
 
+    .. code-block:: python
+
         from c4dtools.misc.boundingbox import AABB
         box = AABB()
         box.expand(op, recursive=True)
@@ -25,6 +61,8 @@ class AABB(object):
     translation can not be performed after expansion of the bounding-
     box, the translation_matrix must therefore be set *before*
     expand() or expand_point() is called.
+
+    .. code-block:: python
 
         from c4dtools.misc.boundingbox import AABB
         box = AABB(translation_matrix=~op.GetMg())
@@ -42,11 +80,11 @@ class AABB(object):
 
     def expand(self, obj, recursive=False):
         r"""
-        Expand the bounding-box by the passed c4d.BaseObject instance.
-        The method can optionally continue recursively.
+        Expand the bounding-box by the passed :class:`c4d.BaseObject`
+        instance. The method can optionally continue recursively.
 
         Raises: TypeError when *obj* is not an instance of
-                c4d.BaseObject.
+                :class:`c4d.BaseObject`.
         """
 
         if not isinstance(obj, c4d.BaseObject):
@@ -102,3 +140,5 @@ class AABB(object):
         """
 
         return (self.max_v - self.min_v) * 0.5
+
+

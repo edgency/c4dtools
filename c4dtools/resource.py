@@ -1,7 +1,34 @@
-# coding: utf-8
-#
-# Copyright (C) 2012, Niklas Rosenstein
-# Licensed under the GNU General Public License
+# Copyright (c) 2012-2013, Niklas Rosenstein
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met: 
+# 
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer. 
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution. 
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+# 
+# The views and conclusions contained in the software and
+# documentation are those of the authors and should not be interpreted
+# as representing official policies,  either expressed or implied, of
+# the FreeBSD Project.
 r"""
 c4dtools.resource
 ~~~~~~~~~~~~~~~~~
@@ -128,9 +155,10 @@ class Resource(object):
     that folder, etc.
     """
 
-    def __init__(self, dirname, symbols):
+    def __init__(self, dirname, c4dres, symbols):
         super(Resource, self).__init__()
         self.dirname = dirname
+        self.c4dres = c4dres
         self.symbols = symbols
         self.string = StringLoader(self)
 
@@ -197,5 +225,50 @@ class StringLoader(object):
         self.resource = resource
 
     def __getattr__(self, name):
-        symbol = self.resource.get(name)
-        return functools.partial(c4d.plugins.GeLoadString, id=symbol)
+        r"""
+        Load a string from the resource by the given *name*. Returns
+        a :class:`ResourceString` object.
+
+        .. code-block:: python
+
+            id = res.IDC_MYSTRING
+            name = res.string.IDC_MYSTRING()
+            # same as
+            id, name = res.string.IDC_MYSTRING.tuple
+        """
+        symbol_id = self.resource.get(name)
+        return ResourceString(symbol_id, self.resource.c4dres)
+
+class ResourceString(object):
+    r"""
+    This class represents a resource-string loaded from plugin resource.
+    """
+
+    def __init__(self, id, c4dres):
+        super(ResourceString, self).__init__()
+        self.id = id
+        self.c4dres = c4dres
+
+    def __call__(self, *args):
+        r"""
+        Wrapper for the :func:`c4d.plugins.GeLoadString` function for
+        loading the actual string from the resource.    
+        """
+        string = self.c4dres.LoadString(self.id)
+
+        # Simulate the behaviour of c4d.plugins.GeLoadString by replacing
+        # all hashes (`#`) with a passed arguments.
+        for arg in args:
+            string = string.replace('#', arg, 1)
+
+        return string
+
+    @property
+    def both(self):
+        r"""
+        Returns a tuple of the ``(id, string)`` where *string* is
+        loaded from the plugin's resource.
+        """
+        return self.id, self()
+
+

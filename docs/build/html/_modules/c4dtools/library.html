@@ -50,10 +50,37 @@
           <div class="body">
             
   <h1>Source code for c4dtools.library</h1><div class="highlight"><pre>
-<span class="c"># coding: utf-8</span>
-<span class="c">#</span>
-<span class="c"># Copyright (C) 2012, Niklas Rosenstein</span>
-<span class="c"># Licensed under the GNU General Public License</span>
+<span class="c"># Copyright (c) 2012-2013, Niklas Rosenstein</span>
+<span class="c"># All rights reserved.</span>
+<span class="c"># </span>
+<span class="c"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c"># modification, are permitted provided that the following conditions</span>
+<span class="c"># are met: </span>
+<span class="c"># </span>
+<span class="c"># 1. Redistributions of source code must retain the above copyright</span>
+<span class="c">#    notice, this list of conditions and the following disclaimer. </span>
+<span class="c"># 2. Redistributions in binary form must reproduce the above copyright</span>
+<span class="c">#    notice, this list of conditions and the following disclaimer in</span>
+<span class="c">#    the documentation and/or other materials provided with the</span>
+<span class="c">#    distribution. </span>
+<span class="c"># </span>
+<span class="c"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<span class="c"># &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<span class="c"># LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS</span>
+<span class="c"># FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE</span>
+<span class="c"># COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,</span>
+<span class="c"># INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,</span>
+<span class="c"># BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;</span>
+<span class="c"># LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER</span>
+<span class="c"># CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT</span>
+<span class="c"># LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN</span>
+<span class="c"># ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span>
+<span class="c"># POSSIBILITY OF SUCH DAMAGE.</span>
+<span class="c"># </span>
+<span class="c"># The views and conclusions contained in the software and</span>
+<span class="c"># documentation are those of the authors and should not be interpreted</span>
+<span class="c"># as representing official policies,  either expressed or implied, of</span>
+<span class="c"># the FreeBSD Project.</span>
 <span class="sd">r&quot;&quot;&quot;</span>
 <span class="sd">c4dtools.library</span>
 <span class="sd">~~~~~~~~~~~~~~~~</span>
@@ -142,6 +169,7 @@
     <span class="n">__meta_default</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s">&#39;abstract&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
         <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="s">&#39;allow_overwrite&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="n">__installed</span> <span class="o">=</span> <span class="p">{}</span>
@@ -166,6 +194,7 @@
             <span class="n">meta</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;Meta&#39;</span><span class="p">)))</span>
 
         <span class="n">meta</span> <span class="o">=</span> <span class="n">Attributor</span><span class="p">(</span><span class="n">meta</span><span class="p">)</span>
+        <span class="nb">dict</span><span class="p">[</span><span class="s">&#39;Meta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">meta</span>
 
         <span class="c"># The libraries name defaults to its class-name.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
@@ -184,8 +213,11 @@
         <span class="c"># Register the Library class if it is *not* abstract.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">meta</span><span class="o">.</span><span class="n">abstract</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">meta</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__installed</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;library with name </span><span class="si">%r</span><span class="s"> is already installed.&#39;</span> <span class="o">%</span> <span class="n">meta</span><span class="o">.</span><span class="n">name</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">existing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__installed</span><span class="p">[</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">existing</span><span class="o">.</span><span class="n">Meta</span><span class="o">.</span><span class="n">allow_overwrite</span><span class="p">:</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;library with name </span><span class="si">%r</span><span class="s"> is already installed.&#39;</span> <span class="o">%</span> \
+                          <span class="n">meta</span><span class="o">.</span><span class="n">name</span>
+                    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">__installed</span><span class="p">[</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">library</span>
             <span class="n">library</span><span class="o">.</span><span class="n">on_install</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -253,12 +285,17 @@
     <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__library</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 </div>
-<span class="k">def</span> <span class="nf">load_library</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">lazy</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="load_library"><a class="viewcode-back" href="../../index.html#c4dtools.library.load_library">[docs]</a><span class="k">def</span> <span class="nf">load_library</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">lazy</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Load a library. Returns a :class:`Library` instance unless *lazy*</span>
+<span class="sd">    does not evaluate to True. If *lazy* is True, a :class:`LazyLibrary`</span>
+<span class="sd">    instance will be returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">lazy</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">LazyLibrary</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">LibraryMeta</span><span class="o">.</span><span class="n">get_library</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-</pre></div>
+</pre></div></div>
 
           </div>
         </div>

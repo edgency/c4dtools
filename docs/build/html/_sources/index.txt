@@ -19,6 +19,17 @@ Welcome to the ``c4dtools`` documentation!
 .. automodule:: c4dtools.resource
     :members:
 
+.. automodule:: c4dtools.misc
+    :members:
+
+.. automodule:: c4dtools.misc.boundingbox
+    :members:
+
+.. automodule:: c4dtools.misc.graphnode
+    :members:
+
+.. automodule:: c4dtools.misc.userdata
+    :members:
 
 
 Indices and tables

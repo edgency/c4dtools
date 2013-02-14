@@ -1,0 +1,302 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>c4dtools.misc.graphnode &mdash; c4dtools 1.01 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.01',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="c4dtools 1.01 documentation" href="../../../index.html" />
+    <link rel="up" title="c4dtools" href="../../c4dtools.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">c4dtools 1.01 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../c4dtools.html" accesskey="U">c4dtools</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for c4dtools.misc.graphnode</h1><div class="highlight"><pre>
+<span class="c"># Copyright (c) 2012-2013, Niklas Rosenstein</span>
+<span class="c"># All rights reserved.</span>
+<span class="c"># </span>
+<span class="c"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c"># modification, are permitted provided that the following conditions</span>
+<span class="c"># are met: </span>
+<span class="c"># </span>
+<span class="c"># 1. Redistributions of source code must retain the above copyright</span>
+<span class="c">#    notice, this list of conditions and the following disclaimer. </span>
+<span class="c"># 2. Redistributions in binary form must reproduce the above copyright</span>
+<span class="c">#    notice, this list of conditions and the following disclaimer in</span>
+<span class="c">#    the documentation and/or other materials provided with the</span>
+<span class="c">#    distribution. </span>
+<span class="c"># </span>
+<span class="c"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<span class="c"># &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<span class="c"># LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS</span>
+<span class="c"># FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE</span>
+<span class="c"># COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,</span>
+<span class="c"># INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,</span>
+<span class="c"># BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;</span>
+<span class="c"># LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER</span>
+<span class="c"># CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT</span>
+<span class="c"># LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN</span>
+<span class="c"># ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span>
+<span class="c"># POSSIBILITY OF SUCH DAMAGE.</span>
+<span class="c"># </span>
+<span class="c"># The views and conclusions contained in the software and</span>
+<span class="c"># documentation are those of the authors and should not be interpreted</span>
+<span class="c"># as representing official policies,  either expressed or implied, of</span>
+<span class="c"># the FreeBSD Project.</span>
+<span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">c4dtools.misc.graphnode</span>
+<span class="sd">~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="sd">Thin wrapper for interacting with XPresso Node UI.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">c4d</span>
+<span class="kn">from</span> <span class="nn">c4d.modules</span> <span class="kn">import</span> <span class="n">graphview</span> <span class="k">as</span> <span class="n">gv</span>
+<span class="kn">from</span> <span class="nn">c4dtools.utils</span> <span class="kn">import</span> <span class="n">vbbmid</span>
+
+<div class="viewcode-block" id="GraphNode"><a class="viewcode-back" href="../../../index.html#c4dtools.misc.graphnode.GraphNode">[docs]</a><span class="k">class</span> <span class="nc">GraphNode</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    This class is a thin wrapper for the `c4d.modules.graphview.GvNode`</span>
+<span class="sd">    class providing an easy interface for accessing and modifieng the</span>
+<span class="sd">    visual appeareance of an XPresso node in the XPresso editor.</span>
+
+<span class="sd">    Currently, only accessing the position and size is supported.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">POS_X</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">POS_Y</span> <span class="o">=</span> <span class="mi">101</span>
+    <span class="n">VIEWPOS_X</span> <span class="o">=</span> <span class="mi">102</span>
+    <span class="n">VIEWPOS_Y</span> <span class="o">=</span> <span class="mi">103</span>
+    <span class="n">SIZE_X</span> <span class="o">=</span> <span class="mi">108</span>
+    <span class="n">SIZE_Y</span> <span class="o">=</span> <span class="mi">109</span>
+    <span class="n">FULLSCREENSIZE_X</span> <span class="o">=</span> <span class="mi">110</span>
+    <span class="n">FULLSCREENSIZE_Y</span> <span class="o">=</span> <span class="mi">111</span>
+
+    <span class="n">ZOOM</span> <span class="o">=</span> <span class="mi">104</span>
+    <span class="n">VIEW</span> <span class="o">=</span> <span class="mi">105</span>
+
+    <span class="n">VIEW_MINIMIZED</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">VIEW_STANDART</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">VIEW_EXTENDED</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">VIEW_FULLSCREEN</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GraphNode</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node</span> <span class="o">=</span> <span class="n">node</span>
+
+        <span class="n">container</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">GetDataInstance</span><span class="p">()</span>
+        <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_graphcontainer</span><span class="p">(</span><span class="n">container</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graphdata</span> <span class="o">=</span> <span class="n">container</span>
+
+<div class="viewcode-block" id="GraphNode.get_graphcontainer"><a class="viewcode-back" href="../../../index.html#c4dtools.misc.graphnode.GraphNode.get_graphcontainer">[docs]</a>    <span class="k">def</span> <span class="nf">get_graphcontainer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">container</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        This method returns the container containing the graphdata for</span>
+<span class="sd">        the node in the XPresso grap based on the ``GvNode`` s container.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">GetContainerInstance</span><span class="p">(</span><span class="mi">1001</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">GetContainerInstance</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+</div>
+    <span class="k">def</span> <span class="nf">get_sizeids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">view</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">VIEW_EXTENDED</span><span class="p">:</span>
+            <span class="n">id_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FULLSCREENSIZE_X</span>
+            <span class="n">id_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FULLSCREENSIZE_Y</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">id_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SIZE_X</span>
+            <span class="n">id_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SIZE_Y</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">id_x</span><span class="p">,</span> <span class="n">id_y</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Returns the visual position of the node as c4d.Vector.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphdata</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">GetReal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">POS_X</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">GetReal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">POS_Y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">c4d</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@position.setter</span>
+<div class="viewcode-block" id="GraphNode.position"><a class="viewcode-back" href="../../../index.html#c4dtools.misc.graphnode.GraphNode.position">[docs]</a>    <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphdata</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">SetReal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">POS_X</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">SetReal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">POS_Y</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">view_position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Returns the position of the &quot;camera&quot; that is &quot;looking&quot; onto the</span>
+<span class="sd">        nodes as c4d.Vector.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphdata</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">GetReal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VIEWPOS_X</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">GetReal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VIEWPOS_Y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">c4d</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@view_position.setter</span>
+<div class="viewcode-block" id="GraphNode.view_position"><a class="viewcode-back" href="../../../index.html#c4dtools.misc.graphnode.GraphNode.view_position">[docs]</a>    <span class="k">def</span> <span class="nf">view_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphdata</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">SetReal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VIEWPOS_X</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">SetReal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VIEWPOS_Y</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Returns the visual size of the node as c4d.Vector. The container</span>
+<span class="sd">        IDs differ for extended and standart view mode. The size is</span>
+<span class="sd">        read/set according the to view mode the node is currently</span>
+<span class="sd">        assigned to.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphdata</span>
+        <span class="n">id_x</span><span class="p">,</span> <span class="n">id_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sizeids</span><span class="p">()</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">GetReal</span><span class="p">(</span><span class="n">id_x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">GetReal</span><span class="p">(</span><span class="n">id_y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">c4d</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@size.setter</span>
+<div class="viewcode-block" id="GraphNode.size"><a class="viewcode-back" href="../../../index.html#c4dtools.misc.graphnode.GraphNode.size">[docs]</a>    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphdata</span>
+        <span class="n">id_x</span><span class="p">,</span> <span class="n">id_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sizeids</span><span class="p">()</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">SetReal</span><span class="p">(</span><span class="n">id_x</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">SetReal</span><span class="p">(</span><span class="n">id_y</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Returns the zoom of the XPresso nodes graphview. This value is</span>
+<span class="sd">        only has effect for XGroups. The zoom is a floating-point value,</span>
+<span class="sd">        100% represented as 1.0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphdata</span><span class="o">.</span><span class="n">GetReal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ZOOM</span><span class="p">)</span>
+
+    <span class="nd">@zoom.setter</span>
+<div class="viewcode-block" id="GraphNode.zoom"><a class="viewcode-back" href="../../../index.html#c4dtools.misc.graphnode.GraphNode.zoom">[docs]</a>    <span class="k">def</span> <span class="nf">zoom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graphdata</span><span class="o">.</span><span class="n">SetReal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ZOOM</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Returns the type of view of the node. Either VIEW_MINIMIZED,</span>
+<span class="sd">        VIEW_STANDART, VIEW_EXTENDED or VIEW_FULLSCREEN.</span>
+
+<span class="sd">        Note: Still not sure how the locking is specified in the container,</span>
+<span class="sd">              it is however defined in the View section in the GUI.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphdata</span><span class="o">.</span><span class="n">GetLong</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VIEW</span><span class="p">)</span>
+
+    <span class="nd">@view.setter</span>
+<div class="viewcode-block" id="GraphNode.view"><a class="viewcode-back" href="../../../index.html#c4dtools.misc.graphnode.GraphNode.view">[docs]</a>    <span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graphdata</span><span class="o">.</span><span class="n">SetLong</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">VIEW</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="find_selected_nodes"><a class="viewcode-back" href="../../../index.html#c4dtools.misc.graphnode.find_selected_nodes">[docs]</a><span class="k">def</span> <span class="nf">find_selected_nodes</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Finds the group of selected nodes in the XPresso Manager and returns</span>
+<span class="sd">    a list of GvNode objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">children</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">GetChildren</span><span class="p">()</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">GetBit</span><span class="p">(</span><span class="n">c4d</span><span class="o">.</span><span class="n">BIT_ACTIVE</span><span class="p">):</span>
+            <span class="n">selected</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">selected</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+            <span class="n">selected</span> <span class="o">=</span> <span class="n">find_selected_nodes</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">selected</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">selected</span>
+    <span class="k">return</span> <span class="n">selected</span>
+</div>
+<div class="viewcode-block" id="find_nodes_mid"><a class="viewcode-back" href="../../../index.html#c4dtools.misc.graphnode.find_nodes_mid">[docs]</a><span class="k">def</span> <span class="nf">find_nodes_mid</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Finds the mid-point of the passed list of</span>
+<span class="sd">    `c4dtools.misc.graphnode.GraphNode` instances.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nodes</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">c4d</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">vectors</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span><span class="o">.</span><span class="n">position</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">vbbmid</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">c4dtools 1.01 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../c4dtools.html" >c4dtools</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Niklas Rosenstein.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

@@ -1,7 +1,34 @@
-# coding: utf-8
-#
-# Copyright (C) 2012, Niklas Rosenstein
-# Licensed under the GNU General Public License
+# Copyright (c) 2012-2013, Niklas Rosenstein
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met: 
+# 
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer. 
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution. 
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+# 
+# The views and conclusions contained in the software and
+# documentation are those of the authors and should not be interpreted
+# as representing official policies,  either expressed or implied, of
+# the FreeBSD Project.
 r"""
 c4dtools.utils
 ~~~~~~~~~~~~~~
@@ -9,7 +36,6 @@ c4dtools.utils
 
 import os
 import sys
-import imp
 import c4d
 import time
 import threading
@@ -107,12 +133,34 @@ def candidates(value, obj, callback=lambda vref, vcmp, kcmp: vref == vcmp):
 
     return results
 
+# Cinema 4D related stuff, making common things easy
+
 def flush_console(id=13957):
     r"""
     Flushes the Cinema 4D console.
     """
 
     c4d.CallCommand(id)
+
+def update_editor():
+    r"""
+    A shortcut for
+
+    .. code-block:: python
+
+        c4d.DrawViews(
+                c4d.DRAWFLAGS_ONLY_ACTIVE_VIEW | c4d.DRAWFLAGS_NO_THREAD |
+                c4d.DRAWFLAGS_NO_REDUCTION | c4d.DRAWFLAGS_STATICBREAK)
+
+    Can be used to update the editor, useful for going through the frames
+    of a document and doing backing or similar stuff.
+
+    :Returns: The return-value of :func:`c4d.DrawViews`.
+    """
+
+    return c4d.DrawViews(
+            c4d.DRAWFLAGS_ONLY_ACTIVE_VIEW | c4d.DRAWFLAGS_NO_THREAD |
+            c4d.DRAWFLAGS_NO_REDUCTION | c4d.DRAWFLAGS_STATICBREAK)
 
 def iter_container(container, callback=None, level=0):
     r"""
@@ -141,7 +189,7 @@ def iter_container(container, callback=None, level=0):
     for key, value in container:
         callback(key, value, level)
         if isinstance(value, c4d.BaseContainer):
-            print_container(value, callback, level + 1)
+            iter_container(value, callback, level + 1)
 
 def current_state_to_object(op, container=c4d.BaseContainer()):
     r"""
@@ -192,6 +240,27 @@ def current_state_to_object(op, container=c4d.BaseContainer()):
 
     return result
 
+def get_shader_bitmap(shader, irs=None):
+    r"""
+    A bitmap can be retrieved from a :class:`c4d.BaseShader` instance of
+    type ``Xbitmap`` using its :meth:`~c4d.BaseShader.GetBitmap` method.
+    This method must however be wrapped in calls to
+    :func:`~c4d.BaseShader.InitRender` and :func:`~c4d.BaseShader.FreeRender`.
+
+    This function initializes rendering of the passed *shader*, retrieves
+    the bitmap and frees it.
+
+    :Return: :class:`c4d.BaseBitmap` or ``None``.
+    """
+    if not irs:
+        irs = render.InitRenderStruct()
+    if shader.InitRender(irs) != c4d.INITRENDERRESULT_OK:
+        return None
+
+    bitmap = shader.GetBitmap()
+    shader.FreeRender()
+    return bitmap
+
 # Utility classes
 
 class Importer(object):
@@ -227,18 +296,24 @@ class Importer(object):
         into `sys.modules` unless ``load_globall`` is True.
         """
 
+        prev_path = sys.path
+        sys.path = self.path + sys.path
+
         prev_module = None
         if name in sys.modules and not load_globally:
             prev_module = sys.modules[name]
             del sys.modules[name]
 
-        data = imp.find_module(name, self.path)
         try:
-            return imp.load_module(name, *data)
+            m = __import__(name)
+            for n in name.split('.')[1:]:
+                m = getattr(m, n)
+            return m
         except:
-            data[0].close()
             raise
         finally:
+            sys.path = prev_path
+
             # Restore the old module or remove the module that was just
             # loaded from ``sys.modules`` only if we do not load the module
             # globally.
@@ -246,7 +321,8 @@ class Importer(object):
                 if prev_module:
                     sys.modules[name] = prev_module
                 else:
-                    del sys.modules[name]
+                    if name in sys.modules:
+                        del sys.modules[name]
 
 class Watch(object):
     r"""

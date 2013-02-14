@@ -50,10 +50,37 @@
           <div class="body">
             
   <h1>Source code for c4dtools.utils</h1><div class="highlight"><pre>
-<span class="c"># coding: utf-8</span>
-<span class="c">#</span>
-<span class="c"># Copyright (C) 2012, Niklas Rosenstein</span>
-<span class="c"># Licensed under the GNU General Public License</span>
+<span class="c"># Copyright (c) 2012-2013, Niklas Rosenstein</span>
+<span class="c"># All rights reserved.</span>
+<span class="c"># </span>
+<span class="c"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c"># modification, are permitted provided that the following conditions</span>
+<span class="c"># are met: </span>
+<span class="c"># </span>
+<span class="c"># 1. Redistributions of source code must retain the above copyright</span>
+<span class="c">#    notice, this list of conditions and the following disclaimer. </span>
+<span class="c"># 2. Redistributions in binary form must reproduce the above copyright</span>
+<span class="c">#    notice, this list of conditions and the following disclaimer in</span>
+<span class="c">#    the documentation and/or other materials provided with the</span>
+<span class="c">#    distribution. </span>
+<span class="c"># </span>
+<span class="c"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<span class="c"># &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<span class="c"># LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS</span>
+<span class="c"># FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE</span>
+<span class="c"># COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,</span>
+<span class="c"># INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,</span>
+<span class="c"># BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;</span>
+<span class="c"># LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER</span>
+<span class="c"># CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT</span>
+<span class="c"># LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN</span>
+<span class="c"># ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span>
+<span class="c"># POSSIBILITY OF SUCH DAMAGE.</span>
+<span class="c"># </span>
+<span class="c"># The views and conclusions contained in the software and</span>
+<span class="c"># documentation are those of the authors and should not be interpreted</span>
+<span class="c"># as representing official policies,  either expressed or implied, of</span>
+<span class="c"># the FreeBSD Project.</span>
 <span class="sd">r&quot;&quot;&quot;</span>
 <span class="sd">c4dtools.utils</span>
 <span class="sd">~~~~~~~~~~~~~~</span>
@@ -61,7 +88,6 @@
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">imp</span>
 <span class="kn">import</span> <span class="nn">c4d</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">threading</span>
@@ -158,6 +184,8 @@
             <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">results</span>
+
+<span class="c"># Cinema 4D related stuff, making common things easy</span>
 </div>
 <div class="viewcode-block" id="flush_console"><a class="viewcode-back" href="../../index.html#c4dtools.utils.flush_console">[docs]</a><span class="k">def</span> <span class="nf">flush_console</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="mi">13957</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
@@ -165,6 +193,26 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">c4d</span><span class="o">.</span><span class="n">CallCommand</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="update_editor"><a class="viewcode-back" href="../../index.html#c4dtools.utils.update_editor">[docs]</a><span class="k">def</span> <span class="nf">update_editor</span><span class="p">():</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    A shortcut for</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        c4d.DrawViews(</span>
+<span class="sd">                c4d.DRAWFLAGS_ONLY_ACTIVE_VIEW | c4d.DRAWFLAGS_NO_THREAD |</span>
+<span class="sd">                c4d.DRAWFLAGS_NO_REDUCTION | c4d.DRAWFLAGS_STATICBREAK)</span>
+
+<span class="sd">    Can be used to update the editor, useful for going through the frames</span>
+<span class="sd">    of a document and doing backing or similar stuff.</span>
+
+<span class="sd">    :Returns: The return-value of :func:`c4d.DrawViews`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">c4d</span><span class="o">.</span><span class="n">DrawViews</span><span class="p">(</span>
+            <span class="n">c4d</span><span class="o">.</span><span class="n">DRAWFLAGS_ONLY_ACTIVE_VIEW</span> <span class="o">|</span> <span class="n">c4d</span><span class="o">.</span><span class="n">DRAWFLAGS_NO_THREAD</span> <span class="o">|</span>
+            <span class="n">c4d</span><span class="o">.</span><span class="n">DRAWFLAGS_NO_REDUCTION</span> <span class="o">|</span> <span class="n">c4d</span><span class="o">.</span><span class="n">DRAWFLAGS_STATICBREAK</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="iter_container"><a class="viewcode-back" href="../../index.html#c4dtools.utils.iter_container">[docs]</a><span class="k">def</span> <span class="nf">iter_container</span><span class="p">(</span><span class="n">container</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
@@ -193,7 +241,7 @@
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">container</span><span class="p">:</span>
         <span class="n">callback</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">c4d</span><span class="o">.</span><span class="n">BaseContainer</span><span class="p">):</span>
-            <span class="n">print_container</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">iter_container</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="current_state_to_object"><a class="viewcode-back" href="../../index.html#c4dtools.utils.current_state_to_object">[docs]</a><span class="k">def</span> <span class="nf">current_state_to_object</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">container</span><span class="o">=</span><span class="n">c4d</span><span class="o">.</span><span class="n">BaseContainer</span><span class="p">()):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
@@ -243,6 +291,27 @@
         <span class="n">op</span><span class="o">.</span><span class="n">Remove</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">result</span>
+</div>
+<div class="viewcode-block" id="get_shader_bitmap"><a class="viewcode-back" href="../../index.html#c4dtools.utils.get_shader_bitmap">[docs]</a><span class="k">def</span> <span class="nf">get_shader_bitmap</span><span class="p">(</span><span class="n">shader</span><span class="p">,</span> <span class="n">irs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    A bitmap can be retrieved from a :class:`c4d.BaseShader` instance of</span>
+<span class="sd">    type ``Xbitmap`` using its :meth:`~c4d.BaseShader.GetBitmap` method.</span>
+<span class="sd">    This method must however be wrapped in calls to</span>
+<span class="sd">    :func:`~c4d.BaseShader.InitRender` and :func:`~c4d.BaseShader.FreeRender`.</span>
+
+<span class="sd">    This function initializes rendering of the passed *shader*, retrieves</span>
+<span class="sd">    the bitmap and frees it.</span>
+
+<span class="sd">    :Return: :class:`c4d.BaseBitmap` or ``None``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">irs</span><span class="p">:</span>
+        <span class="n">irs</span> <span class="o">=</span> <span class="n">render</span><span class="o">.</span><span class="n">InitRenderStruct</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">shader</span><span class="o">.</span><span class="n">InitRender</span><span class="p">(</span><span class="n">irs</span><span class="p">)</span> <span class="o">!=</span> <span class="n">c4d</span><span class="o">.</span><span class="n">INITRENDERRESULT_OK</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="n">bitmap</span> <span class="o">=</span> <span class="n">shader</span><span class="o">.</span><span class="n">GetBitmap</span><span class="p">()</span>
+    <span class="n">shader</span><span class="o">.</span><span class="n">FreeRender</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">bitmap</span>
 
 <span class="c"># Utility classes</span>
 </div>
@@ -279,18 +348,24 @@
 <span class="sd">        into `sys.modules` unless ``load_globall`` is True.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">prev_path</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
+
         <span class="n">prev_module</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">load_globally</span><span class="p">:</span>
             <span class="n">prev_module</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
             <span class="k">del</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">find_module</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">imp</span><span class="o">.</span><span class="n">load_module</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">m</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="k">raise</span>
         <span class="k">finally</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">prev_path</span>
+
             <span class="c"># Restore the old module or remove the module that was just</span>
             <span class="c"># loaded from ``sys.modules`` only if we do not load the module</span>
             <span class="c"># globally.</span>
@@ -298,7 +373,8 @@
                 <span class="k">if</span> <span class="n">prev_module</span><span class="p">:</span>
                     <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">prev_module</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">del</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+                        <span class="k">del</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 </div></div>
 <div class="viewcode-block" id="Watch"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Watch">[docs]</a><span class="k">class</span> <span class="nc">Watch</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>

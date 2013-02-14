@@ -56,7 +56,7 @@ Cinema 4D. The most significant feature is the cached parsing of dialog
 symbols, see <a class="reference internal" href="#c4dtools.prepare" title="c4dtools.prepare"><tt class="xref py py-func docutils literal"><span class="pre">c4dtools.prepare()</span></tt></a>.</p>
 <dl class="function">
 <dt id="c4dtools.prepare">
-<tt class="descclassname">c4dtools.</tt><tt class="descname">prepare</tt><big>(</big><em>filename</em>, <em>cache_symbols=True</em>, <em>libfolder_name='lib'</em>, <em>resfolder_name='res'</em>, <em>parse_descriptions=False</em><big>)</big><a class="reference internal" href="_modules/c4dtools.html#prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.prepare" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">c4dtools.</tt><tt class="descname">prepare</tt><big>(</big><em>filename</em>, <em>c4dres</em>, <em>cache_symbols=True</em>, <em>libfolder_name='lib'</em>, <em>resfolder_name='res'</em>, <em>parse_descriptions=False</em><big>)</big><a class="reference internal" href="_modules/c4dtools.html#prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.prepare" title="Permalink to this definition">¶</a></dt>
 <dd><p>Call this function from a Cinema 4D python plugin-file (*.pyp) to
 set up convenient data that can be used from the plugin.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -66,6 +66,8 @@ set up convenient data that can be used from the plugin.</p>
 <tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><ul class="first simple">
 <li>filename: Just pass the <tt class="docutils literal"><span class="pre">__file__</span></tt> variable from the plugins
 global scope.</li>
+<li>c4dres: The <tt class="xref py py-class docutils literal"><span class="pre">c4d.plugins.GeResource</span></tt> instance from the
+plugin&#8217;s scope.</li>
 <li>cache_symbols: True by default. Defines wether the resource
 symbols will be cached.</li>
 <li>libfolder_name: The name of the folder the plugin related
@@ -296,7 +298,7 @@ called before.</td>
 
 <dl class="function">
 <dt id="c4dtools.utils.candidates">
-<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">candidates</tt><big>(</big><em>value</em>, <em>obj</em>, <em>callback=&lt;function &lt;lambda&gt; at 0x035D37F0&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#candidates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.candidates" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">candidates</tt><big>(</big><em>value</em>, <em>obj</em>, <em>callback=&lt;function &lt;lambda&gt; at 0x03AD3E30&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#candidates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.candidates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searches for <em>value</em> in <em>obj</em> and returns a list of all keys where
 the callback returns True, being passed <em>value</em> as first argument,
 the value to compare it with as the second argument and the name
@@ -319,7 +321,7 @@ for <tt class="docutils literal"><span class="pre">obj.__class__.__name__</span>
 
 <dl class="function">
 <dt id="c4dtools.utils.current_state_to_object">
-<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">current_state_to_object</tt><big>(</big><em>op</em>, <em>container=&lt;c4d.BaseContainer object at 0x03937ED0&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#current_state_to_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.current_state_to_object" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">current_state_to_object</tt><big>(</big><em>op</em>, <em>container=&lt;c4d.BaseContainer instance at 0x03AE52D8&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#current_state_to_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.current_state_to_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Makes the passed <cite>c4d.BaseObject</cite> instance an editable object by
 applieng a modeling command on it. The returned object&#8217;s hierarchy
 will consist of Null-Objects and editable objects only.</p>
@@ -356,6 +358,25 @@ before the last time <em>copy</em> was modified, False otherwise.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="c4dtools.utils.get_shader_bitmap">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">get_shader_bitmap</tt><big>(</big><em>shader</em>, <em>irs=None</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#get_shader_bitmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.get_shader_bitmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>A bitmap can be retrieved from a <tt class="xref py py-class docutils literal"><span class="pre">c4d.BaseShader</span></tt> instance of
+type <tt class="docutils literal"><span class="pre">Xbitmap</span></tt> using its <tt class="xref py py-meth docutils literal"><span class="pre">GetBitmap()</span></tt> method.
+This method must however be wrapped in calls to
+<tt class="xref py py-func docutils literal"><span class="pre">InitRender()</span></tt> and <tt class="xref py py-func docutils literal"><span class="pre">FreeRender()</span></tt>.</p>
+<p>This function initializes rendering of the passed <em>shader</em>, retrieves
+the bitmap and frees it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return :</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">c4d.BaseBitmap</span></tt> or <tt class="docutils literal"><span class="pre">None</span></tt>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="c4dtools.utils.iter_container">
 <tt class="descclassname">c4dtools.utils.</tt><tt class="descname">iter_container</tt><big>(</big><em>container</em>, <em>callback=None</em>, <em>level=0</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#iter_container"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.iter_container" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iterate over the passed <em>container</em> being a <tt class="xref py py-class docutils literal"><span class="pre">c4d.BaseContainer</span></tt>
@@ -369,6 +390,27 @@ pair. The default callback will print out the values in the container.</p>
 <tr class="field-odd field"><th class="field-name">Returns :</th><td class="field-body">None</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body">TypeError when <em>callback</em> is not callable.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.utils.update_editor">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">update_editor</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#update_editor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.update_editor" title="Permalink to this definition">¶</a></dt>
+<dd><p>A shortcut for</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">c4d</span><span class="o">.</span><span class="n">DrawViews</span><span class="p">(</span>
+        <span class="n">c4d</span><span class="o">.</span><span class="n">DRAWFLAGS_ONLY_ACTIVE_VIEW</span> <span class="o">|</span> <span class="n">c4d</span><span class="o">.</span><span class="n">DRAWFLAGS_NO_THREAD</span> <span class="o">|</span>
+        <span class="n">c4d</span><span class="o">.</span><span class="n">DRAWFLAGS_NO_REDUCTION</span> <span class="o">|</span> <span class="n">c4d</span><span class="o">.</span><span class="n">DRAWFLAGS_STATICBREAK</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Can be used to update the editor, useful for going through the frames
+of a document and doing backing or similar stuff.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns :</th><td class="field-body">The return-value of <tt class="xref py py-func docutils literal"><span class="pre">c4d.DrawViews()</span></tt>.</td>
 </tr>
 </tbody>
 </table>
@@ -564,12 +606,20 @@ abstract.</p>
 <dd><p>This exception is thrown when a requested library was not found.</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="c4dtools.library.load_library">
+<tt class="descclassname">c4dtools.library.</tt><tt class="descname">load_library</tt><big>(</big><em>name</em>, <em>lazy=False</em><big>)</big><a class="reference internal" href="_modules/c4dtools/library.html#load_library"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.library.load_library" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a library. Returns a <a class="reference internal" href="#c4dtools.library.Library" title="c4dtools.library.Library"><tt class="xref py py-class docutils literal"><span class="pre">Library</span></tt></a> instance unless <em>lazy</em>
+does not evaluate to True. If <em>lazy</em> is True, a <a class="reference internal" href="#c4dtools.library.LazyLibrary" title="c4dtools.library.LazyLibrary"><tt class="xref py py-class docutils literal"><span class="pre">LazyLibrary</span></tt></a>
+instance will be returned.</p>
+</dd></dl>
+
 </div>
 <span class="target" id="module-c4dtools.resource"></span><div class="section" id="c4dtools-resource">
 <h2>c4dtools.resource<a class="headerlink" href="#c4dtools-resource" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="c4dtools.resource.Resource">
-<em class="property">class </em><tt class="descclassname">c4dtools.resource.</tt><tt class="descname">Resource</tt><big>(</big><em>dirname</em>, <em>symbols</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#Resource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.Resource" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">c4dtools.resource.</tt><tt class="descname">Resource</tt><big>(</big><em>dirname</em>, <em>c4dres</em>, <em>symbols</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#Resource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.Resource" title="Permalink to this definition">¶</a></dt>
 <dd><p>An instance of this class is used to store the symbols of a
 C4D symbols file and several other information to work with
 the resource of a plugin, such as easily grabbing files from
@@ -596,6 +646,19 @@ resource and their value differs.</dd>
 <tt class="descname">get</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#Resource.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.Resource.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the value of the symbol with the passed name, or raises
 KeyError if no symbol was found.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="c4dtools.resource.ResourceString">
+<em class="property">class </em><tt class="descclassname">c4dtools.resource.</tt><tt class="descname">ResourceString</tt><big>(</big><em>id</em>, <em>c4dres</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#ResourceString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.ResourceString" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class represents a resource-string loaded from plugin resource.</p>
+<dl class="attribute">
+<dt id="c4dtools.resource.ResourceString.both">
+<tt class="descname">both</tt><a class="reference internal" href="_modules/c4dtools/resource.html#ResourceString.both"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.ResourceString.both" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a tuple of the <tt class="docutils literal"><span class="pre">(id,</span> <span class="pre">string)</span></tt> where <em>string</em> is
+loaded from the plugin&#8217;s resource.</p>
 </dd></dl>
 
 </dd></dl>
@@ -643,6 +706,187 @@ to load.</p>
 </dd></dl>
 
 </div>
+<span class="target" id="module-c4dtools.misc"></span><div class="section" id="c4dtools-misc">
+<h2>c4dtools.misc<a class="headerlink" href="#c4dtools-misc" title="Permalink to this headline">¶</a></h2>
+<p>Miscellaneous packages.</p>
+</div>
+<span class="target" id="module-c4dtools.misc.boundingbox"></span><div class="section" id="c4dtools-misc-boundingbox">
+<h2>c4dtools.misc.boundingbox<a class="headerlink" href="#c4dtools-misc-boundingbox" title="Permalink to this headline">¶</a></h2>
+<p>Utility for computing the bounding-box spanned by a couple of vectors
+or by <tt class="xref py py-class docutils literal"><span class="pre">c4d.BaseObject</span></tt> instances.</p>
+<dl class="class">
+<dt id="c4dtools.misc.boundingbox.AABB">
+<em class="property">class </em><tt class="descclassname">c4dtools.misc.boundingbox.</tt><tt class="descname">AABB</tt><big>(</big><em>min_v=Vector(0.000</em>, <em>0.000</em>, <em>0.000)</em>, <em>max_v=Vector(0.000</em>, <em>0.000</em>, <em>0.000)</em>, <em>translation_matrix=Matrix(v1: Vector(0.000</em>, <em>0.000</em>, <em>0.000)</em>, <em>v2: Vector(0.000</em>, <em>0.000</em>, <em>0.000)</em>, <em>v3: Vector(0.000</em>, <em>0.000</em>, <em>0.000)</em>, <em>off: Vector(0.000</em>, <em>0.000</em>, <em>0.000))</em><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/boundingbox.html#AABB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.boundingbox.AABB" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class makes it easy to compute the bounding-box of a set of
+points or even objects. AABB is short for &#8220;axis-aligned bounding-box&#8221;.</p>
+<p>Example for Script Manager:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">c4dtools.misc.boundingbox</span> <span class="kn">import</span> <span class="n">AABB</span>
+<span class="n">box</span> <span class="o">=</span> <span class="n">AABB</span><span class="p">()</span>
+<span class="n">box</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">box</span><span class="o">.</span><span class="n">midpoint</span>
+<span class="k">print</span> <span class="n">box</span><span class="o">.</span><span class="n">size</span>
+</pre></div>
+</div>
+<p>The bounding box is <em>always</em> calculated from global coordinates and
+is translated with the matrix in the translation_matrix slot. The
+translation can not be performed after expansion of the bounding-
+box, the translation_matrix must therefore be set <em>before</em>
+expand() or expand_point() is called.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">c4dtools.misc.boundingbox</span> <span class="kn">import</span> <span class="n">AABB</span>
+<span class="n">box</span> <span class="o">=</span> <span class="n">AABB</span><span class="p">(</span><span class="n">translation_matrix</span><span class="o">=~</span><span class="n">op</span><span class="o">.</span><span class="n">GetMg</span><span class="p">())</span>
+<span class="n">box</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">mg</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">box</span><span class="o">.</span><span class="n">midpoint</span>
+<span class="k">print</span> <span class="n">box</span><span class="o">.</span><span class="n">size</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="c4dtools.misc.boundingbox.AABB.expand">
+<tt class="descname">expand</tt><big>(</big><em>obj</em>, <em>recursive=False</em><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/boundingbox.html#AABB.expand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.boundingbox.AABB.expand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expand the bounding-box by the passed <tt class="xref py py-class docutils literal"><span class="pre">c4d.BaseObject</span></tt>
+instance. The method can optionally continue recursively.</p>
+<dl class="docutils">
+<dt>Raises: TypeError when <em>obj</em> is not an instance of</dt>
+<dd><tt class="xref py py-class docutils literal"><span class="pre">c4d.BaseObject</span></tt>.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.misc.boundingbox.AABB.expand_point">
+<tt class="descname">expand_point</tt><big>(</big><em>point</em><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/boundingbox.html#AABB.expand_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.boundingbox.AABB.expand_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expand the bounding-box by the passed c4d.Vector representing
+a point in the 3-dimensional space.</p>
+<dl class="docutils">
+<dt>Raises: TypeError when <em>point</em> is not an instance of</dt>
+<dd>c4d.Vector.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="c4dtools.misc.boundingbox.AABB.midpoint">
+<tt class="descname">midpoint</tt><a class="reference internal" href="_modules/c4dtools/misc/boundingbox.html#AABB.midpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.boundingbox.AABB.midpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calcuates and returns the midpoint of the bounding-box yet
+created.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="c4dtools.misc.boundingbox.AABB.size">
+<tt class="descname">size</tt><a class="reference internal" href="_modules/c4dtools/misc/boundingbox.html#AABB.size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.boundingbox.AABB.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the size of the bounding-box yet created. The size
+plus the midpoint of the bounding-box is the upper-right-front
+corner of the box.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-c4dtools.misc.graphnode"></span><div class="section" id="c4dtools-misc-graphnode">
+<h2>c4dtools.misc.graphnode<a class="headerlink" href="#c4dtools-misc-graphnode" title="Permalink to this headline">¶</a></h2>
+<p>Thin wrapper for interacting with XPresso Node UI.</p>
+<dl class="class">
+<dt id="c4dtools.misc.graphnode.GraphNode">
+<em class="property">class </em><tt class="descclassname">c4dtools.misc.graphnode.</tt><tt class="descname">GraphNode</tt><big>(</big><em>node</em><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/graphnode.html#GraphNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.graphnode.GraphNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is a thin wrapper for the <cite>c4d.modules.graphview.GvNode</cite>
+class providing an easy interface for accessing and modifieng the
+visual appeareance of an XPresso node in the XPresso editor.</p>
+<p>Currently, only accessing the position and size is supported.</p>
+<dl class="method">
+<dt id="c4dtools.misc.graphnode.GraphNode.get_graphcontainer">
+<tt class="descname">get_graphcontainer</tt><big>(</big><em>container</em><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/graphnode.html#GraphNode.get_graphcontainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.graphnode.GraphNode.get_graphcontainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns the container containing the graphdata for
+the node in the XPresso grap based on the <tt class="docutils literal"><span class="pre">GvNode</span></tt> s container.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="c4dtools.misc.graphnode.GraphNode.position">
+<tt class="descname">position</tt><a class="reference internal" href="_modules/c4dtools/misc/graphnode.html#GraphNode.position"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.graphnode.GraphNode.position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the visual position of the node as c4d.Vector.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="c4dtools.misc.graphnode.GraphNode.size">
+<tt class="descname">size</tt><a class="reference internal" href="_modules/c4dtools/misc/graphnode.html#GraphNode.size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.graphnode.GraphNode.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the visual size of the node as c4d.Vector. The container
+IDs differ for extended and standart view mode. The size is
+read/set according the to view mode the node is currently
+assigned to.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="c4dtools.misc.graphnode.GraphNode.view">
+<tt class="descname">view</tt><a class="reference internal" href="_modules/c4dtools/misc/graphnode.html#GraphNode.view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.graphnode.GraphNode.view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the type of view of the node. Either VIEW_MINIMIZED,
+VIEW_STANDART, VIEW_EXTENDED or VIEW_FULLSCREEN.</p>
+<dl class="docutils">
+<dt>Note: Still not sure how the locking is specified in the container,</dt>
+<dd>it is however defined in the View section in the GUI.</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="c4dtools.misc.graphnode.GraphNode.view_position">
+<tt class="descname">view_position</tt><a class="reference internal" href="_modules/c4dtools/misc/graphnode.html#GraphNode.view_position"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.graphnode.GraphNode.view_position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the position of the &#8220;camera&#8221; that is &#8220;looking&#8221; onto the
+nodes as c4d.Vector.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="c4dtools.misc.graphnode.GraphNode.zoom">
+<tt class="descname">zoom</tt><a class="reference internal" href="_modules/c4dtools/misc/graphnode.html#GraphNode.zoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.graphnode.GraphNode.zoom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the zoom of the XPresso nodes graphview. This value is
+only has effect for XGroups. The zoom is a floating-point value,
+100% represented as 1.0.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.misc.graphnode.find_nodes_mid">
+<tt class="descclassname">c4dtools.misc.graphnode.</tt><tt class="descname">find_nodes_mid</tt><big>(</big><em>nodes</em><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/graphnode.html#find_nodes_mid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.graphnode.find_nodes_mid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the mid-point of the passed list of
+<cite>c4dtools.misc.graphnode.GraphNode</cite> instances.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.misc.graphnode.find_selected_nodes">
+<tt class="descclassname">c4dtools.misc.graphnode.</tt><tt class="descname">find_selected_nodes</tt><big>(</big><em>root</em><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/graphnode.html#find_selected_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.graphnode.find_selected_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the group of selected nodes in the XPresso Manager and returns
+a list of GvNode objects.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-c4dtools.misc.userdata"></span><div class="section" id="c4dtools-misc-userdata">
+<h2>c4dtools.misc.userdata<a class="headerlink" href="#c4dtools-misc-userdata" title="Permalink to this headline">¶</a></h2>
+<p>Package for interacting with Cinema 4D&#8217;s UserData interface.</p>
+<dl class="class">
+<dt id="c4dtools.misc.userdata.UserDataSetAndGet">
+<em class="property">class </em><tt class="descclassname">c4dtools.misc.userdata.</tt><tt class="descname">UserDataSetAndGet</tt><big>(</big><em>fields</em>, <em>op</em>, <em>do_caching=True</em><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/userdata.html#UserDataSetAndGet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.userdata.UserDataSetAndGet" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class manages userdata-value retrieval and storing.
+It accepts a dictionary associating the attribute-name and
+the userdata&#8217;s sub-id on initialization and the c4d.BaseList2D
+object to use for retrival and storing.</p>
+<p>The values can optionally be cached to improve value retrieval.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">c4dtools.misc.userdata</span> <span class="kn">import</span> <span class="n">UserDataSetAndGet</span> <span class="k">as</span> <span class="n">UDSG</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">UDSG</span><span class="p">({</span>
+    <span class="s">&#39;count&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s">&#39;link&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+<span class="p">},</span> <span class="n">op</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">data</span><span class="o">.</span><span class="n">count</span>
+<span class="k">print</span> <span class="n">data</span><span class="o">.</span><span class="n">link</span>
+<span class="c"># Equal to</span>
+<span class="k">print</span> <span class="n">op</span><span class="p">[</span><span class="n">c4d</span><span class="o">.</span><span class="n">ID_USERDATA</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="k">print</span> <span class="n">op</span><span class="p">[</span><span class="n">c4d</span><span class="o">.</span><span class="n">ID_USERDATA</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="c4dtools.misc.userdata.UserDataSetAndGet.clear_cache">
+<tt class="descname">clear_cache</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/userdata.html#UserDataSetAndGet.clear_cache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.userdata.UserDataSetAndGet.clear_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear the cached values. Call this in case the host object&#8217;s
+parameters have changed by not using the instance of this class.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
@@ -668,6 +912,10 @@ to load.</p>
 <li><a class="reference internal" href="#c4dtools-plugins">c4dtools.plugins</a></li>
 <li><a class="reference internal" href="#c4dtools-library">c4dtools.library</a></li>
 <li><a class="reference internal" href="#c4dtools-resource">c4dtools.resource</a></li>
+<li><a class="reference internal" href="#c4dtools-misc">c4dtools.misc</a></li>
+<li><a class="reference internal" href="#c4dtools-misc-boundingbox">c4dtools.misc.boundingbox</a></li>
+<li><a class="reference internal" href="#c4dtools-misc-graphnode">c4dtools.misc.graphnode</a></li>
+<li><a class="reference internal" href="#c4dtools-misc-userdata">c4dtools.misc.userdata</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
