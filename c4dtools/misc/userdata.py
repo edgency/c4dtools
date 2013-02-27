@@ -90,7 +90,7 @@ class UserDataSetAndGet(object):
 
         self._op[c4d.ID_USERDATA, self._fields[name]] = value
         if self._do_caching:
-            getattr(name)
+            getattr(self, name)
 
     def clear_cache(self):
         r"""
