@@ -267,11 +267,22 @@ class Importer(object):
     r"""
     Use this class to enable importing modules from specific
     directories independent from ``sys.path``.
+
+    .. attribute:: high_priority
+        When this value evaluates to ``True``, the paths defined in the
+        imported are preprended to the original paths in ``sys.path``.
+        The're appended otherwise. Does not have effect when
+        :attr:`use_sys_path` evaluates to ``True``.
+
+    .. attribute:: use_sys_path
+        When this value is ``True``, the original paths from ``sys.path``
+        are used additionally to the paths defined in the imported.
     """
 
-    def __init__(self):
+    def __init__(self, high_priority=False, use_sys_path=True):
         super(Importer, self).__init__()
         self.path = []
+        self.high_priority = high_priority
 
     def add(self, *paths):
         r"""
@@ -297,7 +308,11 @@ class Importer(object):
         """
 
         prev_path = sys.path
-        sys.path = self.path + sys.path
+        if self.use_sys_path:
+            if self.high_priority:
+                sys.path = self.path + sys.path
+            else:
+                sys.path = sys.path + self.path
 
         prev_module = None
         if name in sys.modules and not load_globally:
