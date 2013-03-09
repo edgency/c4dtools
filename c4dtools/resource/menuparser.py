@@ -108,7 +108,6 @@ class MenuString(MenuNode):
         self._assert_symbol(self.symbol, res)
         dialog.MenuAddString(*res.string.get(self.symbol).both)
 
-
 class MenuSet(scan.TokenSet):
 
     def on_init(self):
@@ -122,7 +121,7 @@ class MenuSet(scan.TokenSet):
         self.add('bclose',  1, scan.Keyword('}'))
         self.add('end',     1, scan.Keyword(';'))
         self.add('sep',     0, scan.CharacterSet('-'))
-        self.add('symbol',  0, scan.CharacterSet(letters))
+        self.add('symbol',  0, scan.CharacterSet(letters, letters + digits))
         self.add('number',  0, scan.CharacterSet(digits))
 
 class MenuParser(object):
@@ -180,9 +179,9 @@ class MenuParser(object):
                         lexer.t_command, lexer.t_sep, lexer.t_symbol])
 
             items.add(item)
-            lexer.read_token()
 
             if require_endstmt:
+                lexer.read_token()
                 self._assert_type(lexer.token, lexer.t_end)
                 lexer.read_token()
 
