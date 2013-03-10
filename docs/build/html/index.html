@@ -209,9 +209,18 @@ to the passed suffix.</p>
 
 <dl class="class">
 <dt id="c4dtools.utils.Importer">
-<em class="property">class </em><tt class="descclassname">c4dtools.utils.</tt><tt class="descname">Importer</tt><a class="reference internal" href="_modules/c4dtools/utils.html#Importer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Importer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">c4dtools.utils.</tt><tt class="descname">Importer</tt><big>(</big><em>high_priority=False</em>, <em>use_sys_path=True</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#Importer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Importer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use this class to enable importing modules from specific
 directories independent from <tt class="docutils literal"><span class="pre">sys.path</span></tt>.</p>
+<dl class="attribute">
+<dt id="c4dtools.utils.Importer.use_sys_path">
+<tt class="descname">use_sys_path</tt><a class="headerlink" href="#c4dtools.utils.Importer.use_sys_path" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">When this value is ``True``, the original paths from ``sys.path``</tt></dt>
+<dt>
+<tt class="descname">are used additionally to the paths defined in the imported.</tt></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="c4dtools.utils.Importer.add">
 <tt class="descname">add</tt><big>(</big><em>*paths</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#Importer.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Importer.add" title="Permalink to this definition">¶</a></dt>
@@ -226,6 +235,20 @@ Passed paths are automatically expanded.</p>
 <dd><p>Import the module with the given name from the directories
 added to the Importer. The loaded module will not be inserted
 into <cite>sys.modules</cite> unless <tt class="docutils literal"><span class="pre">load_globall</span></tt> is True.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="c4dtools.utils.PolygonObjectInfo">
+<em class="property">class </em><tt class="descclassname">c4dtools.utils.</tt><tt class="descname">PolygonObjectInfo</tt><a class="headerlink" href="#c4dtools.utils.PolygonObjectInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class stores the points and polygons of a polygon-object and
+additionally computes it&#8217;s normals and polygon-midpoints.</p>
+<dl class="method">
+<dt id="c4dtools.utils.PolygonObjectInfo.init">
+<tt class="descname">init</tt><big>(</big><em>op</em><big>)</big><a class="headerlink" href="#c4dtools.utils.PolygonObjectInfo.init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the instance. <em>op</em> must be a <tt class="xref py py-class docutils literal"><span class="pre">c4d.PolygonObject</span></tt>
+instance.</p>
 </dd></dl>
 
 </dd></dl>
@@ -297,8 +320,20 @@ called before.</td>
 </dd></dl>
 
 <dl class="function">
+<dt id="c4dtools.utils.assert_type">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">assert_type</tt><big>(</big><em>x</em>, <em>*types</em><big>)</big><a class="headerlink" href="#c4dtools.utils.assert_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is similar to the built-in <a class="reference external" href="http://docs.python.org/library/functions.html#isinstance" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">isinstance()</span></tt></a> method in
+Python. It accepts an instance of a class as first argument, namely
+<em>x</em>, and checks if it is an instance of one of the passed types. The
+types must not be encapsulated in a tuple (which is in contrast to
+the <a class="reference external" href="http://docs.python.org/library/functions.html#isinstance" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">isinstance()</span></tt></a> method).</p>
+<p>This function raises a <tt class="xref py py-class docutils literal"><span class="pre">TypeError</span></tt> exception with a proper
+error message when <em>x</em> is not an instance of the passed <em>*types</em>.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="c4dtools.utils.candidates">
-<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">candidates</tt><big>(</big><em>value</em>, <em>obj</em>, <em>callback=&lt;function &lt;lambda&gt; at 0x03AD3E30&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#candidates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.candidates" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">candidates</tt><big>(</big><em>value</em>, <em>obj</em>, <em>callback=&lt;function &lt;lambda&gt; at 0x03631070&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#candidates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.candidates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searches for <em>value</em> in <em>obj</em> and returns a list of all keys where
 the callback returns True, being passed <em>value</em> as first argument,
 the value to compare it with as the second argument and the name
@@ -321,7 +356,7 @@ for <tt class="docutils literal"><span class="pre">obj.__class__.__name__</span>
 
 <dl class="function">
 <dt id="c4dtools.utils.current_state_to_object">
-<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">current_state_to_object</tt><big>(</big><em>op</em>, <em>container=&lt;c4d.BaseContainer instance at 0x03AE52D8&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#current_state_to_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.current_state_to_object" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">current_state_to_object</tt><big>(</big><em>op</em>, <em>container=&lt;c4d.BaseContainer instance at 0x0362EEE0&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#current_state_to_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.current_state_to_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Makes the passed <cite>c4d.BaseObject</cite> instance an editable object by
 applieng a modeling command on it. The returned object&#8217;s hierarchy
 will consist of Null-Objects and editable objects only.</p>
@@ -619,7 +654,7 @@ instance will be returned.</p>
 <h2>c4dtools.resource<a class="headerlink" href="#c4dtools-resource" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="c4dtools.resource.Resource">
-<em class="property">class </em><tt class="descclassname">c4dtools.resource.</tt><tt class="descname">Resource</tt><big>(</big><em>dirname</em>, <em>c4dres</em>, <em>symbols</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#Resource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.Resource" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">c4dtools.resource.</tt><tt class="descname">Resource</tt><big>(</big><em>dirname</em>, <em>c4dres</em>, <em>symbols={}</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#Resource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.Resource" title="Permalink to this definition">¶</a></dt>
 <dd><p>An instance of this class is used to store the symbols of a
 C4D symbols file and several other information to work with
 the resource of a plugin, such as easily grabbing files from
@@ -703,6 +738,38 @@ file.</td>
 <tt class="descclassname">c4dtools.resource.</tt><tt class="descname">parse_symbols</tt><big>(</big><em>string</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#parse_symbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.parse_symbols" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse symbols from the passed string containing the enumerations
 to load.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-c4dtools.resource.menuparser"></span><div class="section" id="c4dtools-resource-menuparser">
+<h2>c4dtools.resource.menuparser<a class="headerlink" href="#c4dtools-resource-menuparser" title="Permalink to this headline">¶</a></h2>
+<p>This module implements parsing a Menu-resource in order to attach the
+resource to a dialog.</p>
+<dl class="function">
+<dt id="c4dtools.resource.menuparser.parse_and_prepare">
+<tt class="descclassname">c4dtools.resource.menuparser.</tt><tt class="descname">parse_and_prepare</tt><big>(</big><em>filename</em>, <em>dialog</em>, <em>res</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource/menuparser.html#parse_and_prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.menuparser.parse_and_prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Like <a class="reference internal" href="#c4dtools.resource.menuparser.parse_file" title="c4dtools.resource.menuparser.parse_file"><tt class="xref py py-func docutils literal"><span class="pre">parse_file()</span></tt></a>, but renders the parsed menus to the dialog.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.resource.menuparser.parse_file">
+<tt class="descclassname">c4dtools.resource.menuparser.</tt><tt class="descname">parse_file</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource/menuparser.html#parse_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.menuparser.parse_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a <tt class="docutils literal"><span class="pre">*.menu</span></tt> file from the local file-system. Returns a list
+of <tt class="xref py py-class docutils literal"><span class="pre">MenuContainer</span></tt> objects.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.resource.menuparser.parse_fileobject">
+<tt class="descclassname">c4dtools.resource.menuparser.</tt><tt class="descname">parse_fileobject</tt><big>(</big><em>fl</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource/menuparser.html#parse_fileobject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.menuparser.parse_fileobject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a file-like object. Returns a list of <tt class="xref py py-class docutils literal"><span class="pre">MenuContainer</span></tt>
+objects.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.resource.menuparser.parse_string">
+<tt class="descclassname">c4dtools.resource.menuparser.</tt><tt class="descname">parse_string</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource/menuparser.html#parse_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.menuparser.parse_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a <tt class="docutils literal"><span class="pre">*.menu</span></tt> formatted string. Returns a list of of
+<tt class="xref py py-class docutils literal"><span class="pre">MenuContainer</span></tt> objects.</p>
 </dd></dl>
 
 </div>
@@ -856,7 +923,7 @@ a list of GvNode objects.</p>
 </div>
 <span class="target" id="module-c4dtools.misc.userdata"></span><div class="section" id="c4dtools-misc-userdata">
 <h2>c4dtools.misc.userdata<a class="headerlink" href="#c4dtools-misc-userdata" title="Permalink to this headline">¶</a></h2>
-<p>Package for interacting with Cinema 4D&#8217;s UserData interface.</p>
+<p>Module for interacting with Cinema 4D&#8217;s UserData interface.</p>
 <dl class="class">
 <dt id="c4dtools.misc.userdata.UserDataSetAndGet">
 <em class="property">class </em><tt class="descclassname">c4dtools.misc.userdata.</tt><tt class="descname">UserDataSetAndGet</tt><big>(</big><em>fields</em>, <em>op</em>, <em>do_caching=True</em><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/userdata.html#UserDataSetAndGet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.userdata.UserDataSetAndGet" title="Permalink to this definition">¶</a></dt>
@@ -912,6 +979,7 @@ parameters have changed by not using the instance of this class.</p>
 <li><a class="reference internal" href="#c4dtools-plugins">c4dtools.plugins</a></li>
 <li><a class="reference internal" href="#c4dtools-library">c4dtools.library</a></li>
 <li><a class="reference internal" href="#c4dtools-resource">c4dtools.resource</a></li>
+<li><a class="reference internal" href="#c4dtools-resource-menuparser">c4dtools.resource.menuparser</a></li>
 <li><a class="reference internal" href="#c4dtools-misc">c4dtools.misc</a></li>
 <li><a class="reference internal" href="#c4dtools-misc-boundingbox">c4dtools.misc.boundingbox</a></li>
 <li><a class="reference internal" href="#c4dtools-misc-graphnode">c4dtools.misc.graphnode</a></li>

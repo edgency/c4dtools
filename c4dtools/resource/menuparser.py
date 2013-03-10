@@ -36,7 +36,8 @@ c4dtools.resource.menuparser
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module implements parsing a Menu-resource in order to attach the
-resource to a dialog.
+resource to a dialog. It requires the py-scan module in version 0.4.2 or
+higher.
 """
 
 import c4d

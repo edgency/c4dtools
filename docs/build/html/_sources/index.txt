@@ -19,6 +19,10 @@ Welcome to the ``c4dtools`` documentation!
 .. automodule:: c4dtools.resource
     :members:
 
+.. automodule:: c4dtools.resource.menuparser
+    :members:
+
+
 .. automodule:: c4dtools.misc
     :members:
 
