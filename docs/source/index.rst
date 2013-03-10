@@ -35,6 +35,8 @@ Welcome to the ``c4dtools`` documentation!
 .. automodule:: c4dtools.misc.userdata
     :members:
 
+.. automodule:: c4dtools.misc.normalalign
+    :members:
 
 Indices and tables
 ==================
