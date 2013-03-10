@@ -45,6 +45,7 @@ all the `*.py` files.
 ```python
 import c4d
 import c4dtools
+import c4dtools.resource.menuparser as menuparser
 
 res, importer = c4dtools.prepare(__file__, __res__)
 
@@ -58,16 +59,36 @@ class MyDialog(c4d.gui.GeDialog):
     def CreateLayout(self):
         # Access symbols from the `res/c4d_symbols.h` file via
         # the global `res` variable returned by `c4dtools.prepare()`.
-        return self.LoadDialogResource(res.DLG_MYDIALOG)
+        success = self.LoadDialogResource(res.DLG_MYDIALOG)
+
+        # Parse and evaluate MENU files since version 1.2.0. A MENU file might
+        # look like this:
+        #
+        # MENU MENU_FILE {
+        #     MENU_FILE_ITEM1;
+        #     MENU_FILE_ITEM2;
+        #     ---------------;
+        #     COMMAND 5159; # Cube object command
+        #     COMMAND SOME_OTHER_RESOURCE_SYMBOL;
+        #     ---------------;
+        #     MENU MENU_FILE_SUB {
+        #         # ...
+        #     }
+        # }
+        #
+        if success:
+           menuparser.parse_and_prepare(res.file('menus', 'mymenu.menu'), self, res)
+
+        return success
 
     def InitValues(self):
         # Load strings from the `res/strings_xx/c4d_strings.str` file
         # via `res.string`.
-        string_1 = res.string.IDC_MYSTRING_1()
-        string_2 = res.string.IDC_MYSTRING_2("Peter")
+        string = res.string.EDT_STRING1("Peter")
+        self.SetString(res.EDT_STRING1, string)
 
-        self.SetString(res.EDT_STRING1, string_1)
-        self.SetString(res.EDT_STRING2, string_2)
+        # New in version 1.1.0, but does not allow string-argument substitution.
+        self.SetString(*res.string.EDT_STRING2.both)
 
         return True
 
