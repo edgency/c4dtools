@@ -1,17 +1,17 @@
 # Copyright (c) 2012-2013, Niklas Rosenstein
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
-# are met: 
-# 
+# are met:
+#
 # 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer. 
+#    notice, this list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in
 #    the documentation and/or other materials provided with the
-#    distribution. 
-# 
+#    distribution.
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -24,7 +24,7 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 # The views and conclusions contained in the software and
 # documentation are those of the authors and should not be interpreted
 # as representing official policies,  either expressed or implied, of
@@ -132,6 +132,36 @@ def candidates(value, obj, callback=lambda vref, vcmp, kcmp: vref == vcmp):
             results.append(k)
 
     return results
+
+def assert_type(x, *types):
+    r"""
+    This method is similar to the built-in :func:`isinstance` method in
+    Python. It accepts an instance of a class as first argument, namely
+    *x*, and checks if it is an instance of one of the passed types. The
+    types must not be encapsulated in a tuple (which is in contrast to
+    the :func:`isinstance` method).
+
+    This function raises a :class:`TypeError` exception with a proper
+    error message when *x* is not an instance of the passed *\*types*.
+    """
+
+    if not types:
+        pass
+    elif not isinstance(x, types):
+        names = []
+        for t in types:
+            names.append(t.__module__ + '.' + t.__name__)
+
+        if len(names) > 1:
+            message = 'Expected instance of %s, got %s'
+            first = ', '.join(names[:-1]) + ' or ' + names[-1]
+        else:
+            message = 'Expected instance of type %s, got %s'
+            first = names[0]
+
+        cls = x.__class__
+        message = message % (first, cls.__module__ + '.' + cls.__name__)
+        raise TypeError(message)
 
 # Cinema 4D related stuff, making common things easy
 
@@ -712,3 +742,57 @@ class Filename(object):
         for ext in glob_exts:
             for filename in glob.iglob(os.path.join(self.filename, ext)):
                 yield filename
+
+class PolygonObjectInfo(object):
+    r"""
+    This class stores the points and polygons of a polygon-object and
+    additionally computes it's normals and polygon-midpoints.
+    """
+
+    def __init__(self):
+        super(PolygonObjectInfo, self).__init__()
+        self.points = []
+        self.polygons = []
+        self.normals = []
+        self.midpoints = []
+        self.pointcount = 0
+        self.polycount = 0
+
+    def init(self, op):
+        r"""
+        Initialize the instance. *op* must be a :class:`c4d.PolygonObject`
+        instance.
+        """
+
+        assert_type(op, c4d.PolygonObject)
+
+        points = op.GetAllPoints()
+        polygons = op.GetAllPolygons()
+        normals = []
+        midpoints = []
+
+        for p in polygons:
+            a, b, c, d = points[p.a], points[p.b], points[p.c], points[p.d]
+
+            # Compute the polygon's normal vector.
+            normal = (a - b).Cross(a - d)
+            normal.Normalize()
+
+            # Compute the mid-point of the polygon.
+            midpoint = a + b + c
+            if p.c == p.d:
+                midpoint *= 1.0 / 3
+            else:
+                midpoint += d
+                midpoint *= 1.0 / 4
+
+            normals.append(normal)
+            midpoints.append(midpoint)
+
+        self.points = points
+        self.polygons = polygons
+        self.normals = normals
+        self.midpoints = midpoints
+        self.pointcount = len(points)
+        self.polycount = len(polygons)
+

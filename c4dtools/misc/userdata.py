@@ -33,7 +33,7 @@ r"""
 c4dtools.misc.userdata
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Package for interacting with Cinema 4D's UserData interface.
+Module for interacting with Cinema 4D's UserData interface.
 """
 
 import c4d
