@@ -133,11 +133,12 @@ it is importing a version of the library it can not run with.
 
 ### How to fix?
 
-The important lines are just three, but it doesn't look very nice:
+It's just a six-liner actually, the middle-part is just for demonstrational
+purpose.
 
 ```python
-# Remove and store all previous c4dtools modules.
-old_c4dtools = [(k, sys.modules.pop(k)) for k in sys.modules.keys() if k.startswith('c4dtools')]
+# Store the old module configuration.
+old_modules = sys.modules.copy()
 
 # Add the path to the folder where the c4dtools library resides, import it
 # and remove the path again. 
@@ -147,9 +148,12 @@ import c4dtools
 sys.path.pop(0)
 assert c4dtools.__version__ >= (1, 2, 5)
 
-# Restore the previous c4dtools modules.
-[sys.modules.pop(k) for k in sys.modules.keys() if k.startswith('c4dtools')]
-[sys.modules.__setitem__(k, v) for k, v in old_c4dtools]
+# Restore the previous module configuration.
+for k, v in sys.modules.items():
+    if k not in old_modules:
+        sys.modules.pop(k)
+    else:
+        sys.modules[k] = v
 ```
 
 ## License
