@@ -144,8 +144,8 @@ old_c4dtools = [(k, sys.modules.pop(k)) for k in sys.modules.keys() if k.startsw
 dirname = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(dirname, 'lib'))
 import c4dtools
-assert c4dtools.__version__ >= (1, 2, 5)
 sys.path.pop(0)
+assert c4dtools.__version__ >= (1, 2, 5)
 
 # Restore the previous c4dtools modules.
 [sys.modules.pop(k) for k in sys.modules.keys() if k.startswith('c4dtools')]
