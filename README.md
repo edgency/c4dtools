@@ -112,6 +112,46 @@ if __name__ == '__main__':
     c4dtools.plugins.main()
 ```
 
+## Important notice for developers
+
+When you as a developer are relying on the fact that the user has installed
+the `c4dtools` library on his local machine (as described above), you're fine
+since he is responsible for updating the library. You should however give the
+user a notice that your plugin relies on a certain version of the `c4dtools`
+library and that the user *must* update his local copy if his version is
+older than the version your plugin requires to run.
+
+It's a bit more tricky to deliver the library *with* a plugin. You as a
+developer have to ensure that the library imported from your plugin's local
+folder does not reside in `sys.modules` !!
+
+### Why?
+
+The version you are delivering with your plugin might be older than the
+version another plugin requires. If your plugin is loaded before the other,
+it is importing a version of the library it can not run with.
+
+### How to fix?
+
+The important lines are just three, but it doesn't look very nice:
+
+```python
+# Remove and store all previous c4dtools modules.
+old_c4dtools = [(k, sys.modules.pop(k)) for k in sys.modules.keys() if k.startswith('c4dtools')]
+
+# Add the path to the folder where the c4dtools library resides, import it
+# and remove the path again. 
+dirname = os.path.dirname(__file__)
+sys.path.insert(0, os.path.join(dirname, 'lib'))
+import c4dtools
+assert c4dtools.__version__ >= (1, 2, 5)
+sys.path.pop(0)
+
+# Restore the previous c4dtools modules.
+[sys.modules.pop(k) for k in sys.modules.keys() if k.startswith('c4dtools')]
+[sys.modules.__setitem__(k, v) for k, v in old_c4dtools]
+```
+
 ## License
 
 The `c4dtools` library is licensed under the Simplified BSD License since
