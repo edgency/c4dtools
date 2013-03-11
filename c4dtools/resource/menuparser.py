@@ -36,8 +36,7 @@ c4dtools.resource.menuparser
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module implements parsing a Menu-resource in order to attach the
-resource to a dialog. It requires the py-scan module in version 0.4.2 or
-higher.
+resource to a dialog.
 """
 
 import c4d
@@ -167,6 +166,7 @@ class MenuParser(object):
         lexer.read_token()
 
         while lexer.token and lexer.token.type != lexer.t_bclose:
+
             require_endstmt = True
             if lexer.token.type == lexer.t_menu:
                 item = self._menu(lexer)
@@ -206,8 +206,7 @@ def parse_file(filename):
     of :class:`MenuContainer` objects.
     """
 
-    fl = open(filename)
-    return parse_fileobject(fl)
+    return parse_fileobject(open(filename, 'rb'))
 
 def parse_string(data):
     r"""
@@ -245,7 +244,5 @@ def parse_and_prepare(filename, dialog, res):
     menus = parse_file(filename)
     for menu in menus:
         menu.render(dialog, res)
-
-
 
 
