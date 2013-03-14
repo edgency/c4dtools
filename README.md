@@ -140,18 +140,20 @@ purpose.
 # Store the old module configuration.
 old_modules = sys.modules.copy()
 
-# Add the path to the folder where the c4dtools library resides, import it
-# and remove the path again. 
-dirname = os.path.dirname(__file__)
-sys.path.insert(0, os.path.join(dirname, 'lib'))
-import c4dtools
-sys.path.pop(0)
-assert c4dtools.__version__ >= (1, 2, 5)
+# Import your stuff, for example:
+lib_path = os.path.join(os.path.dirname(__file__), 'lib')
+sys.path.insert(0, lib_path)
+try:
+    import module
+finally:
+    sys.path.pop(0)
 
-# Restore the previous module configuration.
+# Restore the previous module configuration making sure to not
+# remove modules not loaded from the local libraries folder.
 for k, v in sys.modules.items():
-    if k not in old_modules:
-        sys.modules.pop(k)
+    if k not in old_modules and hasattr(v, '__file__') or not v:
+        if not v or v.__file__.startswith(lib_path):
+            sys.modules.pop(k)
     else:
         sys.modules[k] = v
 ```
