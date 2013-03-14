@@ -144,7 +144,7 @@ old_modules = sys.modules.copy()
 lib_path = os.path.join(os.path.dirname(__file__), 'lib')
 sys.path.insert(0, lib_path)
 try:
-    import module
+    import c4dtools
 finally:
     sys.path.pop(0)
 
@@ -156,7 +156,12 @@ for k, v in sys.modules.items():
             sys.modules.pop(k)
     else:
         sys.modules[k] = v
+
+res, _ = c4dtools.prepare(__file__, __res__)
 ```
+
+Note: We're omitting the second value returned by `c4dtools.prepare()` since we do
+not need an Importer (we're doing it manually in the snippet above).
 
 ## License
 
