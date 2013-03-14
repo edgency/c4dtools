@@ -165,6 +165,29 @@ def assert_type(x, *types):
         message = message % (first, cls.__module__ + '.' + cls.__name__)
         raise TypeError(message)
 
+def get_root_module(modname, suffixes='pyc pyo py'.split()):
+    r"""
+    Returns the root-file or folder of a module filename. The return-value
+    is a tuple of ``(root_path, is_file)``.
+    """
+
+    dirname, basename = os.path.split(modname)
+
+    # Check if the module-filename is part of a Python package.
+    in_package =  False
+    for sufx in suffixes:
+        init_mod = os.path.join(dirname, '__init__.%s' % sufx)
+        if os.path.exists(init_mod):
+            in_package = True
+            break
+
+    # Go on recursively if the module is in a package or return the
+    # module path and if it is a file.
+    if in_package:
+        return get_root_module(dirname)
+    else:
+        return os.path.normpath(modname), os.path.isfile(modname)
+
 # Cinema 4D related stuff, making common things easy
 
 def flush_console(id=13957):
@@ -293,7 +316,129 @@ def get_shader_bitmap(shader, irs=None):
     shader.FreeRender()
     return bitmap
 
+def get_material_objects(doc):
+    r"""
+    This function goes through the complete object hierarchy of the
+    passed :class:`c4d.BaseDocument` and all materials with the objects
+    that carry a texture-tag with that material. The returnvalue is an
+    :class:`AtomDict` instance. The keys of the dictionary-like object
+    are the materials in the document, their associated values are lists
+    of :class:`c4d.BaseObject`. Note that an object *can* occure twice in
+    the same list when the object has two tags with the same material on
+    it.
+
+    :param doc: :class:`c4d.BaseDocument`
+    :return: :class:`AtomDict`
+    """
+
+    data = c4dtools.utils.AtomDict()
+
+    def callback(op):
+        for tag in op.GetTags():
+            if tag.CheckType(c4d.Ttexture):
+                mat = tag[c4d.TEXTURETAG_MATERIAL]
+                if not mat: continue
+
+                data.setdefault(mat, []).append(op)
+
+        for child in op.GetChildren():
+            callback(child)
+
+    for obj in doc.GetObjects():
+        callback(obj)
+
+    return data
+
 # Utility classes
+
+class AtomDict(object):
+    r"""
+    This class implements a subset of the dictionary interface but without the
+    requirement of the :func:`__hash__` method to be implemented. It is using
+    comparing objects directly with the ``==`` operator instead.
+    """
+
+    def __init__(self):
+        super(AtomDict, self).__init__()
+        self.__data = []
+
+    def __getitem__(self, x):
+        self.__get_item(x)[1]
+
+    def __setitem__(self, x, v):
+        try:
+            self.__get_item(x)[1] = v
+        except KeyError:
+            self.__data.append([x, v])
+
+    def __iter__(self):
+        return self.iterkeys()
+
+    def __repr__(self):
+        content = ', '.join('%r: %r' % (k, v) for (k, v) in self.__data)
+        return 'AtomDict({%s})' % content
+
+    def __contains__(self, key):
+        try:
+            self.__get_item(key)
+            return True
+        except KeyError:
+            return False
+
+    def __get_item(self, x):
+        for item in self.__data:
+            if item[0] == x:
+                return item
+        raise KeyError(x)
+
+    def setdefault(self, x, v):
+        try:
+            item = self.__get_item(x)
+        except KeyError:
+            item = [x, v]
+            self.__data.append(item)
+        return item[1]
+
+    def keys(self):
+        return list(self.iterkeys())
+
+    def values(self):
+        return list(self.itervalues())
+
+    def items(self):
+        return list(self.iteritems())
+
+    def iterkeys(self):
+        for key, value in self.__data:
+            yield key
+
+    def itervalues(self):
+        for key, value in self.__data:
+            yield value
+
+    def iteritems(self):
+        for key, value in self.__data:
+            yield (key, value)
+
+    def get(self, key, default=None):
+        try:
+            return self.__get_item(key)[1]
+        except KeyError:
+            return default
+
+    def set(self, key, value):
+        self.__setitem__(key, value)
+
+    def pop(self, key, *args):
+        try:
+            item = self.__get_item(key)
+            self.__data.remove(item)
+            return item[1]
+        except KeyError:
+            if not args:
+                raise
+            else:
+                return args[0]
 
 class Importer(object):
     r"""
@@ -314,6 +459,7 @@ class Importer(object):
     def __init__(self, high_priority=False, use_sys_path=True):
         super(Importer, self).__init__()
         self.path = []
+        self.use_sys_path = use_sys_path
         self.high_priority = high_priority
 
     def add(self, *paths):
@@ -328,15 +474,27 @@ class Importer(object):
             if not isinstance(path, basestring):
                 raise TypeError('passed argument must be string.')
             path = os.path.expanduser(path)
-            new_paths.append(path)
+            new_paths.append(os.path.normpath(path))
 
         self.path.extend(new_paths)
 
-    def import_(self, name, load_globally=False):
+    def is_local(self, module):
+        r"""
+        Returns True if the passed module object can be found in the
+        paths defined in the importer, False if not.
+        """
+
+        if not hasattr(module, '__file__'):
+            return False
+
+        modpath = os.path.dirname(get_root_module(module.__file__)[0])
+        return modpath in self.path
+
+    def import_(self, name):
         r"""
         Import the module with the given name from the directories
         added to the Importer. The loaded module will not be inserted
-        into `sys.modules` unless ``load_globall`` is True.
+        into `sys.modules`.
         """
 
         prev_path = sys.path
@@ -346,10 +504,13 @@ class Importer(object):
             else:
                 sys.path = sys.path + self.path
 
-        prev_module = None
-        if name in sys.modules and not load_globally:
-            prev_module = sys.modules[name]
-            del sys.modules[name]
+        prev_modules = sys.modules.copy()
+
+        # Remove any existing modules with the passed name from
+        # sys.modules.
+        for k in sys.modules.keys():
+            if k == name or k.startswith('%s.' % name):
+                del sys.modules[k]
 
         try:
             m = __import__(name)
@@ -361,15 +522,13 @@ class Importer(object):
         finally:
             sys.path = prev_path
 
-            # Restore the old module or remove the module that was just
-            # loaded from ``sys.modules`` only if we do not load the module
-            # globally.
-            if not load_globally:
-                if prev_module:
-                    sys.modules[name] = prev_module
+            # Restore the old module configuration. Only modules that have
+            # not been in sys.path before will be removed.
+            for k, v in sys.modules.items():
+                if k not in prev_modules and self.is_local(v) or not v:
+                    del sys.modules[k]
                 else:
-                    if name in sys.modules:
-                        del sys.modules[name]
+                    sys.modules[k] = v
 
 class Watch(object):
     r"""
@@ -797,4 +956,7 @@ class PolygonObjectInfo(object):
         self.midpoints = midpoints
         self.pointcount = len(points)
         self.polycount = len(polygons)
+
+
+
 
