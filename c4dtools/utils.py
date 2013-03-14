@@ -331,7 +331,7 @@ def get_material_objects(doc):
     :return: :class:`AtomDict`
     """
 
-    data = c4dtools.utils.AtomDict()
+    data = AtomDict()
 
     def callback(op):
         for tag in op.GetTags():
