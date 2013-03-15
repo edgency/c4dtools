@@ -2,18 +2,18 @@
 #
 # Copyright (c) 2012-2013, Niklas Rosenstein
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
-# are met: 
-# 
+# are met:
+#
 # 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer. 
+#    notice, this list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in
 #    the documentation and/or other materials provided with the
-#    distribution. 
-# 
+#    distribution.
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -26,7 +26,7 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 # The views and conclusions contained in the software and
 # documentation are those of the authors and should not be interpreted
 # as representing official policies,  either expressed or implied, of
@@ -34,6 +34,8 @@
 r"""
 c4dtools.resource.menuparser
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+New in 1.2.0.
 
 This module implements parsing a Menu-resource in order to attach the
 resource to a dialog.
@@ -57,27 +59,78 @@ class MenuNode(object):
             raise AttributeError('Resource does not have required symbol %r' %
                                  symbol)
 
+    def _compare_symbol(self, node_id, res):
+        r"""
+        Sub-procedure for sub-classes implementing a ``symbol`` attribute.
+        """
+
+        if self.symbol:
+            if node_id == self.symbol:
+                return True
+
+            self._assert_symbol(self.symbol, res)
+            if res.get(self.symbol) == node_id:
+                return True
+
+        return False
+
     def render(self, dialog, res):
         pass
 
+    def find_node(self, node_id, res):
+        r"""
+        New in 1.2.7.
+
+        Find a node by it's identifier.
+        """
+
+        return None
+
 class MenuContainer(MenuNode):
+    r"""
+    This class represents a container for Cinema 4D dialog menus
+    containg menu commands. The class can be rendered recursively
+    on a dialog to create such a menu.
+
+    .. attribute:: symbol
+        The resource-symbol for the menu-container that can be
+        used to obtain the name of the menu. No sub-menu will be
+        created with rendering the instance when this value
+        evaluates to False (eg. None value).
+    """
 
     def __init__(self, symbol):
         super(MenuContainer, self).__init__()
         self.children = []
         self.symbol = symbol
 
+    def __iter__(self):
+        # For partial backwards compatibility where MenuParser.parse()
+        # return a list.
+        return iter(self.children)
+
     def add(self, child):
         self.children.append(child)
 
     def render(self, dialog, res):
-        self._assert_symbol(self.symbol, res)
-        dialog.MenuSubBegin(res.string.get(self.symbol)())
+        if self.symbol:
+            self._assert_symbol(self.symbol, res)
+            dialog.MenuSubBegin(res.string.get(self.symbol)())
         try:
             for child in self.children:
                 child.render(dialog, res)
         finally:
-            dialog.MenuFinished()
+            if self.symbol:
+                dialog.MenuFinished()
+
+    def find_node(self, node_id, res):
+        if self._compare_symbol(node_id, res):
+            return self
+
+        for child in self.children:
+            node = child.find_node(node_id, res)
+            if node:
+                return node
 
 class MenuSeperator(MenuNode):
 
@@ -100,6 +153,14 @@ class MenuCommand(MenuNode):
 
         dialog.MenuAddCommand(command_id)
 
+    def find_node(self, node_id, res):
+        if self.command_id and self.command_id == node_id:
+            return self
+        elif self._compare_symbol(node_id, res):
+            return self
+
+        return None
+
 class MenuString(MenuNode):
 
     def __init__(self, symbol):
@@ -109,6 +170,11 @@ class MenuString(MenuNode):
     def render(self, dialog, res):
         self._assert_symbol(self.symbol, res)
         dialog.MenuAddString(*res.string.get(self.symbol).both)
+
+    def find_node(self, node_id, res):
+        if self._compare_symbol(node_id, res):
+            return self
+            
 
 class MenuSet(scan.TokenSet):
 
@@ -193,10 +259,10 @@ class MenuParser(object):
         return items
 
     def parse(self, lexer):
-        menus = []
+        menus = MenuContainer(None)
         while lexer.token:
             menu = self._menu(lexer)
-            menus.append(menu)
+            menus.add(menu)
         return menus
 
 
@@ -241,8 +307,7 @@ def parse_and_prepare(filename, dialog, res):
     if not isinstance(res, Resource):
         raise TypeError('Expected c4dtools.resource.Resource as 3rd argument.')
 
-    menus = parse_file(filename)
-    for menu in menus:
-        menu.render(dialog, res)
+    menu = parse_file(filename)
+    menu.render(dialog, res)
 
 

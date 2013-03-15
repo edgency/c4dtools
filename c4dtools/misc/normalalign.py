@@ -35,6 +35,8 @@ r"""
 c4dtools.misc.normalalign
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
+New in 1.2.5.
+
 This module implements a function for checking the alignment of the
 normals of a polygon-object.
 """

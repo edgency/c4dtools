@@ -43,7 +43,9 @@ import time
 import threading
 import collections
 
-# Path operations
+# =============================================================================
+#                                Path operations
+# =============================================================================
 
 def change_suffix(filename, new_suffix):
     r"""
@@ -64,7 +66,9 @@ def file_changed(original, copy):
 
     return os.path.getmtime(original) > os.path.getmtime(copy)
 
-# Vector operations
+# =============================================================================
+#                               Vector operations
+# =============================================================================
 
 def vmin(dest, test):
     r"""
@@ -108,7 +112,9 @@ def vbbmid(vectors):
 
     return (min + max) * 0.5
 
-# Several utilities
+# =============================================================================
+#                               Several utilities
+# =============================================================================
 
 def clsname(obj):
     r"""
@@ -137,6 +143,8 @@ def candidates(value, obj, callback=lambda vref, vcmp, kcmp: vref == vcmp):
 
 def assert_type(x, *types):
     r"""
+    New in 1.2.5.
+
     This method is similar to the built-in :func:`isinstance` method in
     Python. It accepts an instance of a class as first argument, namely
     *x*, and checks if it is an instance of one of the passed types. The
@@ -167,6 +175,8 @@ def assert_type(x, *types):
 
 def get_root_module(modname, suffixes='pyc pyo py'.split()):
     r"""
+    New in 1.2.6.
+
     Returns the root-file or folder of a module filename. The return-value
     is a tuple of ``(root_path, is_file)``.
     """
@@ -188,7 +198,28 @@ def get_root_module(modname, suffixes='pyc pyo py'.split()):
     else:
         return os.path.normpath(modname), os.path.isfile(modname)
 
-# Cinema 4D related stuff, making common things easy
+# =============================================================================
+#                                  Decorators
+# =============================================================================
+
+def func_attr(**attrs):
+    r"""
+    New in 1.2.6.
+
+    This decorator must be called, passing attributes to be stored in the
+    decorated function.
+    """
+
+    def wrapper(func):
+        for k, v in attrs.iteritems():
+            setattr(func, k, v)
+        return func
+
+    return wrapper
+
+# =============================================================================
+#              Cinema 4D related stuff, making common things easy
+# =============================================================================
 
 def flush_console(id=13957):
     r"""
@@ -295,6 +326,22 @@ def current_state_to_object(op, container=c4d.BaseContainer()):
 
     return result
 
+def serial_info():
+    r"""
+    New in 1.2.7.
+
+    Returns serial-information of the user. Returns ``(sinfo, is_multi)``.
+    *is_multi* indicates whether the *sinfo* is a multilicense information
+    or not.
+    """
+
+    is_multi = True
+    sinfo = c4d.GeGetSerialInfo(c4d.SERIALINFO_MULTILICENSE)
+    if not sinfo['nr']:
+        is_multi = False
+        sinfo = c4d.GeGetSerialInfo(c4d.SERIALINFO_CINEMA4D)
+    return sinfo, is_multi
+
 def get_shader_bitmap(shader, irs=None):
     r"""
     A bitmap can be retrieved from a :class:`c4d.BaseShader` instance of
@@ -318,6 +365,8 @@ def get_shader_bitmap(shader, irs=None):
 
 def get_material_objects(doc):
     r"""
+    New in 1.2.6.
+
     This function goes through the complete object hierarchy of the
     passed :class:`c4d.BaseDocument` and all materials with the objects
     that carry a texture-tag with that material. The returnvalue is an
@@ -349,10 +398,14 @@ def get_material_objects(doc):
 
     return data
 
-# Utility classes
+# =============================================================================
+#                                Utility classes
+# =============================================================================
 
 class AtomDict(object):
     r"""
+    New in 1.2.6.
+
     This class implements a subset of the dictionary interface but without the
     requirement of the :func:`__hash__` method to be implemented. It is using
     comparing objects directly with the ``==`` operator instead.
@@ -906,6 +959,8 @@ class Filename(object):
 
 class PolygonObjectInfo(object):
     r"""
+    New in 1.2.5.
+
     This class stores the points and polygons of a polygon-object and
     additionally computes it's normals and polygon-midpoints.
     """
