@@ -54,6 +54,9 @@ except ImportError:
 
 class MenuNode(object):
 
+    # Always a MenuContainer instance or None.
+    parent = None
+
     def _assert_symbol(self, symbol, res):
         if not res.has_symbol(symbol):
             raise AttributeError('Resource does not have required symbol %r' %
@@ -79,12 +82,19 @@ class MenuNode(object):
 
     def find_node(self, node_id, res):
         r"""
-        New in 1.2.7.
-
-        Find a node by it's identifier.
+        New in 1.2.7. Find a node by it's identifier.
         """
 
         return None
+
+    def remove(self):
+        r"""
+        New in 1.2.8. Remove the node from the tree.
+        """
+
+        if self.parent:
+            self.parent.children.remove(self)
+            self.parent = None
 
 class MenuContainer(MenuNode):
     r"""
@@ -111,6 +121,7 @@ class MenuContainer(MenuNode):
 
     def add(self, child):
         self.children.append(child)
+        child.parent = self
 
     def render(self, dialog, res):
         if self.symbol:
@@ -121,7 +132,7 @@ class MenuContainer(MenuNode):
                 child.render(dialog, res)
         finally:
             if self.symbol:
-                dialog.MenuFinished()
+                dialog.MenuSubEnd()
 
     def find_node(self, node_id, res):
         if self._compare_symbol(node_id, res):
