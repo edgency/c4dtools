@@ -499,12 +499,14 @@ class Importer(object):
     directories independent from ``sys.path``.
 
     .. attribute:: high_priority
-        When this value evaluates to ``True``, the paths defined in the
-        imported are preprended to the original paths in ``sys.path``.
-        The're appended otherwise. Does not have effect when
-        :attr:`use_sys_path` evaluates to ``True``.
+
+        When this value is True, the paths defined in the importer are
+        prepended to the original paths in ``sys.path``. If False, they
+        will be appended. Does only have an effect when :attr:`use_sys_path`
+        is True.
 
     .. attribute:: use_sys_path
+
         When this value is ``True``, the original paths from ``sys.path``
         are used additionally to the paths defined in the imported.
     """
