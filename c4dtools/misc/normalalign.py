@@ -71,7 +71,7 @@ def test_object_normals(op, info=None, logger=None):
         info = PolygonObjectInfo()
         info.init(op)
     if info.polycount <= 0:
-        return []
+        return ([], None)
 
     collider = GeRayCollider()
     if not collider.Init(op):

@@ -141,19 +141,27 @@ def candidates(value, obj, callback=lambda vref, vcmp, kcmp: vref == vcmp):
 
     return results
 
-def assert_type(x, *types):
+def ensure_type(x, *types, **kwargs):
     r"""
     New in 1.2.5.
 
-    This method is similar to the built-in :func:`isinstance` method in
-    Python. It accepts an instance of a class as first argument, namely
+    This function is similar to the built-in :func:`isinstance` function
+    in Python. It accepts an instance of a class as first argument, namely
     *x*, and checks if it is an instance of one of the passed types. The
     types must not be encapsulated in a tuple (which is in contrast to
     the :func:`isinstance` method).
 
     This function raises a :class:`TypeError` exception with a proper
     error message when *x* is not an instance of the passed *\*types*.
+
+    *Changed in 1.2.8*: Renamed from *assert_type* to *ensure_type*. Added
+    *\*\*kwargs* parameter. Pass ``name`` as keyword-argument for adding
+    the parameter    name that was wrong in the message.
     """
+
+    name = kwargs.pop('name', None)
+    for k, v in kwargs:
+        raise TypeError("unexpected keyword argument '%r'" % k)
 
     if not types:
         pass
@@ -163,15 +171,52 @@ def assert_type(x, *types):
             names.append(t.__module__ + '.' + t.__name__)
 
         if len(names) > 1:
-            message = 'Expected instance of %s, got %s'
+            message = 'xpected instance of %s, got %s'
             first = ', '.join(names[:-1]) + ' or ' + names[-1]
         else:
-            message = 'Expected instance of type %s, got %s'
+            message = 'xpected instance of type %s, got %s'
             first = names[0]
+
+        if name:
+            message = 'Invalid type for parameter %r, e' % name + message
+        else:
+            message = 'E' + message
 
         cls = x.__class__
         message = message % (first, cls.__module__ + '.' + cls.__name__)
         raise TypeError(message)
+
+assert_type = ensure_type # Backwards compatibility for < 1.2.8
+
+def ensure_value(x, *values, **kwargs):
+    r"""
+    New in 1.2.8.
+
+    This function checks if the value *x* is in *\*values*. If this does
+    not result in True, :class:`ValueError` is raised.
+
+    Pass ``name`` as keyword-argument to specify the parameter name that
+    was given wrong in the message.
+    """
+
+    name = kwargs.pop('name', None)
+    for k in kwargs:
+        raise TypeError("unexpected keyword argument %r" % k)
+
+    if not values:
+        pass
+
+    if x not in values:
+        if len(values) > 1:
+            message = 'Possible values are %r' % list(values)
+        else:
+            message = 'Expected value is %r' % values[0]
+
+        if name:
+            message = 'Invalid value for parameter %r, ' + message
+            message = message % name
+
+        raise ValueError(message)
 
 def get_root_module(modname, suffixes='pyc pyo py'.split()):
     r"""
@@ -326,6 +371,25 @@ def current_state_to_object(op, container=c4d.BaseContainer()):
 
     return result
 
+def join_objects(objects, container=None):
+    """
+    New in 1.2.8. Merge the iterable *object* of :class:`c4d.BaseObject`
+    instances into a new object using the :attr:`c4d.MCOMMAND_JOIN` modeling
+    command.
+    """
+
+    if container is None:
+        container = c4d.BaseContainer()
+        container.SetBool(c4d.MDATA_JOIN_MERGE_SELTAGS, True)
+
+    result = c4d.utils.SendModelingCommand(
+        c4d.MCOMMAND_JOIN, objects, bc=container)
+    if not result:
+        return None
+
+    assert len(result) == 1
+    return result[0]
+
 def serial_info():
     r"""
     New in 1.2.7.
@@ -397,6 +461,25 @@ def get_material_objects(doc):
         callback(obj)
 
     return data
+
+def bl_iterator(obj, safe=False):
+    r"""
+    New in 1.2.8. Yields the passed object and all following objects
+    in the hierarchy (retrieved via :func:`~c4d.BaseList2D.GetNext`). When
+    the *safe* parameter is True, the next object will be retrieved before
+    yielding to allow the yielded object to be moved in the hierarchy and
+    iteration continues as if the object was not moved in hierarchy.
+    """
+
+    if safe:
+        while obj:
+            next = obj.GetNext()
+            yield obj
+            obj = next
+    else:
+        while obj:
+            yield obj
+            obj = obj.GetNext()
 
 # =============================================================================
 #                                Utility classes
@@ -982,7 +1065,7 @@ class PolygonObjectInfo(object):
         instance.
         """
 
-        assert_type(op, c4d.PolygonObject)
+        ensure_type(op, c4d.PolygonObject)
 
         points = op.GetAllPoints()
         polygons = op.GetAllPolygons()
@@ -1013,7 +1096,5 @@ class PolygonObjectInfo(object):
         self.midpoints = midpoints
         self.pointcount = len(points)
         self.polycount = len(polygons)
-
-
 
 

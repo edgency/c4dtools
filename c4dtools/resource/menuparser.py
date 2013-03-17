@@ -96,6 +96,12 @@ class MenuNode(object):
             self.parent.children.remove(self)
             self.parent = None
 
+    def copy(self):
+        r"""
+        New in 1.2.8. Return a copy of the Menu tree.
+        """
+        raise NotImplementedError
+
 class MenuContainer(MenuNode):
     r"""
     This class represents a container for Cinema 4D dialog menus
@@ -143,10 +149,19 @@ class MenuContainer(MenuNode):
             if node:
                 return node
 
+    def copy(self):
+        new = MenuContainer(self.symbol)
+        for child in self.children:
+            new.add(child.copy())
+        return new
+
 class MenuSeperator(MenuNode):
 
     def render(self, dialog, res):
         dialog.MenuAddSeparator()
+
+    def copy(self):
+        return MenuSeperator()
 
 class MenuCommand(MenuNode):
 
@@ -172,6 +187,9 @@ class MenuCommand(MenuNode):
 
         return None
 
+    def copy(self):
+        return MenuCommand(self.command_id, self.symbol)
+
 class MenuString(MenuNode):
 
     def __init__(self, symbol):
@@ -186,6 +204,25 @@ class MenuString(MenuNode):
         if self._compare_symbol(node_id, res):
             return self
             
+    def copy(self):
+        return MenuString(self.symbol)
+
+class MenuItem(MenuNode):
+
+    def __init__(self, id, string):
+        super(MenuItem, self).__init__()
+        self.id = id
+        self.string = string
+
+    def render(self, dialog, res):
+        dialog.MenuAddString(self.id, self.string)
+
+    def find_node(self, node_id, res):
+        if node_id == self.id:
+            return self
+
+    def copy(self):
+        return MenuItem(self.id, self.string)
 
 class MenuSet(scan.TokenSet):
 

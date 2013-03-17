@@ -257,7 +257,10 @@ class StringLoader(object):
         return ResourceString(symbol_id, self.resource.c4dres)
 
     def get(self, name):
-        return getattr(self,name)
+        if isinstance(name, int):
+            return ResourceString(name, self.resource.c4dres)
+
+        return getattr(self, name)
 
     def has_symbol(self, name):
         return self.resource.has_symbol(name)
@@ -285,6 +288,13 @@ class ResourceString(object):
             string = string.replace('#', arg, 1)
 
         return string
+
+    def __str__(self):
+        r"""
+        New in 1.2.8. Equal to :met:`__call__` without passing parameters.
+        """
+
+        return self()
 
     @property
     def both(self):
