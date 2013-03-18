@@ -36,8 +36,7 @@ c4dtools.misc.dialogs
 ~~~~~~~~~~~~~~~~~~~~~
 
 New in 1.2.8. This module allows you to store and retrieve data from
-a dialog dynamically, creating a dictionary or :class:`c4d.BaseContainer`
-from this data and also loading this data back.
+a dialog dynamically.
 """
 
 import abc
@@ -50,18 +49,18 @@ from c4dtools.utils import ensure_type, ensure_value
 
 class Datatype(object):
     r"""
-    This class represents a datype used in the :class:`DialogContainer`
-    class. It acts as worker for retreiving, setting and converting data.
+    This class represents a datype used in the :class:`ParameterManager`
+    class. It acts as a worker for retreiving, setting and converting data.
     """
 
     __metaclass__ = abc.ABCMeta
 
     # Set this to the identifier for the datatype used in the
-    # :methd:`DialogContainer.add` method.
+    # :methd:`ParameterManager.add` method.
     identifier = None
 
     @abc.abstractmethod
-    def get_value(self, dialog, symbol ):
+    def get_value(self, dialog, symbol):
         r"""
         Retrieve the value of the parameter identified by the integral
         *symbol* from the :class:`c4d.GeDialog` *dialog*.
@@ -84,7 +83,7 @@ class Datatype(object):
         object.
 
         .. note:: *symbol* might not be exactly the same value as it
-                  was passed to :meth:`DialogContainer.add`.
+                  was passed to :meth:`ParameterManager.add`.
         """
         pass
 
@@ -97,112 +96,29 @@ class Datatype(object):
         container.
 
         .. note:: *symbol* might not be exactly the same value as it
-                  was passed to :meth:`DialogContainer.add`.
+                  was passed to :meth:`ParameterManager.add`.
         """
         pass
 
-class DialogContainer(object):
+    @abc.abstractmethod
+    def get_default_value(self):
+        r"""
+        Return the default-value for the datatype.  
+        """
+        pass
+
+class ParameterManager(object):
     r"""
     This class is used to store the configuration of a
     :class:`c4d.gui.GeDialog` is a :class:`c4d.BaseContainer` object.
     It requires an initialization step to associate resource symbols
     with the data-type.
-
-    Here's an example:
-
-    .. code-block:: python
-
-        import c4d
-        import c4dtools
-        from c4d import BaseContainer
-        from c4d.plugins import GetWorldPluginData, SetWorldPluginData
-        from c4dtools.misc.dialog import DialogContainer
-
-        res, _ = c4dtools.prepare(__file__, __res__)
-
-        class MyDialog(c4d.gui.GeDialog):
-
-            # Must be a unique plugincafe identifier, used in
-            # InitValues and DestroyWindow!
-            ID = 1027195
-
-            container = None
-
-            def __init__(self):
-                super(MyDialog, self).__init__()
-
-                # Initialize the container.
-                c = DialogContainer()
-                add = c.add
-
-                add('optimize', res.CHK_OPTIMIZE, 'b')
-                add('optimize_tolerance', res.EDT_OPTIMIZE_TOLERANCE, 'f')
-                add('scenefile', res.FLN_SCENE, 'fl')
-                add('mode', res.CMB_MODE, 'l')
-
-                self.container = c
-
-            def __getattr__(self, name):
-                return self.container.get(self, name)
-
-            def __call__(self, name, value):
-                self.container.set(self, name, value)
-
-            # c4d.gui.GeDialog
-
-            def CreateLayout(self):
-                return self.LoadDialogResource(res.DLG_MAIN)
-
-            def InitValues(self):
-                self('optimize', True)
-                self('optimize_tolerance', 0.01)
-                self('scenefile', '')
-                self('mode', res.CMB_MODE_DEFAULT)
-
-                # Load a container that stores the dialog configuration.
-                bc = GetWorldPluginData(MyDialog.ID) or BaseContainer()
-                print self.container.load_container(self, bc, genlist=True)
-
-                return True
-            def AskClose(self):
-                # Save the dialog configuration !
-                if getattr(self, 'container', None):
-                    bc = self.container.to_container(self)
-                    SetWorldPluginData(MyDialog.ID, bc)
-                return False
-
-            def Command(self, id, msg):
-                print "Dialog Values:",
-                print self.optimize, self.optimize_tolerance,
-                print self.scenefile, self.mode
-                return True
-
-        dlg = MyDialog()
-        dlg.Open(c4d.DLG_TYPE_MODAL)
     """
 
     def __init__(self):
-        super(DialogContainer, self).__init__()
+        super(ParameterManager, self).__init__()
         self._data = {}
         self._types = {}
-
-        self.on_init()
-
-    def on_init(self):
-        r"""
-        Called after :meth:`__init__` has finished. The default
-        implementation adds the default datatypes.
-        """
-
-        self.register_datatype(BoolDatatype())
-        self.register_datatype(RealDatatype())
-        self.register_datatype(MeterDatatype())
-        self.register_datatype(DegreeDatatype())
-        self.register_datatype(PercentDatatype())
-        self.register_datatype(LongDatatype())
-        self.register_datatype(StringDatatype())
-        self.register_datatype(FilenameDatatype())
-        self.register_datatype(TimeDatatype())
 
     def register_datatype(self, datatype):
         r"""
@@ -218,7 +134,7 @@ class DialogContainer(object):
 
         self._types[datatype.identifier] = datatype
 
-    def add(self, param_name, symbol, param_type):
+    def add(self, param_name, symbol, param_type, default_value=None):
         r"""
         Let the container know about a new parameter. *param_name*
         must be a string that will be used to access the parameter via
@@ -227,41 +143,8 @@ class DialogContainer(object):
         *symbol* must be an integer used to identify the parameter
         in the dialog.
 
-        *param_type* must be either a string identifieng the data-type
-        of the parameter or a sequence of 2 or 4 elements. When passing
-        an sequence type the first two elements are always 1. the
-        getter of the parameter 2. the setter of the parameter. The getter
-        function is passed the integral *symbol* passed to this method
-        and the dialog to retrieve the value from. The setter is additionally
-        passed the value to set.
-
-        When the sequence has not 2 elements, it must have 4.
-        :class:`ValueError` is raised otherwise. The last 2 elements of
-        the sequence must be a converter from and to data of a
-        :class:`c4d.BaseContainer`. The converter from the container to
-        Python object is passed ``(symbol, container)`` and the converter
-        from Python object to container is passed
-        ``(symbol, container, value)``. The function itself is responsible
-        for storing the symbol in the container.
-
-        If *param_type* is not a sequence type, it must be a string
-        identifieng the parameter data type. Possible values are:
-
-        =============================== =================
-        Data Type                       String Identifier
-        =============================== =================
-        Bool (:class:`bool`)            ``'b'``
-        Real (:class:`float`)           ``'f'``
-        Meter (:class:`float`)          ``'m'``
-        Degree (:class:`float`)         ``'d'``
-        Percent (:class:`float`)        ``'p'``
-        Long (:class:`int`)             ``'i'``
-        String (:class:`str`)           ``'s'``
-        Filename (:class:`str`)         ``'fl'``
-        Time (:class:`c4d.BaseTime`)    ``'t'``
-
-        These are the standart types. More types can be registered via
-        :meth:`register_datatype`.
+        *param_type* must be a string identifieng the data-type of
+        the parameter.
         """
 
         if param_type not in self._types:
@@ -271,14 +154,18 @@ class DialogContainer(object):
         if param_name in self._data:
             raise ValueError('parameter %r already registered.' % param_name)
 
-        self._data[param_name] = (symbol, self._types[param_type])
+        datatype = self._types[param_type]
+        if default_value is None:
+            default_value = datatype.get_default_value()
+
+        self._data[param_name] = (symbol, datatype, default_value)
 
     def get(self, dialog, name):
         r"""
         Retrieve a parameter from the dialog.
         """
 
-        symbol, datatype = self._data[name]
+        symbol, datatype, default = self._data[name]
         return datatype.get_value(dialog, symbol)
 
     def set(self, dialog, name, value):
@@ -286,17 +173,12 @@ class DialogContainer(object):
         Set a parameter to the dialog.
         """
 
-        symbol, datatype = self._data[name]
+        symbol, datatype, default = self._data[name]
         datatype.set_value(dialog, symbol, value)
 
     def to_dict(self, dialog, names=(), mode='exclude'):
         r"""
         Creates a dictionary of all values stored in the container.
-        *exclude* may be a sequence type containing the names to exclude
-        from the dictionary. *include* may contain the names to include
-        in the dictionary.
-
-        *include* has precedence over *exclude*.
         """
 
         ensure_value(mode, 'include', 'exclude', name='mode')
@@ -306,7 +188,7 @@ class DialogContainer(object):
             def check(n): return n in names
 
         result = {}
-        for name, (symbol, datatype) in self._data.iteritems():
+        for name, (symbol, datatype, default) in self._data.iteritems():
             if check(name):
                 result[name] = datatype.get_value(dialog, symbol)
 
@@ -323,7 +205,7 @@ class DialogContainer(object):
 
         names = []
         for name, value in data.iteritems():
-            symbol, datatype = self._data[name]
+            symbol, datatype, default = self._data[name]
             datatype.set_value(dialog, symbol, value)
 
             if genlist:
@@ -344,7 +226,7 @@ class DialogContainer(object):
             def check(n): return n in names
 
         data = BaseContainer()
-        for name, (symbol, datatype) in self._data.iteritems():
+        for name, (symbol, datatype, default) in self._data.iteritems():
             if check(name):
                 value = datatype.get_value(dialog, symbol)
                 datatype.to_container(symbol, data, value)
@@ -363,12 +245,16 @@ class DialogContainer(object):
         # Rework the data dictionary to associate the symbols
         # with the datatypes.
         data = {}
-        for name, (symbol, datatype) in self._data.iteritems():
+        for name, (symbol, datatype, default) in self._data.iteritems():
             data[symbol] = datatype, name
 
         names = []
         for symbol, value in container:
-            datatype, name = data[symbol]
+            try:
+                datatype, name = data[symbol]
+            except KeyError:
+                continue
+
             value = datatype.from_container(symbol, container)
             datatype.set_value(dialog, symbol, value)
 
@@ -376,6 +262,51 @@ class DialogContainer(object):
                 names.append(name)
 
         return names
+
+    def set_defaults(self, dialog):
+        r"""
+        Set all registered parameters to the default-values passed on
+        :meth:`add`.
+        """
+
+        for name, (symbol, datatype, default) in self._data.iteritems():
+            datatype.set_value(dialog, symbol, default)
+
+class DefaultParameterManager(ParameterManager):
+    r"""
+    This class adds the default datatypes to the container. The default
+    datatypes are:
+
+    =============================== =================
+    Data Type                       String Identifier
+    =============================== =================
+    Bool (:class:`bool`)            ``'b'``
+    Real (:class:`float`)           ``'f'``
+    Meter (:class:`float`)          ``'m'``
+    Degree (:class:`float`)         ``'d'``
+    Percent (:class:`float`)        ``'p'``
+    Long (:class:`int`)             ``'i'``
+    String (:class:`str`)           ``'s'``
+    Filename (:class:`str`)         ``'fl'``
+    Time (:class:`c4d.BaseTime`)    ``'t'``
+    =============================== =================
+
+    More types can be registered via :meth:`register_datatype`.
+    """
+
+    def __init__(self):
+        super(DefaultParameterManager, self).__init__()
+
+        self.register_datatype(BoolDatatype())
+        self.register_datatype(RealDatatype())
+        self.register_datatype(MeterDatatype())
+        self.register_datatype(DegreeDatatype())
+        self.register_datatype(PercentDatatype())
+        self.register_datatype(LongDatatype())
+        self.register_datatype(StringDatatype())
+        self.register_datatype(FilenameDatatype())
+        self.register_datatype(TimeDatatype())
+
 
 
 class FunctionBoundDatatype(Datatype):
@@ -426,6 +357,9 @@ class FunctionBoundDatatype(Datatype):
     def to_container(self, symbol, container, value):
         self.c_setter(container, symbol, value)
 
+    def get_default_value(self):
+        return self.d_default
+
 class BoolDatatype(FunctionBoundDatatype):
 
     # FunctionBoundDatatype
@@ -438,6 +372,9 @@ class BoolDatatype(FunctionBoundDatatype):
         self.d_setter = GeDialog.SetBool
         self.c_getter = BaseContainer.GetBool
         self.c_setter = BaseContainer.SetBool
+
+    def set_value(self, dialog, symbol, value):
+        dialog.SetBool(symbol, value)
 
     # Datatype
 
@@ -511,11 +448,14 @@ class LongDatatype(FunctionBoundDatatype):
 
     # Datatype
 
-    identifier = 'l'
+    identifier = 'i'
 
 class StringDatatype(FunctionBoundDatatype):
 
     # FunctionBoundDatatype
+
+    d_default = ''
+    c_default = ''
 
     def on_init(self):
         self.d_getter = GeDialog.GetString
@@ -530,6 +470,9 @@ class StringDatatype(FunctionBoundDatatype):
 class FilenameDatatype(FunctionBoundDatatype):
 
     # FunctionBoundDatatype
+
+    d_default = ''
+    c_default = ''
 
     def on_init(self):
         self.d_getter = GeDialog.GetFilename
