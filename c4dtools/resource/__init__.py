@@ -187,12 +187,6 @@ class Resource(object):
     def has_symbol(self, name):
         return name in self.symbols
 
-    def file(self, *path_parts):
-        r"""
-        Concatenate the resource folders path with the passed filename.
-        """
-        return os.path.join(self.dirname, *path_parts)
-
     def add_symbols(self, symbols):
         r"""
         Add the dictionary *symbols* to the resources symbols.
@@ -216,6 +210,21 @@ class Resource(object):
                 self.highest_symbol = value
 
         res_symbols.update(symbols)
+
+    def get_symbol_name(self, id_):
+        r"""
+        Returns the name of the passed symbol id.
+        """
+
+        for k, v in self.symbols.iteritems():
+            if v == id_:
+                return k
+
+    def file(self, *path_parts):
+        r"""
+        Concatenate the resource folders path with the passed filename.
+        """
+        return os.path.join(self.dirname, *path_parts)
 
 class StringLoader(object):
     r"""
