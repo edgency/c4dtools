@@ -102,13 +102,15 @@ def prepare(filename, c4dres, cache_symbols=True, libfolder_name='lib',
     symbols_container = resource.Resource(path.res, c4dres, {})
 
     if os.path.isfile(path.c4d_symbols):
-        symbols = resource.load(path.c4d_symbols, cache_symbols)
+        symbols, changed = resource.load(path.c4d_symbols, cache_symbols)
         symbols_container.add_symbols(symbols)
+        symbols_container.changed |= changed
 
     if parse_descriptions:
         files = glob.glob(os.path.join(path.description, '*.h'))
         for filename in files:
-            symbols = resource.load(filename, cache_symbols)
+            symbols, changed = resource.load(filename, cache_symbols)
             symbols_container.add_symbols(symbols)
+            symbols_container.changed |= changed
 
     return (symbols_container, importer)

@@ -59,7 +59,7 @@ def load(filename, use_cache=True, cache_suffix='cache'):
     The advantage of caching the symbols in a seperate file is the
     improved speed of reading in the symbols.
 
-    :Returns: A dictionary of the loaded symbols.
+    :Returns: ``(symbols_dict, changed)``
     :Raises:  OSError if *filename* does not exist or does not point to a
               file.
     """
@@ -72,8 +72,13 @@ def load(filename, use_cache=True, cache_suffix='cache'):
 
     # Load the cache if desired and available.
     load_from_source = True
-    load_from_cache = use_cache and os.path.isfile(cache_name) \
-        and not utils.file_changed(filename, cache_name)
+    original_changed = False
+    load_from_cache = False
+
+    if use_cache and os.path.isfile(cache_name):
+        original_changed = utils.file_changed(filename, cache_name)
+        load_from_cache = not original_changed
+
     if load_from_cache:
         fp = open(cache_name, 'rb')
         data = None
@@ -113,7 +118,7 @@ def load(filename, use_cache=True, cache_suffix='cache'):
             with open(cache_name, 'wb') as cache_fp:
                 json.dump(symbols, cache_fp)
 
-    return symbols
+    return symbols, original_changed
 
 def parse_symbols(string):
     r"""
@@ -155,6 +160,46 @@ class Resource(object):
     C4D symbols file and several other information to work with
     the resource of a plugin, such as easily grabbing files from
     that folder, etc.
+
+    .. attribute:: dirname
+        The directory name of the resource-folder. Not garuanteed to
+        exist!
+
+    .. attribute:: c4dres
+        The :class:`c4d.plugins.GeResource` object passed on construction.
+        This is usually the ``__res__`` variable passed through from a
+        Python plugin.
+
+    .. attribute:: string
+        A :class:`StringLoader` instance associated with the resource
+        object. Used to load resource strings.
+
+        .. code-block:: python
+            # Load a resource-string with the IDC_MYSTRING symbol-name
+            # without formatting arguments.
+            res.string.IDC_MYSTRING()
+
+            # Or call the str() function on the returned ResourceString
+            # instance.
+            str(res.string.IDC_MYSTRING)
+
+            # Format the resource string by replacing the hashes in
+            # the string with the passed arguments.
+            res.string.IDC_FILENOTFOUND(filename)
+
+            # Unpack the tuple returned by the `both` property.
+            # Shortcut for:
+            #   container.SetString(
+            #       res.IDC_CONTEXTMENU_1,
+            #       res.string.IDC_CONTEXTMENU_1())
+            container.SetString(*res.string.IDC_CONTEXTMENU_1.both)
+
+    .. attribute:: changed
+        This attribute is set in :func:`~c4dtools.prepare` function for
+        example. It is only True when the resource was cached *and* has
+        changed, and symbol-IDs might not be the same as they have been
+        before. When symbol-caching is deactivated, this attribute will
+        always be False.
     """
 
     def __init__(self, dirname, c4dres, symbols={}):
@@ -163,6 +208,7 @@ class Resource(object):
         self.c4dres = c4dres
         self.string = StringLoader(self)
         self.symbols = symbols
+        self.changed = False
 
     def __getattr__(self, name):
         return self.symbols[name]
@@ -196,9 +242,7 @@ class Resource(object):
                 resource and their value differs.
         """
 
-        if not isinstance(symbols, dict):
-            raise TypeError('expected dict, got %s' %
-                            symbols.__class__.__name__)
+        utils.ensure_type(symbols, dict)
 
         res_symbols = self.symbols
         for key, value in symbols.iteritems():
