@@ -371,24 +371,86 @@ def current_state_to_object(op, container=c4d.BaseContainer()):
 
     return result
 
-def join_objects(objects, container=None):
-    """
-    New in 1.2.8. Merge the iterable *object* of :class:`c4d.BaseObject`
-    instances into a new object using the :attr:`c4d.MCOMMAND_JOIN` modeling
-    command.
+def join_polygon_objects(objects, dest_mat=None):
+    r"""
+    New in 1.2.8.
+    This function creates one polygon object from the passed list
+    *objects* containing :class:`c4d.PolygonObject` instances. Any other
+    type of object is ignored.
+
+    The returned polygon-object is located at the global world
+    center.
+
+    # TODO: Add description for parameters.
     """
 
-    if container is None:
-        container = c4d.BaseContainer()
-        container.SetBool(c4d.MDATA_JOIN_MERGE_SELTAGS, True)
-
-    result = c4d.utils.SendModelingCommand(
-        c4d.MCOMMAND_JOIN, objects, bc=container)
-    if not result:
+    # Filter all polygon-objects from the passed sequence.
+    objects = filter(lambda x: x.CheckType(c4d.Opolygon), objects)
+    if not objects:
         return None
 
-    assert len(result) == 1
-    return result[0]
+    if dest_mat is None:
+        dest_mat = objects[0].GetMg()
+
+    # Merge points and polygons into single lists and collect
+    # all tags.
+    points = []
+    polys = []
+    tags = []
+    for obj in objects:
+        mg = obj.GetMg() * ~dest_mat
+
+        point_offset = len(points)
+        for poly in obj.GetAllPolygons():
+            poly.a += point_offset
+            poly.b += point_offset
+            poly.c += point_offset
+            poly.d += point_offset
+            polys.append(poly)
+
+        for point in obj.GetAllPoints():
+            point = point * mg
+            points.append(point)
+
+        tags.extend(obj.GetTags())
+
+    # No points, no luck.
+    if not points:
+        return None
+
+    # Create a polygon-object from the points and polygons.
+    object = c4d.PolygonObject(len(points), len(polys))
+    object.SetAllPoints(points)
+    for i, poly in enumerate(polys):
+        object.SetPolygon(i, poly)
+
+    # Tell the object about the change.
+    object.Message(c4d.MSG_UPDATE)
+
+    # Create a list of unique tags for the object.
+    new_tags = []
+    for tag in tags:
+        # Skip variable tags as they do not match the new
+        # number of datasets anymore.
+        if tag.CheckType(c4d.Tvariable):
+            continue
+
+        # Check if such a tag already exists.
+        exists = False
+        for ex_tag in new_tags:
+            if ex_tag.CheckType(tag.GetType()):
+                exists = ex_tag.GetDataInstance() == tag.GetDataInstance()
+                if exists:
+                    break
+
+        if not exists:
+            new_tags.append(tag.GetClone(c4d.COPYFLAGS_0))
+
+    for tag in new_tags:
+        object.InsertTag(tag)
+
+    object.SetMg(dest_mat)
+    return object
 
 def serial_info():
     r"""

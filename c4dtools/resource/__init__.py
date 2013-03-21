@@ -195,11 +195,10 @@ class Resource(object):
             container.SetString(*res.string.IDC_CONTEXTMENU_1.both)
 
     .. attribute:: changed
-        This attribute is set in :func:`~c4dtools.prepare` function for
-        example. It is only True when the resource was cached *and* has
-        changed, and symbol-IDs might not be the same as they have been
-        before. When symbol-caching is deactivated, this attribute will
-        always be False.
+        This attribute is set by the :func:`load` function and is only
+        True when the resource was cached *and* has changed, therefore
+        the cache was rebuilt. When symbol-caching is deactivated,
+        this attribute will always be False.
     """
 
     def __init__(self, dirname, c4dres, symbols={}):
