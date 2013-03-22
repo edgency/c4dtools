@@ -10,13 +10,11 @@ class BaseContainer:
 
 class Vector:
 
-    def __init__(self, x=0, y=0, z=0):
-        self.x = x
-        self.y = y
-        self.z = z
+    def __init__(self, *args):
+        pass
 
     def __repr__(self):
-        return 'Vector(%.3f, %.3f, %.3f)' % (self.x, self.y, self.z)
+        return 'Vector()'
 
 class Matrix:
 
@@ -27,8 +25,7 @@ class Matrix:
         self.off = off
 
     def __repr__(self):
-        return 'Matrix(v1: %s, v2: %s, v3: %s, off: %s)' % (
-            self.v1, self.v2, self.v3, self.off)
+        return 'Matrix()'
 
 PLUGINFLAG_COMMAND_HOTKEY = 0
 

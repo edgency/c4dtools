@@ -50,6 +50,8 @@
           <div class="body">
             
   <h1>Source code for c4dtools.misc.userdata</h1><div class="highlight"><pre>
+<span class="c"># coding: utf-8</span>
+<span class="c">#</span>
 <span class="c"># Copyright (c) 2012-2013, Niklas Rosenstein</span>
 <span class="c"># All rights reserved.</span>
 <span class="c"># </span>
@@ -85,7 +87,7 @@
 <span class="sd">c4dtools.misc.userdata</span>
 <span class="sd">~~~~~~~~~~~~~~~~~~~~~~</span>
 
-<span class="sd">Package for interacting with Cinema 4D&#39;s UserData interface.</span>
+<span class="sd">Module for interacting with Cinema 4D&#39;s UserData interface.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">c4d</span>
@@ -99,6 +101,19 @@
 <span class="sd">    object to use for retrival and storing.</span>
 
 <span class="sd">    The values can optionally be cached to improve value retrieval.</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from c4dtools.misc.userdata import UserDataSetAndGet as UDSG</span>
+<span class="sd">        data = UDSG({</span>
+<span class="sd">            &#39;count&#39;: 1,</span>
+<span class="sd">            &#39;link&#39;: 2,</span>
+<span class="sd">        }, op)</span>
+<span class="sd">        print data.count</span>
+<span class="sd">        print data.link</span>
+<span class="sd">        # Equal to</span>
+<span class="sd">        print op[c4d.ID_USERDATA, 1]</span>
+<span class="sd">        print op[c4d.ID_USERDATA, 2]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">__slots__</span> <span class="o">=</span> <span class="s">&#39;_fields _op _cache _do_caching&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
@@ -129,7 +144,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="p">[</span><span class="n">c4d</span><span class="o">.</span><span class="n">ID_USERDATA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">[</span><span class="n">name</span><span class="p">]]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_caching</span><span class="p">:</span>
-            <span class="nb">getattr</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
 <div class="viewcode-block" id="UserDataSetAndGet.clear_cache"><a class="viewcode-back" href="../../../index.html#c4dtools.misc.userdata.UserDataSetAndGet.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">r&quot;&quot;&quot;</span>

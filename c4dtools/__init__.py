@@ -54,10 +54,20 @@ from c4dtools.library import load_library
 def prepare(filename, c4dres, cache_symbols=True, libfolder_name='lib',
             resfolder_name='res', parse_descriptions=False):
     r"""
-    Call this function from a Cinema 4D python plugin-file (\*.pyp) to
+    Call this function from a Cinema 4D python plugin-file (``*.pyp``) to
     set up convenient data that can be used from the plugin.
 
+    .. code-block:: python
+
+        import c4d
+        import c4dtools
+
+        res, imp = c4dtools.prepare(__file__, __res__)
+
+        # ...
+
     :Parameters:
+
         - filename: Just pass the ``__file__`` variable from the plugins
           global scope.
         - c4dres: The :class:`c4d.plugins.GeResource` instance from the
@@ -75,10 +85,13 @@ def prepare(filename, c4dres, cache_symbols=True, libfolder_name='lib',
           resource symbols will parsed additionally to the dialog
           resource symbols. Note that strings can *not* be loaded from
           symbols of description resources.
-    :Returns: A tuple of two elements.
 
-             0. :class:`c4dtools.resource.Resource` instance.
-             1. :class:`c4dtools.utils.Importer` instance.
+    :return:
+
+        A tuple of two elements.
+
+        0. :class:`c4dtools.resource.Resource` instance.
+        1. :class:`c4dtools.utils.Importer` instance.
     """
 
     path = helpers.Attributor()

@@ -162,15 +162,18 @@ class Resource(object):
     that folder, etc.
 
     .. attribute:: dirname
+
         The directory name of the resource-folder. Not garuanteed to
         exist!
 
     .. attribute:: c4dres
+
         The :class:`c4d.plugins.GeResource` object passed on construction.
         This is usually the ``__res__`` variable passed through from a
         Python plugin.
 
     .. attribute:: string
+
         A :class:`StringLoader` instance associated with the resource
         object. Used to load resource strings.
 
@@ -196,6 +199,7 @@ class Resource(object):
             container.SetString(*res.string.IDC_CONTEXTMENU_1.both)
 
     .. attribute:: changed
+
         This attribute is set by the :func:`load` function and is only
         True when the resource was cached *and* has changed, therefore
         the cache was rebuilt. When symbol-caching is deactivated,

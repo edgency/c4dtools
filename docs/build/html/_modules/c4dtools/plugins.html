@@ -50,6 +50,8 @@
           <div class="body">
             
   <h1>Source code for c4dtools.plugins</h1><div class="highlight"><pre>
+<span class="c"># coding: utf-8</span>
+<span class="c">#</span>
 <span class="c"># Copyright (c) 2012-2013, Niklas Rosenstein</span>
 <span class="c"># All rights reserved.</span>
 <span class="c"># </span>
@@ -110,6 +112,7 @@
     <span class="c"># This attribute is set from `c4dtools.plugins.main()`.</span>
     <span class="n">detected</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="n">is_registered</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">tried_register</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="n">autoregister</span> <span class="o">=</span> <span class="bp">True</span>
 
     <span class="n">PLUGIN_INFO</span> <span class="o">=</span> <span class="n">c4d</span><span class="o">.</span><span class="n">PLUGINFLAG_COMMAND_HOTKEY</span>
@@ -121,6 +124,12 @@
 <span class="sd">        set in the instances attributes. See the class-documentation</span>
 <span class="sd">        for more information.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span>
+
+        <span class="c"># Do not register if already tried or is already registered.</span>
+        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">tried_register</span> <span class="ow">or</span> <span class="n">cls</span><span class="o">.</span><span class="n">is_registered</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_registered</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLUGIN_ICON</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PLUGIN_ICON</span><span class="p">,</span> <span class="n">c4d</span><span class="o">.</span><span class="n">bitmaps</span><span class="o">.</span><span class="n">BaseBitmap</span><span class="p">):</span>
@@ -136,7 +145,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">PLUGIN_HELP</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">is_registered</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">is_registered</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">tried_register</span> <span class="o">=</span> <span class="bp">True</span>
         <span class="k">return</span> <span class="n">result</span>
 </div></div>
 <div class="viewcode-block" id="gather_subclasses"><a class="viewcode-back" href="../../index.html#c4dtools.plugins.gather_subclasses">[docs]</a><span class="k">def</span> <span class="nf">gather_subclasses</span><span class="p">(</span><span class="n">clazz</span><span class="p">):</span>

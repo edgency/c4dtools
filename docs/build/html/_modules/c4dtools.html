@@ -49,6 +49,8 @@
           <div class="body">
             
   <h1>Source code for c4dtools</h1><div class="highlight"><pre>
+<span class="c"># coding: utf-8</span>
+<span class="c">#</span>
 <span class="c"># Copyright (c) 2012-2013, Niklas Rosenstein</span>
 <span class="c"># All rights reserved.</span>
 <span class="c"># </span>
@@ -90,7 +92,7 @@
 <span class="sd">symbols, see :func:`c4dtools.prepare`.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="n">__version__</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;Niklas Rosenstein&#39;</span><span class="p">,</span>
               <span class="s">&#39;email&#39;</span><span class="p">:</span> <span class="s">&#39;rosensteinniklas@gmail.com&#39;</span><span class="p">}</span>
 
@@ -151,14 +153,16 @@
     <span class="n">symbols_container</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">Resource</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">res</span><span class="p">,</span> <span class="n">c4dres</span><span class="p">,</span> <span class="p">{})</span>
 
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">c4d_symbols</span><span class="p">):</span>
-        <span class="n">symbols</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">c4d_symbols</span><span class="p">,</span> <span class="n">cache_symbols</span><span class="p">)</span>
+        <span class="n">symbols</span><span class="p">,</span> <span class="n">changed</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">c4d_symbols</span><span class="p">,</span> <span class="n">cache_symbols</span><span class="p">)</span>
         <span class="n">symbols_container</span><span class="o">.</span><span class="n">add_symbols</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
+        <span class="n">symbols_container</span><span class="o">.</span><span class="n">changed</span> <span class="o">|=</span> <span class="n">changed</span>
 
     <span class="k">if</span> <span class="n">parse_descriptions</span><span class="p">:</span>
         <span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="s">&#39;*.h&#39;</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-            <span class="n">symbols</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">cache_symbols</span><span class="p">)</span>
+            <span class="n">symbols</span><span class="p">,</span> <span class="n">changed</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">cache_symbols</span><span class="p">)</span>
             <span class="n">symbols_container</span><span class="o">.</span><span class="n">add_symbols</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
+            <span class="n">symbols_container</span><span class="o">.</span><span class="n">changed</span> <span class="o">|=</span> <span class="n">changed</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">symbols_container</span><span class="p">,</span> <span class="n">importer</span><span class="p">)</span></div>
 </pre></div>
