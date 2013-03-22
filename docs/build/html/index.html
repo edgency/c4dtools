@@ -222,13 +222,20 @@ to the passed suffix.</p>
 <dd><p>Use this class to enable importing modules from specific
 directories independent from <tt class="docutils literal"><span class="pre">sys.path</span></tt>.</p>
 <dl class="attribute">
+<dt id="c4dtools.utils.Importer.high_priority">
+<tt class="descname">high_priority</tt><a class="headerlink" href="#c4dtools.utils.Importer.high_priority" title="Permalink to this definition">¶</a></dt>
+<dd><p>When this value is True, the paths defined in the importer are
+prepended to the original paths in <tt class="docutils literal"><span class="pre">sys.path</span></tt>. If False, they
+will be appended. Does only have an effect when <a class="reference internal" href="#c4dtools.utils.Importer.use_sys_path" title="c4dtools.utils.Importer.use_sys_path"><tt class="xref py py-attr docutils literal"><span class="pre">use_sys_path</span></tt></a>
+is True.</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="c4dtools.utils.Importer.use_sys_path">
 <tt class="descname">use_sys_path</tt><a class="headerlink" href="#c4dtools.utils.Importer.use_sys_path" title="Permalink to this definition">¶</a></dt>
-<dt>
-<tt class="descname">When this value is ``True``, the original paths from ``sys.path``</tt></dt>
-<dt>
-<tt class="descname">are used additionally to the paths defined in the imported.</tt></dt>
-<dd></dd></dl>
+<dd><p>When this value is <tt class="docutils literal"><span class="pre">True</span></tt>, the original paths from <tt class="docutils literal"><span class="pre">sys.path</span></tt>
+are used additionally to the paths defined in the imported.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="c4dtools.utils.Importer.add">
@@ -338,20 +345,33 @@ called before.</td>
 
 <dl class="function">
 <dt id="c4dtools.utils.assert_type">
-<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">assert_type</tt><big>(</big><em>x</em>, <em>*types</em><big>)</big><a class="headerlink" href="#c4dtools.utils.assert_type" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">assert_type</tt><big>(</big><em>x</em>, <em>*types</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#c4dtools.utils.assert_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>New in 1.2.5.</p>
-<p>This method is similar to the built-in <a class="reference external" href="http://docs.python.org/library/functions.html#isinstance" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">isinstance()</span></tt></a> method in
-Python. It accepts an instance of a class as first argument, namely
+<p>This function is similar to the built-in <a class="reference external" href="http://docs.python.org/library/functions.html#isinstance" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">isinstance()</span></tt></a> function
+in Python. It accepts an instance of a class as first argument, namely
 <em>x</em>, and checks if it is an instance of one of the passed types. The
 types must not be encapsulated in a tuple (which is in contrast to
 the <a class="reference external" href="http://docs.python.org/library/functions.html#isinstance" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">isinstance()</span></tt></a> method).</p>
 <p>This function raises a <tt class="xref py py-class docutils literal"><span class="pre">TypeError</span></tt> exception with a proper
 error message when <em>x</em> is not an instance of the passed <em>*types</em>.</p>
+<p><em>Changed in 1.2.8</em>: Renamed from <em>assert_type</em> to <em>ensure_type</em>. Added
+<em>**kwargs</em> parameter. Pass <tt class="docutils literal"><span class="pre">name</span></tt> as keyword-argument for adding
+the parameter    name that was wrong in the message.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.utils.bl_iterator">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">bl_iterator</tt><big>(</big><em>obj</em>, <em>safe=False</em><big>)</big><a class="headerlink" href="#c4dtools.utils.bl_iterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>New in 1.2.8. Yields the passed object and all following objects
+in the hierarchy (retrieved via <tt class="xref py py-func docutils literal"><span class="pre">GetNext()</span></tt>). When
+the <em>safe</em> parameter is True, the next object will be retrieved before
+yielding to allow the yielded object to be moved in the hierarchy and
+iteration continues as if the object was not moved in hierarchy.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="c4dtools.utils.candidates">
-<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">candidates</tt><big>(</big><em>value</em>, <em>obj</em>, <em>callback=&lt;function &lt;lambda&gt; at 0x038A86B0&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#candidates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.candidates" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">candidates</tt><big>(</big><em>value</em>, <em>obj</em>, <em>callback=&lt;function &lt;lambda&gt; at 0x0378A070&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#candidates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.candidates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searches for <em>value</em> in <em>obj</em> and returns a list of all keys where
 the callback returns True, being passed <em>value</em> as first argument,
 the value to compare it with as the second argument and the name
@@ -374,7 +394,7 @@ for <tt class="docutils literal"><span class="pre">obj.__class__.__name__</span>
 
 <dl class="function">
 <dt id="c4dtools.utils.current_state_to_object">
-<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">current_state_to_object</tt><big>(</big><em>op</em>, <em>container=&lt;c4d.BaseContainer instance at 0x038C42B0&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#current_state_to_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.current_state_to_object" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">current_state_to_object</tt><big>(</big><em>op</em>, <em>container=&lt;c4d.BaseContainer instance at 0x02B89E18&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#current_state_to_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.current_state_to_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Makes the passed <cite>c4d.BaseObject</cite> instance an editable object by
 applieng a modeling command on it. The returned object&#8217;s hierarchy
 will consist of Null-Objects and editable objects only.</p>
@@ -395,6 +415,32 @@ information to the c4d.utils.SendModelingCommand function.</p>
 </div>
 <p>Raises: TypeError if <em>op</em> is not a c4d.BaseObject instance.
 Returns: c4d.BaseObject</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.utils.ensure_type">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">ensure_type</tt><big>(</big><em>x</em>, <em>*types</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#c4dtools.utils.ensure_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>New in 1.2.5.</p>
+<p>This function is similar to the built-in <a class="reference external" href="http://docs.python.org/library/functions.html#isinstance" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">isinstance()</span></tt></a> function
+in Python. It accepts an instance of a class as first argument, namely
+<em>x</em>, and checks if it is an instance of one of the passed types. The
+types must not be encapsulated in a tuple (which is in contrast to
+the <a class="reference external" href="http://docs.python.org/library/functions.html#isinstance" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">isinstance()</span></tt></a> method).</p>
+<p>This function raises a <tt class="xref py py-class docutils literal"><span class="pre">TypeError</span></tt> exception with a proper
+error message when <em>x</em> is not an instance of the passed <em>*types</em>.</p>
+<p><em>Changed in 1.2.8</em>: Renamed from <em>assert_type</em> to <em>ensure_type</em>. Added
+<em>**kwargs</em> parameter. Pass <tt class="docutils literal"><span class="pre">name</span></tt> as keyword-argument for adding
+the parameter    name that was wrong in the message.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.utils.ensure_value">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">ensure_value</tt><big>(</big><em>x</em>, <em>*values</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#c4dtools.utils.ensure_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>New in 1.2.8.</p>
+<p>This function checks if the value <em>x</em> is in <em>*values</em>. If this does
+not result in True, <tt class="xref py py-class docutils literal"><span class="pre">ValueError</span></tt> is raised.</p>
+<p>Pass <tt class="docutils literal"><span class="pre">name</span></tt> as keyword-argument to specify the parameter name that
+was given wrong in the message.</p>
 </dd></dl>
 
 <dl class="function">
@@ -486,6 +532,18 @@ pair. The default callback will print out the values in the container.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.utils.join_polygon_objects">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">join_polygon_objects</tt><big>(</big><em>objects</em>, <em>dest_mat=None</em><big>)</big><a class="headerlink" href="#c4dtools.utils.join_polygon_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>New in 1.2.8.
+This function creates one polygon object from the passed list
+<em>objects</em> containing <tt class="xref py py-class docutils literal"><span class="pre">c4d.PolygonObject</span></tt> instances. Any other
+type of object is ignored.</p>
+<p>The returned polygon-object is located at the global world
+center.</p>
+<p># TODO: Add description for parameters.</p>
 </dd></dl>
 
 <dl class="function">
@@ -726,6 +784,48 @@ instance will be returned.</p>
 C4D symbols file and several other information to work with
 the resource of a plugin, such as easily grabbing files from
 that folder, etc.</p>
+<dl class="attribute">
+<dt id="c4dtools.resource.Resource.dirname">
+<tt class="descname">dirname</tt><a class="headerlink" href="#c4dtools.resource.Resource.dirname" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">The directory name of the resource-folder. Not garuanteed to</tt></dt>
+<dt>
+<tt class="descname">exist!</tt></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="c4dtools.resource.Resource.c4dres">
+<tt class="descname">c4dres</tt><a class="headerlink" href="#c4dtools.resource.Resource.c4dres" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">The :class:`c4d.plugins.GeResource` object passed on construction.</tt></dt>
+<dt>
+<tt class="descname">This is usually the ``__res__`` variable passed through from a</tt></dt>
+<dt>
+<tt class="descname">Python plugin.</tt></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="c4dtools.resource.Resource.string">
+<tt class="descname">string</tt><a class="headerlink" href="#c4dtools.resource.Resource.string" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">A :class:`StringLoader` instance associated with the resource</tt></dt>
+<dt>
+<tt class="descname">object. Used to load resource strings.</tt></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="c4dtools.resource.Resource.changed">
+<tt class="descname">changed</tt><a class="headerlink" href="#c4dtools.resource.Resource.changed" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">This attribute is set by the :func:`load` function and is only</tt></dt>
+<dt>
+<tt class="descname">True when the resource was cached *and* has changed, therefore</tt></dt>
+<dt>
+<tt class="descname">the cache was rebuilt. When symbol-caching is deactivated,</tt></dt>
+<dt>
+<tt class="descname">this attribute will always be False.</tt></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="c4dtools.resource.Resource.add_symbols">
 <tt class="descname">add_symbols</tt><big>(</big><em>symbols</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#Resource.add_symbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.Resource.add_symbols" title="Permalink to this definition">¶</a></dt>
@@ -748,6 +848,12 @@ resource and their value differs.</dd>
 <tt class="descname">get</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#Resource.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.Resource.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the value of the symbol with the passed name, or raises
 KeyError if no symbol was found.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.resource.Resource.get_symbol_name">
+<tt class="descname">get_symbol_name</tt><big>(</big><em>id_</em><big>)</big><a class="headerlink" href="#c4dtools.resource.Resource.get_symbol_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the name of the passed symbol id.</p>
 </dd></dl>
 
 </dd></dl>
@@ -791,7 +897,7 @@ improved speed of reading in the symbols.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns :</th><td class="field-body">A dictionary of the loaded symbols.</td>
+<tr class="field-odd field"><th class="field-name">Returns :</th><td class="field-body"><tt class="docutils literal"><span class="pre">(symbols_dict,</span> <span class="pre">changed)</span></tt></td>
 </tr>
 <tr class="field-even field"><th class="field-name">Raises :</th><td class="field-body">OSError if <em>filename</em> does not exist or does not point to a
 file.</td>

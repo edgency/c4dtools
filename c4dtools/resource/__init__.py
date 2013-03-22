@@ -175,6 +175,7 @@ class Resource(object):
         object. Used to load resource strings.
 
         .. code-block:: python
+
             # Load a resource-string with the IDC_MYSTRING symbol-name
             # without formatting arguments.
             res.string.IDC_MYSTRING()
