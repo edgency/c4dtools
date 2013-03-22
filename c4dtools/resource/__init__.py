@@ -337,7 +337,7 @@ class ResourceString(object):
         # Simulate the behaviour of c4d.plugins.GeLoadString by replacing
         # all hashes (`#`) with a passed arguments.
         for arg in args:
-            string = string.replace('#', arg, 1)
+            string = string.replace('#', str(arg), 1)
 
         return string
 
