@@ -39,6 +39,8 @@ c4dtools.utils
 import os
 import sys
 import c4d
+import copy
+import glob
 import time
 import threading
 import collections
@@ -155,8 +157,18 @@ def ensure_type(x, *types, **kwargs):
     error message when *x* is not an instance of the passed *\*types*.
 
     *Changed in 1.2.8*: Renamed from *assert_type* to *ensure_type*. Added
-    *\*\*kwargs* parameter. Pass ``name`` as keyword-argument for adding
-    the parameter    name that was wrong in the message.
+    *\*\*kwargs* parameter.
+
+    :param x: The value to check.
+    :param *types: The types that *x* is allowed to be an instance of.
+    :param **kwargs:
+
+        - *name*: If given, the string passed by this argument will be
+        assumed to be the parameter that was passed wrong.
+    :raise TypeError:
+
+        - When an invalid keyword-argument was given
+        - When *x* is not an instance of any of the passed types
     """
 
     name = kwargs.pop('name', None)
@@ -171,10 +183,10 @@ def ensure_type(x, *types, **kwargs):
             names.append(t.__module__ + '.' + t.__name__)
 
         if len(names) > 1:
-            message = 'xpected instance of %s, got %s'
+            message = 'xpected instance of %s, got %s instead'
             first = ', '.join(names[:-1]) + ' or ' + names[-1]
         else:
-            message = 'xpected instance of type %s, got %s'
+            message = 'xpected instance of type %s, got %s instead'
             first = names[0]
 
         if name:
@@ -195,8 +207,16 @@ def ensure_value(x, *values, **kwargs):
     This function checks if the value *x* is in *\*values*. If this does
     not result in True, :class:`ValueError` is raised.
 
-    Pass ``name`` as keyword-argument to specify the parameter name that
-    was given wrong in the message.
+    :param x: The value to check.
+    :param *values: The values *x* is allowed to be one of.
+    :param **kwargs*:
+
+        - *name*: If given, the string passed by this argument will be
+        assumed to be the parameter that was passed wrong.
+    :raise TypeError:
+
+        - When an invalid keyword-argument was given
+        - When *x* is not a value of any of the passed values.
     """
 
     name = kwargs.pop('name', None)
@@ -543,6 +563,27 @@ def bl_iterator(obj, safe=False):
             yield obj
             obj = obj.GetNext()
 
+def move_axis(obj, new_matrix=c4d.Matrix()):
+    r"""
+    *New in 1.2.9*: Normalize the axis of an object by adjusting the local
+    matrix of the child objects and, if *obj* is a polygon object, it's
+    points. Simulates the 'Axis Move' mode in Cinema.
+
+    :param obj: :class:`c4d.BaseObject`
+    :param new_matrix: :class:`c4d.Matrix`
+    """
+
+    mat = ~new_matrix * obj.GetMl()
+    if obj.CheckType(c4d.Opoint):
+        points = obj.GetAllPoints()
+        for i, p in enumerate(points):
+            obj.SetPoint(i, p * mat)
+        obj.Message(c4d.MSG_UPDATE)
+
+    for child in obj.GetChildren():
+        child.SetMl(mat * child.GetMl())
+    obj.SetMl(new_matrix)
+
 # =============================================================================
 #                                Utility classes
 # =============================================================================
@@ -656,6 +697,42 @@ class Importer(object):
         are used additionally to the paths defined in the imported.
     """
 
+    class ProtectedEnvironment(object):
+
+        def __init__(self, importer):
+            super(Importer.ProtectedEnvironment, self).__init__()
+            self.importer = importer
+
+        def __enter__(self):
+            importer = self.importer
+
+            # Store the previous path and module configuration.
+            self.prev_path = copy.copy(sys.path)
+            self.prev_modules = copy.copy(sys.modules)
+
+            # Modify `sys.path`.
+            if importer.use_sys_path:
+                if importer.high_priority:
+                    sys.path = importer.path + sys.path
+                else:
+                    sys.path = sys.path + importer.path
+
+            return None
+
+        def __exit__(self, exc_type, exc_value, exc_tb):
+            importer = self.importer
+
+            # Restore the previous `sys.path` configuration.
+            sys.path = self.prev_path
+
+            # Restore the old module configuration. Only modules that have
+            # not been in `sys.path` before will be removed.
+            for k, v in sys.modules.items():
+                if k not in self.prev_modules and importer.is_local(v) or not v:
+                    del sys.modules[k]
+                else:
+                    sys.modules[k] = v
+
     def __init__(self, high_priority=False, use_sys_path=True):
         super(Importer, self).__init__()
         self.path = []
@@ -697,38 +774,26 @@ class Importer(object):
         into `sys.modules`.
         """
 
-        prev_path = sys.path
-        if self.use_sys_path:
-            if self.high_priority:
-                sys.path = self.path + sys.path
-            else:
-                sys.path = sys.path + self.path
-
-        prev_modules = sys.modules.copy()
-
-        # Remove any existing modules with the passed name from
-        # sys.modules.
-        for k in sys.modules.keys():
-            if k == name or k.startswith('%s.' % name):
-                del sys.modules[k]
-
-        try:
+        with self.protected():
             m = __import__(name)
             for n in name.split('.')[1:]:
                 m = getattr(m, n)
             return m
-        except:
-            raise
-        finally:
-            sys.path = prev_path
 
-            # Restore the old module configuration. Only modules that have
-            # not been in sys.path before will be removed.
-            for k, v in sys.modules.items():
-                if k not in prev_modules and self.is_local(v) or not v:
-                    del sys.modules[k]
-                else:
-                    sys.modules[k] = v
+    def protected(self):
+        r"""
+        New in 1.2.9. Return an object implementing the with-interface
+        creating a protected environment for importing modules. The
+        with-entrance does not return any value.
+
+        .. code-block:: python
+
+            with imp.protected():
+                import module_a
+                import module_b
+        """
+
+        return Importer.ProtectedEnvironment(self)
 
 class Watch(object):
     r"""

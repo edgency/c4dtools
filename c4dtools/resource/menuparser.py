@@ -37,8 +37,75 @@ c4dtools.resource.menuparser
 
 New in 1.2.0.
 
-This module implements parsing a Menu-resource in order to attach the
-resource to a dialog.
+This module implements parsing a Menu-resources and rendering them
+to a dialog. The following is an example resource file:
+
+.. code-block:: none
+
+    # Write comments like in Python.
+    MENU MENU_FILE {
+        MENU_FILE_OPEN;
+        MENU_FILE_SAVE;
+        --------------;         # Adds a separator.
+        COMMAND COMMAND_ID;     # Uses GeDialog.MenuAddCommand().
+        COMMAND 5159;           # Same here.
+
+        # Create a sub-menu.
+        MENU_FILE_RECENTS {
+            # Will be filled programatically.
+        }
+    }
+    # More menus may follow ...
+
+The symbols in the menu resource must be defined in the plugin resource
+created by :func:`c4dtools.prepare`. You can also pass your own
+:class:`c4dtools.resource.Resource` instance.
+
+This is how to read the menu resource:
+
+.. code-block:: python
+
+    res, imp = c4dtools.prepare(__file__, __res__)
+
+    class MyDialog(c4d.gui.GeDialog):
+
+        MENU_FILE = res.file('menu', 'my_menu.menu')
+        RECENTS_START = 1000000
+
+        def CreateLayout(self):
+            menu = c4dtools.resource.menuparser.parse_file(self.MENU_FILE)
+            recents = menu.find_node(res.MENU_FILE_RECENTS)
+
+            item_id = self.RECENTS_START
+            for fn in get_recent_files(): # arbitrary function
+                node = c4dtools.resource.menuparser.MenuItem(item_id, str(fn))
+                recents.add(node)
+
+            # Render the menu on the dialog, passing the dialog itself
+            # and the c4dtools resource.
+            self.MenuFlushAll()
+            menu.render(self, res)
+            self.MenuFinished()
+
+            # ...
+            return True
+
+.. warning::
+
+    The :mod:`c4dtools.resource.menuparser` module requires the :mod:`scan` 
+    module. This is why this module is not imported implicitly with the
+    :mod:`c4dtools` module. You have to import it explicitly:
+
+    .. code-block:: python
+
+        import c4dtools.resource.menuparser
+        # or
+        from c4dtools.resource import menuparser
+
+    The :mod:`scan` module can be obtained from `github
+    <https://github.com/NiklasRosenstein/py-scan>`_. The minimum version
+    required is 0.4.5.
+
 """
 
 import c4d
@@ -51,6 +118,8 @@ try:
     import cStringIO as StringIO
 except ImportError:
     import StringIO
+
+assert scan.__version__ >= (0, 4, 5), "Require scan version 0.4.5 or higher"
 
 class MenuNode(object):
 
@@ -109,6 +178,7 @@ class MenuContainer(MenuNode):
     on a dialog to create such a menu.
 
     .. attribute:: symbol
+
         The resource-symbol for the menu-container that can be
         used to obtain the name of the menu. No sub-menu will be
         created with rendering the instance when this value
@@ -208,6 +278,19 @@ class MenuString(MenuNode):
         return MenuString(self.symbol)
 
 class MenuItem(MenuNode):
+    r"""
+    This class represents an item added via
+    :meth:`c4d.gui.GeDialog.MenuAddString`. It is not created from this
+    module but may be used create dynamic menus.
+
+    .. attribute:: id
+
+        The integral number of the symbol to add.
+
+    .. attribute:: string
+
+        The menu-commands item string.
+    """
 
     def __init__(self, id, string):
         super(MenuItem, self).__init__()

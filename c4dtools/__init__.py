@@ -41,45 +41,95 @@ Cinema 4D. The most significant feature is the cached parsing of dialog
 symbols, see :func:`c4dtools.prepare`.
 """
 
-__version__ = (1, 2, 8)
+__version__ = (1, 2, 9, 'dev')
 __author__ = {'name': 'Niklas Rosenstein',
               'email': 'rosensteinniklas@gmail.com'}
 
 import os
+import sys
+import c4d
 import glob
 
 from c4dtools import utils, resource, helpers, plugins, library
 from c4dtools.library import load_library
 
-def prepare(filename, c4dres, cache_symbols=True, libfolder_name='lib',
-            resfolder_name='res', parse_descriptions=False):
+def prepare(filename=None, c4dres=None, cache_symbols=True,
+            libfolder_name='lib', resfolder_name='res',
+            parse_descriptions=False):
     r"""
-    Call this function from a Cinema 4D python plugin-file (\*.pyp) to
+    Call this function from a Cinema 4D python plugin-file (``*.pyp``) to
     set up convenient data that can be used from the plugin.
 
-    :Parameters:
-        - filename: Just pass the ``__file__`` variable from the plugins
-          global scope.
-        - c4dres: The :class:`c4d.plugins.GeResource` instance from the
-          plugin's scope.
-        - cache_symbols: True by default. Defines wether the resource
-          symbols will be cached.
-        - libfolder_name: The name of the folder the plugin related
-          libraries are stored. The returned Importer instance will
-          be able to load python modules and packages from this
-          directory.
-        - resfolder_name: The name of the plugins resource folder. This
-          usually does not need to be changed as the name of this folder
-          is defined by Cinema 4D.
-        - parse_descriptions: False by default. When True, description
-          resource symbols will parsed additionally to the dialog
-          resource symbols. Note that strings can *not* be loaded from
-          symbols of description resources.
-    :Returns: A tuple of two elements.
+    .. code-block:: python
 
-             0. :class:`c4dtools.resource.Resource` instance.
-             1. :class:`c4dtools.utils.Importer` instance.
+        import c4d
+        import c4dtools
+
+        res, imp = c4dtools.prepare(__file__, __res__)
+
+        # ...
+
+    :param filename:
+
+        Just pass the ``__file__`` variable from the plugins global
+        scope.
+
+        *New in 1.2.9*: Default value added. The filename will
+        be retrieved using the globals of the frame that has called
+        the function if *None* was passed.
+
+    :param c4dres:
+
+        The :class:`c4d.plugins.GeResource` instance from the
+        plugin's scope.
+
+        *New in 1.2.6*: Default value added. The plugin resource
+        will be retrieved using the globals of the frame that
+        has called the function if *None* was passed.
+
+    :param cache_symbols:
+
+        True by default. Defines wether the resource symbols will
+        be cached.
+
+    :param libfolder_name:
+
+        The name of the folder the plugin related libraries are
+        stored. The returned Importer instance will be able to load
+        python modules and packages from this directory.
+
+    :param resfolder_name:
+
+        The name of the plugins resource folder. This usually does
+        not need to be changed as the name of this folder is defined
+        by Cinema 4D.
+
+    :param parse_descriptions:
+
+        False by default. When True, description resource symbols will
+        parsed additionally to the dialog resource symbols. Note that
+        strings can *not* be loaded from symbols of description
+        resources.
+
+    :return:
+
+        A tuple of two elements:
+
+        - :class:`c4dtools.resource.Resource`
+        - :class:`c4dtools.utils.Importer`
     """
+
+    globals_ = sys._getframe().f_back.f_globals
+    if filename is None:
+        filename = globals_.get('__file__', None)
+        if not filename:
+            raise ValueError('filename could not be retrieved from the '
+                             'calling frame.')
+    if c4dres is None:
+        c4dres = globals_.get('__res__', None)
+
+    utils.ensure_type(filename, basestring, name='filename')
+    utils.ensure_type(c4dres, c4d.plugins.GeResource, type(None), name='c4dres')
 
     path = helpers.Attributor()
     path.root = os.path.dirname(filename)

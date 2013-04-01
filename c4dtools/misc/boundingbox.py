@@ -80,10 +80,13 @@ class AABB(object):
         self.max_v = copy.copy(max_v)
         self.translation_matrix = copy.copy(translation_matrix)
 
-    def expand(self, obj, recursive=False):
+    def expand(self, obj, recursive=False, init=False):
         r"""
         Expand the bounding-box by the passed :class:`c4d.BaseObject`
         instance. The method can optionally continue recursively.
+
+        *New in 1.2.9*: Added parameter *init*. Pass *True* for initializing
+        the bounding-box with this point.
 
         Raises: TypeError when *obj* is not an instance of
                 :class:`c4d.BaseObject`.
@@ -92,37 +95,44 @@ class AABB(object):
         if not isinstance(obj, c4d.BaseObject):
             raise TypeError('expected c4d.BaseObject, got %s.' % clsname(obj))
 
-        matrix = obj.GetMg()
+        mg = obj.GetMg()
         mp = obj.GetMp()
         bb = obj.GetRad()
 
-        v = c4d.Vector
+        V = c4d.Vector
 
-        self.expand_point(v(mp.x + bb.x, mp.y + bb.y, mp.z + bb.z) * matrix)
-        self.expand_point(v(mp.x - bb.x, mp.y + bb.y, mp.z + bb.z) * matrix)
-        self.expand_point(v(mp.x + bb.x, mp.y + bb.y, mp.z - bb.z) * matrix)
-        self.expand_point(v(mp.x - bb.x, mp.y + bb.y, mp.z - bb.z) * matrix)
+        self.expand_point(V(mp.x + bb.x, mp.y + bb.y, mp.z + bb.z) * mg, init)
+        self.expand_point(V(mp.x - bb.x, mp.y + bb.y, mp.z + bb.z) * mg)
+        self.expand_point(V(mp.x + bb.x, mp.y + bb.y, mp.z - bb.z) * mg)
+        self.expand_point(V(mp.x - bb.x, mp.y + bb.y, mp.z - bb.z) * mg)
 
-        self.expand_point(v(mp.x + bb.x, mp.y - bb.y, mp.z + bb.z) * matrix)
-        self.expand_point(v(mp.x - bb.x, mp.y - bb.y, mp.z + bb.z) * matrix)
-        self.expand_point(v(mp.x + bb.x, mp.y - bb.y, mp.z - bb.z) * matrix)
-        self.expand_point(v(mp.x - bb.x, mp.y - bb.y, mp.z - bb.z) * matrix)
+        self.expand_point(V(mp.x + bb.x, mp.y - bb.y, mp.z + bb.z) * mg)
+        self.expand_point(V(mp.x - bb.x, mp.y - bb.y, mp.z + bb.z) * mg)
+        self.expand_point(V(mp.x + bb.x, mp.y - bb.y, mp.z - bb.z) * mg)
+        self.expand_point(V(mp.x - bb.x, mp.y - bb.y, mp.z - bb.z) * mg)
 
         if recursive:
             for child in obj.GetChildren():
-                self.expand(child, True)
+                self.expand(child, True, False)
 
-    def expand_point(self, point):
+    def expand_point(self, point, init=False):
         r"""
         Expand the bounding-box by the passed c4d.Vector representing
         a point in the 3-dimensional space.
+
+        *New in 1.2.9*: Added parameter *init*. Pass *True* for initializing
+        the bounding-box with this point.
 
         Raises: TypeError when *point* is not an instance of
                 c4d.Vector.
         """
 
-        vmin(self.min_v, point * self.translation_matrix)
-        vmax(self.max_v, point * self.translation_matrix)
+        if init:
+            self.min_v = c4d.Vector(point)
+            self.max_v = c4d.Vector(point)
+        else:
+            vmin(self.min_v, point * self.translation_matrix)
+            vmax(self.max_v, point * self.translation_matrix)
 
     @property
     def midpoint(self):
