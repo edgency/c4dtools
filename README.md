@@ -51,7 +51,14 @@ res, importer = c4dtools.prepare(__file__, __res__)
 
 # Import libraries from the `lib` folder relative to the plugins
 # directory, 100% self-contained and independent from `sys.path`.
-mylib = importer.import_('mylib')
+with importer.protected():
+   import mylib
+
+# Ensure that `mylibb` is not in the cached modules. Just for
+# demonstrational purpose, does not need to be done in a plugin.
+assert 'mylib' not in sys.modules
+
+# An arbitrary function from the imported module.
 mylib.do_stuff()
 
 class MyDialog(c4d.gui.GeDialog):
@@ -76,6 +83,7 @@ class MyDialog(c4d.gui.GeDialog):
         #     }
         # }
         #
+        # IDs and strings are taken from c4d_symbols.h/c4d_strings.str respectively.
         if success:
            menuparser.parse_and_prepare(res.file('menus', 'mymenu.menu'), self, res)
 
@@ -88,14 +96,12 @@ class MyDialog(c4d.gui.GeDialog):
         self.SetString(res.EDT_STRING1, string)
 
         # New in version 1.1.0, but does not allow string-argument substitution.
+        # (Replacing the `#` which is default for Cinema resource files, see
+        # `c4d.plugins.GeLoadString()`)
         self.SetString(*res.string.EDT_STRING2.both)
 
         return True
 
-# As of the current release, the only wrapped plugin class is
-# `c4d.plugins.CommandData`. The plugin is registered automatically
-# in `c4dtools.plugins.main()`, the information for registration
-# is defined on class-level.
 class MyCommand(c4dtools.plugins.Command):
 
     PLUGIN_ID = 100008 # !! Must be obtained from the plugincafe !!
