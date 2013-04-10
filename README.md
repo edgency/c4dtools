@@ -17,7 +17,7 @@ The `c4dtools` is **not a plugin**. It is "add on" code that can be used by devl
 to make their life easier. A plugin that relies on this library requires you to install
 `c4dtools` before it can be used (the plugin will not even register to Cinema4D).
 
-# Installation
+### Installation
 
 The `c4dtools` library is casual Python package. For the Python interpreter
 embedded into Cinema 4D to find it, you need to install it into the preferences
@@ -34,7 +34,7 @@ folder of your Cinema 4D installation.
 To install a new version of the library, simply delete the old `c4dtools` folder
 and paste the new one.
 
-# Alternative Installation
+### Alternative Installation
 
 Add a directory to the `PYTHONPATH` environment variable where you put in the
 `c4dtools` library folder. Again, the library folder is *only* the one containing
