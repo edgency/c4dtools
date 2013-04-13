@@ -45,6 +45,7 @@ import time
 import threading
 import collections
 
+
 # =============================================================================
 #                                Path operations
 # =============================================================================
@@ -72,27 +73,35 @@ def file_changed(original, copy):
 #                               Vector operations
 # =============================================================================
 
-def vmin(dest, test):
+def vmin(a, b):
     r"""
-    For each component of the vectors *dest* and *test*, this function
-    writes the lower value of each pairs into the respective component
-    of *dest*.
+    Combines the lowest components of the two vectors *a* and *b* into
+    a new vector. Returns the new vector.
+
+    *Changed in 1.2.9*: The new vector is now returned instead of
+    stored in *a*.
     """
 
-    if test.x < dest.x: dest.x = test.x
-    if test.y < dest.y: dest.y = test.y
-    if test.z < dest.z: dest.z = test.z
+    c = c4d.Vector(a)
+    if b.x < a.x: c.x = b.x
+    if b.y < a.y: c.y = b.y
+    if b.z < a.z: c.z = b.z
+    return c
 
-def vmax(dest, test):
+def vmax(a, b):
     r"""
-    For each component of the vectors *dest* and *test*, this function
-    writes the upper value of each pairs into the respective component
-    of *dest*.
+    Combines the highest components of the two vectors *a* and *b* into
+    a new vector. Returns the new vector.
+
+    *Changed in 1.2.9*: The new vector is now returned instead of
+    stored in *a*.
     """
 
-    if test.x > dest.x: dest.x = test.x
-    if test.y > dest.y: dest.y = test.y
-    if test.z > dest.z: dest.z = test.z
+    c = c4d.Vector(a)
+    if b.x > a.x: c.x = b.x
+    if b.y > a.y: c.y = b.y
+    if b.z > a.z: c.z = b.z
+    return c
 
 def vbbmid(vectors):
     r"""
