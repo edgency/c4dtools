@@ -53,9 +53,9 @@ import glob
 from c4dtools import utils, resource, helpers, plugins, library
 from c4dtools.library import load_library
 
-def prepare(filename=None, c4dres=None, cache_symbols=True,
+def prepare(filename=None, c4dres=None, cache=True,
             libfolder_name='lib', resfolder_name='res',
-            parse_descriptions=False):
+            parse_description=False):
     r"""
     Call this function from a Cinema 4D python plugin-file (``*.pyp``) to
     set up convenient data that can be used from the plugin.
@@ -87,7 +87,7 @@ def prepare(filename=None, c4dres=None, cache_symbols=True,
         will be retrieved using the globals of the frame that
         has called the function if *None* was passed.
 
-    :param cache_symbols:
+    :param cache:
 
         True by default. Defines wether the resource symbols will
         be cached.
@@ -104,7 +104,7 @@ def prepare(filename=None, c4dres=None, cache_symbols=True,
         not need to be changed as the name of this folder is defined
         by Cinema 4D.
 
-    :param parse_descriptions:
+    :param parse_description:
 
         False by default. When True, description resource symbols will
         parsed additionally to the dialog resource symbols. Note that
@@ -152,14 +152,14 @@ def prepare(filename=None, c4dres=None, cache_symbols=True,
     symbols_container = resource.Resource(path.res, c4dres, {})
 
     if os.path.isfile(path.c4d_symbols):
-        symbols, changed = resource.load(path.c4d_symbols, cache_symbols)
+        symbols, changed = resource.load(path.c4d_symbols, cache)
         symbols_container.add_symbols(symbols)
         symbols_container.changed |= changed
 
-    if parse_descriptions:
+    if parse_description:
         files = glob.glob(os.path.join(path.description, '*.h'))
         for filename in files:
-            symbols, changed = resource.load(filename, cache_symbols)
+            symbols, changed = resource.load(filename, cache)
             symbols_container.add_symbols(symbols)
             symbols_container.changed |= changed
 
