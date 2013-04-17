@@ -217,6 +217,15 @@ class Resource(object):
     def __getattr__(self, name):
         return self.symbols[name]
 
+    def __getitem__(self, name):
+        r"""
+        *New in 1.2.9*: Shortcut for accessing the :class:`StringLoader`
+        in the :class:`Resource` instance. Returns a :class.`ResourceString`
+        instance.
+        """
+
+        return self.string.get(name)
+
     @property
     def symbols(self):
         return self._symbols
