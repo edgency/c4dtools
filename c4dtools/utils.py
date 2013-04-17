@@ -45,6 +45,8 @@ import time
 import threading
 import collections
 
+# Nackwards compatibility for < 1.2.9
+from c4dtools.decorators import f_attrs as func_attr
 
 # =============================================================================
 #                                Path operations
@@ -207,7 +209,8 @@ def ensure_type(x, *types, **kwargs):
         message = message % (first, cls.__module__ + '.' + cls.__name__)
         raise TypeError(message)
 
-assert_type = ensure_type # Backwards compatibility for < 1.2.8
+# Backwards compatibility for < 1.2.8
+assert_type = ensure_type
 
 def ensure_value(x, *values, **kwargs):
     r"""
@@ -271,25 +274,6 @@ def get_root_module(modname, suffixes='pyc pyo py'.split()):
         return get_root_module(dirname)
     else:
         return os.path.normpath(modname), os.path.isfile(modname)
-
-# =============================================================================
-#                                  Decorators
-# =============================================================================
-
-def func_attr(**attrs):
-    r"""
-    New in 1.2.6.
-
-    This decorator must be called, passing attributes to be stored in the
-    decorated function.
-    """
-
-    def wrapper(func):
-        for k, v in attrs.iteritems():
-            setattr(func, k, v)
-        return func
-
-    return wrapper
 
 # =============================================================================
 #              Cinema 4D related stuff, making common things easy
@@ -553,6 +537,9 @@ def get_material_objects(doc):
 
     return data
 
+def get_real_descid(descid):
+    return descid[descid.GetDepth() - 1].id
+
 def bl_iterator(obj, safe=False):
     r"""
     New in 1.2.8. Yields the passed object and all following objects
@@ -571,6 +558,18 @@ def bl_iterator(obj, safe=False):
         while obj:
             yield obj
             obj = obj.GetNext()
+
+def iter_inexclude(inexclude, doc=None):
+    r"""
+    *New in 1.2.9*. A generator yielding all objects in an
+    :class:`c4d.InExcludeData` instance passing *doc* as the document
+    parameter.
+    """
+
+    ensure_type(inexclude, c4d.InExcludeData)
+    for i in xrange(inexclude.GetObjectCount()):
+        object = inexclude.ObjectFromIndex(doc, i)
+        if object: yield object
 
 def move_axis(obj, new_matrix=c4d.Matrix()):
     r"""
@@ -633,11 +632,39 @@ class AtomDict(object):
         except KeyError:
             return False
 
+    def __copy__(self):
+        dict_ = AtomDict()
+        dict_.__data = copy.copy(self.__data)
+        return dict_
+
+    def __deepcopy__(self):
+        dict_ = AtomDict()
+        dict_.__data = copy.deepcopy(self.__data)
+        return dict_
+
     def __get_item(self, x):
         for item in self.__data:
             if item[0] == x:
                 return item
         raise KeyError(x)
+
+    def __len__(self):
+        return len(self.__data)
+
+    def clear(self, filter_=None):
+        r"""
+        Clear all elements in the dictionary. If *filter_* is passed, it
+        must be a callable object accepting ``(key, value)`` as arguments and
+        return True when the entry should be kept and False otherwise.
+        """
+        if not filter_:
+            self.__data[:] = []
+        else:
+            newdat = []
+            for key, value in self.__data:
+                if filter_(key, value):
+                    newdat.append((key, value))
+            self.__data[:] = newdat
 
     def setdefault(self, x, v):
         try:
@@ -687,6 +714,9 @@ class AtomDict(object):
                 raise
             else:
                 return args[0]
+
+    def copy(self):
+        return copy.copy(self)
 
 class Importer(object):
     r"""
