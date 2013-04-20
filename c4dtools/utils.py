@@ -537,8 +537,10 @@ def get_material_objects(doc):
 
     return data
 
-def get_real_descid(descid):
-    return descid[descid.GetDepth() - 1].id
+def get_real_descid(descid, index=0):
+    if index < 0:
+        index = descid.GetDepth() - index
+    return descid[index].id
 
 def bl_iterator(obj, safe=False):
     r"""
