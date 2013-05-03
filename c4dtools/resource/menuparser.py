@@ -433,7 +433,7 @@ def parse_and_prepare(filename, dialog, res):
     Like :func:`parse_file`, but renders the parsed menus to the dialog.
     """
 
-    if not isinstance(dialog, c4d.GeDialog):
+    if not isinstance(dialog, c4d.gui.GeDialog):
         raise TypeError('Expected c4d.gui.GeDialog as 2nd argument.')
     if not isinstance(res, Resource):
         raise TypeError('Expected c4dtools.resource.Resource as 3rd argument.')
