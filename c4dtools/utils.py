@@ -45,8 +45,9 @@ import time
 import threading
 import collections
 
-# Nackwards compatibility for < 1.2.9
+# Backwards compatibility for < 1.2.9
 from c4dtools.decorators import f_attrs as func_attr
+from c4dtools.importer import Importer
 
 # =============================================================================
 #                                Path operations
@@ -169,6 +170,7 @@ def ensure_type(x, *types, **kwargs):
 
     *Changed in 1.2.8*: Renamed from *assert_type* to *ensure_type*. Added
     *\*\*kwargs* parameter.
+    *New in 1.2.9*: Added *subclass* paramater to *\*\*kwargs*.
 
     :param x: The value to check.
     :param *types: The types that *x* is allowed to be an instance of.
@@ -176,6 +178,8 @@ def ensure_type(x, *types, **kwargs):
 
         - *name*: If given, the string passed by this argument will be
         assumed to be the parameter that was passed wrong.
+        - *subclass*: Pass True if :func:`issubclass` should be used instead
+        of :func:`isinstance`.
     :raise TypeError:
 
         - When an invalid keyword-argument was given
@@ -183,12 +187,20 @@ def ensure_type(x, *types, **kwargs):
     """
 
     name = kwargs.pop('name', None)
-    for k, v in kwargs:
+    subclass = kwargs.pop('subclass', False)
+    for k in kwargs:
         raise TypeError("unexpected keyword argument '%r'" % k)
+
+    func = issubclass if subclass else isinstance
+    if subclass and not isinstance(x, type):
+        message = 'Expected type instance'
+        if name:
+            message += ' for paramter %s' % name
+        raise TypeError(message)
 
     if not types:
         pass
-    elif not isinstance(x, types):
+    elif not func(x, types):
         names = []
         for t in types:
             names.append(t.__module__ + '.' + t.__name__)
@@ -249,31 +261,6 @@ def ensure_value(x, *values, **kwargs):
             message = message % name
 
         raise ValueError(message)
-
-def get_root_module(modname, suffixes='pyc pyo py'.split()):
-    r"""
-    New in 1.2.6.
-
-    Returns the root-file or folder of a module filename. The return-value
-    is a tuple of ``(root_path, is_file)``.
-    """
-
-    dirname, basename = os.path.split(modname)
-
-    # Check if the module-filename is part of a Python package.
-    in_package =  False
-    for sufx in suffixes:
-        init_mod = os.path.join(dirname, '__init__.%s' % sufx)
-        if os.path.exists(init_mod):
-            in_package = True
-            break
-
-    # Go on recursively if the module is in a package or return the
-    # module path and if it is a file.
-    if in_package:
-        return get_root_module(dirname)
-    else:
-        return os.path.normpath(modname), os.path.isfile(modname)
 
 # =============================================================================
 #              Cinema 4D related stuff, making common things easy
@@ -719,122 +706,6 @@ class AtomDict(object):
 
     def copy(self):
         return copy.copy(self)
-
-class Importer(object):
-    r"""
-    Use this class to enable importing modules from specific
-    directories independent from ``sys.path``.
-
-    .. attribute:: high_priority
-
-        When this value is True, the paths defined in the importer are
-        prepended to the original paths in ``sys.path``. If False, they
-        will be appended. Does only have an effect when :attr:`use_sys_path`
-        is True.
-
-    .. attribute:: use_sys_path
-
-        When this value is ``True``, the original paths from ``sys.path``
-        are used additionally to the paths defined in the imported.
-    """
-
-    class ProtectedEnvironment(object):
-
-        def __init__(self, importer):
-            super(Importer.ProtectedEnvironment, self).__init__()
-            self.importer = importer
-
-        def __enter__(self):
-            importer = self.importer
-
-            # Store the previous path and module configuration.
-            self.prev_path = copy.copy(sys.path)
-            self.prev_modules = copy.copy(sys.modules)
-
-            # Modify `sys.path`.
-            if importer.use_sys_path:
-                if importer.high_priority:
-                    sys.path = importer.path + sys.path
-                else:
-                    sys.path = sys.path + importer.path
-
-            return None
-
-        def __exit__(self, exc_type, exc_value, exc_tb):
-            importer = self.importer
-
-            # Restore the previous `sys.path` configuration.
-            sys.path = self.prev_path
-
-            # Restore the old module configuration. Only modules that have
-            # not been in `sys.path` before will be removed.
-            for k, v in sys.modules.items():
-                if k not in self.prev_modules and importer.is_local(v) or not v:
-                    del sys.modules[k]
-                else:
-                    sys.modules[k] = v
-
-    def __init__(self, high_priority=False, use_sys_path=True):
-        super(Importer, self).__init__()
-        self.path = []
-        self.use_sys_path = use_sys_path
-        self.high_priority = high_priority
-
-    def add(self, *paths):
-        r"""
-        Add the passed strings to the search-path for importing
-        modules. Raises TypeError if non-string object was passed.
-        Passed paths are automatically expanded.
-        """
-
-        new_paths = []
-        for path in paths:
-            if not isinstance(path, basestring):
-                raise TypeError('passed argument must be string.')
-            path = os.path.expanduser(path)
-            new_paths.append(os.path.normpath(path))
-
-        self.path.extend(new_paths)
-
-    def is_local(self, module):
-        r"""
-        Returns True if the passed module object can be found in the
-        paths defined in the importer, False if not.
-        """
-
-        if not hasattr(module, '__file__'):
-            return False
-
-        modpath = os.path.dirname(get_root_module(module.__file__)[0])
-        return modpath in self.path
-
-    def import_(self, name):
-        r"""
-        Import the module with the given name from the directories
-        added to the Importer. The loaded module will not be inserted
-        into `sys.modules`.
-        """
-
-        with self.protected():
-            m = __import__(name)
-            for n in name.split('.')[1:]:
-                m = getattr(m, n)
-            return m
-
-    def protected(self):
-        r"""
-        New in 1.2.9. Return an object implementing the with-interface
-        creating a protected environment for importing modules. The
-        with-entrance does not return any value.
-
-        .. code-block:: python
-
-            with imp.protected():
-                import module_a
-                import module_b
-        """
-
-        return Importer.ProtectedEnvironment(self)
 
 class Watch(object):
     r"""
