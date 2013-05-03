@@ -50,12 +50,12 @@ import sys
 import c4d
 import glob
 
-from c4dtools import utils, resource, helpers, plugins, library
+from c4dtools import utils, resource, helpers, plugins, library, importer
 from c4dtools.library import load_library
 
 def prepare(filename=None, c4dres=None, cache=True,
             libfolder_name='lib', resfolder_name='res',
-            parse_description=False):
+            parse_description=False, imp_store_modules=True):
     r"""
     Call this function from a Cinema 4D python plugin-file (``*.pyp``) to
     set up convenient data that can be used from the plugin.
@@ -111,12 +111,19 @@ def prepare(filename=None, c4dres=None, cache=True,
         strings can *not* be loaded from symbols of description
         resources.
 
+    :param imp_store_modules:
+
+        Passed to the constructor of the returned :class:`Importer`,
+        defining whether imported modules are stored or not.
+
     :return:
 
         A tuple of two elements:
 
         - :class:`c4dtools.resource.Resource`
         - :class:`c4dtools.utils.Importer`
+
+    *New in 1.2.9*: Added *imp_store_modules* parameter.
     """
 
     globals_ = sys._getframe().f_back.f_globals
@@ -144,10 +151,10 @@ def prepare(filename=None, c4dres=None, cache=True,
     path.c4d_symbols = os.path.join(path.res, 'c4d_symbols.h')
     path.description = os.path.join(path.res, 'description')
 
-    importer = utils.Importer()
+    imp = importer.Importer(store_modules=imp_store_modules)
 
     if os.path.isdir(path.lib):
-        importer.add(path.lib)
+        imp.add(path.lib)
 
     symbols_container = resource.Resource(path.res, c4dres, {})
 
@@ -163,4 +170,4 @@ def prepare(filename=None, c4dres=None, cache=True,
             symbols_container.add_symbols(symbols)
             symbols_container.changed |= changed
 
-    return (symbols_container, importer)
+    return (symbols_container, imp)
