@@ -221,10 +221,16 @@ class Resource(object):
         r"""
         *New in 1.2.9*: Shortcut for accessing the :class:`StringLoader`
         in the :class:`Resource` instance. Returns a :class.`ResourceString`
-        instance.
+        instance. You can pass a tuple where the first element is a the
+        name of the resource symbol and the others serve as substitution.
         """
 
-        return self.string.get(name)
+        if isinstance(name, tuple):
+            name, args = name[0], name[1:]
+        else:
+            args = ()
+
+        return self.string.get(name)(*args)
 
     @property
     def symbols(self):
@@ -259,6 +265,8 @@ class Resource(object):
 
         res_symbols = self.symbols
         for key, value in symbols.iteritems():
+            utils.ensure_type(key, basestring, name='dict-key')
+            utils.ensure_type(value, int, name='dict-value')
             if key in res_symbols and res_symbols[key] != value:
                 msg = 'key %r already defined in the resource and ' \
                       'the value differs from the updating symbols.'
@@ -267,6 +275,29 @@ class Resource(object):
                 self.highest_symbol = value
 
         res_symbols.update(symbols)
+
+    def new_symbols(self, *symbols):   
+        r"""
+        *New in 1.2.9*. Adds new symbols to the :class:`Resource` instance.
+        Each element in the *\*symbols* parameter may be a string or a tuple.   
+        If it's a tuple, the name of the symbol is the first name, otherwise
+        it will be the string itself. The second element in the tuple must be
+        the value.
+        """
+
+        l = []
+        for symbol in symbols:
+            if isinstance(symbol, tuple):
+                symbol, value = symbol
+            else:
+                if self.symbols:
+                    value = max(self.symbols.itervalues()) + 1
+                else:
+                    value = 10000
+
+            self.add_symbols({symbol: value})
+            l.append(self.get(symbol))
+        return l
 
     def get_symbol_name(self, id_):
         r"""
