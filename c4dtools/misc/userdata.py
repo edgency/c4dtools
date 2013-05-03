@@ -41,7 +41,9 @@ Module for interacting with Cinema 4D's UserData interface.
 import c4d
 import copy
 
-class UserDataSetAndGet(object):
+from c4dtools.utils import ensure_type
+
+class UserDataManager(object):
     r"""
     This class manages userdata-value retrieval and storing.
     It accepts a dictionary associating the attribute-name and
@@ -62,12 +64,19 @@ class UserDataSetAndGet(object):
         # Equal to
         print op[c4d.ID_USERDATA, 1]
         print op[c4d.ID_USERDATA, 2]
+
+    *New in 1.2.9*: Renamed to ``UserDataManager`` and added
+    type-safety for constructor.
     """
 
     __slots__ = '_fields _op _cache _do_caching'.split()
 
     def __init__(self, fields, op, do_caching=True):
         super(UserDataSetAndGet, self).__init__()
+
+        ensure_type(fields, dict)
+        ensure_type(op, c4d.BaseObject)
+
         self._fields = copy.copy(fields)
         self._op = op
         self._cache = {}
@@ -101,4 +110,6 @@ class UserDataSetAndGet(object):
         """
         self._cache = {}
 
+# Backwards compatibility for < 1.2.9
+UserDataSetAndGet = UserDataManager
 
