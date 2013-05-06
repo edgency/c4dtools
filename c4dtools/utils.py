@@ -45,11 +45,6 @@ import time
 import threading
 import collections
 
-# Backwards compatibility for < 1.3.0
-from c4dtools.math import vmin, vmax, vbbmid
-from c4dtools.importer import Importer
-from c4dtools.decorators import f_attrs as func_attr
-
 # =============================================================================
 #                                Path operations
 # =============================================================================
@@ -1097,5 +1092,11 @@ class PolygonObjectInfo(object):
         self.midpoints = midpoints
         self.pointcount = len(points)
         self.polycount = len(polygons)
+
+
+# Backwards compatibility for < 1.3.0
+from c4dtools.math import vmin, vmax, vbbmid
+from c4dtools.importer import Importer
+from c4dtools.decorators import f_attrs as func_attr
 
 
