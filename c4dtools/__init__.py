@@ -41,7 +41,7 @@ Cinema 4D. The most significant feature is the cached parsing of dialog
 symbols, see :func:`c4dtools.prepare`.
 """
 
-__version__ = (1, 2, 9, 'dev')
+__version__ = (1, 3, 0, 'dev')
 __author__ = {'name': 'Niklas Rosenstein',
               'email': 'rosensteinniklas@gmail.com'}
 
@@ -74,7 +74,7 @@ def prepare(filename=None, c4dres=None, cache=True,
         Just pass the ``__file__`` variable from the plugins global
         scope.
 
-        *New in 1.2.9*: Default value added. The filename will
+        *New in 1.3.0*: Default value added. The filename will
         be retrieved using the globals of the frame that has called
         the function if *None* was passed.
 
@@ -123,7 +123,7 @@ def prepare(filename=None, c4dres=None, cache=True,
         - :class:`c4dtools.resource.Resource`
         - :class:`c4dtools.utils.Importer`
 
-    *New in 1.2.9*: Added *imp_store_modules* parameter.
+    *New in 1.3.0*: Added *imp_store_modules* parameter.
     """
 
     globals_ = sys._getframe().f_back.f_globals

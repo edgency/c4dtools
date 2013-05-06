@@ -219,7 +219,7 @@ class Resource(object):
 
     def __getitem__(self, name):
         r"""
-        *New in 1.2.9*: Shortcut for accessing the :class:`StringLoader`
+        *New in 1.3.0*: Shortcut for accessing the :class:`StringLoader`
         in the :class:`Resource` instance. Returns a :class.`ResourceString`
         instance. You can pass a tuple where the first element is a the
         name of the resource symbol and the others serve as substitution.
@@ -278,7 +278,7 @@ class Resource(object):
 
     def new_symbols(self, *symbols):   
         r"""
-        *New in 1.2.9*. Adds new symbols to the :class:`Resource` instance.
+        *New in 1.3.0*. Adds new symbols to the :class:`Resource` instance.
         Each element in the *\*symbols* parameter may be a string or a tuple.   
         If it's a tuple, the name of the symbol is the first name, otherwise
         it will be the string itself. The second element in the tuple must be

@@ -65,7 +65,7 @@ class UserDataManager(object):
         print op[c4d.ID_USERDATA, 1]
         print op[c4d.ID_USERDATA, 2]
 
-    *New in 1.2.9*: Renamed to ``UserDataManager`` and added
+    *New in 1.3.0*: Renamed to ``UserDataManager`` and added
     type-safety for constructor.
     """
 
@@ -110,6 +110,6 @@ class UserDataManager(object):
         """
         self._cache = {}
 
-# Backwards compatibility for < 1.2.9
+# Backwards compatibility for < 1.3.0
 UserDataSetAndGet = UserDataManager
 

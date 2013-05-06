@@ -32,11 +32,13 @@
 # as representing official policies,  either expressed or implied, of
 # the FreeBSD Project.
 r"""
-c4dtools.misc.boundingbox
-~~~~~~~~~~~~~~~~~~~~~~~~~
+c4dtools.misc.aabb
+~~~~~~~~~~~~~~~~~~
 
 Utility for computing the bounding-box spanned by a couple of vectors
 or by :class:`c4d.BaseObject` instances.
+
+*Changed in 1.3.0*: Renamed from ``boundingbox`` to ``aabb``.
 """
 
 import c4d

@@ -35,7 +35,7 @@ r"""
 c4dtools.decorators
 ~~~~~~~~~~~~~~~~~~~
 
-*New in 1.2.9*. Implements usefuly decorator functions and classes.
+*New in 1.3.0*. Implements usefuly decorator functions and classes.
 """
 
 import collections
@@ -43,7 +43,7 @@ import collections
 def f_attrs(self=False, **attrs):
     r"""
     - *New in 1.2.6*.
-    - *Changed in 1.2.9*
+    - *Changed in 1.3.0*
         - Moved from ``utils`` to ``decorators``
         - Added *self* parameter.
     This function returns a decorator adding all passed keyword arguments
@@ -77,7 +77,7 @@ def f_attrs(self=False, **attrs):
 
 def override(fnc=None):
     r"""
-    *New in 1.2.9*. Decorator for class-methods. Use in combination with
+    *New in 1.3.0*. Decorator for class-methods. Use in combination with
     the :func:`subclass` decorator.
 
     This decorator will raise a :class:`NotImplementedError`

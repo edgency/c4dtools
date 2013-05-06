@@ -35,7 +35,7 @@ r"""
 c4dtools.importer
 ~~~~~~~~~~~~~~~~~
 
-*New in 1.2.9*. Implements a class for safely importing packages. The
+*New in 1.3.0*. Implements a class for safely importing packages. The
 contents of this package was previously defined in :mod`c4dtools.utils`.
 """
 
@@ -50,7 +50,7 @@ def get_root_module(modname, suffixes='pyc pyo py'.split()):
     Returns the root-file or folder of a module filename. The return-value
     is a tuple of ``(root_path, is_file)``.
 
-    *New in 1.2.9*: Moved to :mod:`c4dtools.importer`.
+    *New in 1.3.0*: Moved to :mod:`c4dtools.importer`.
     """
 
     dirname, basename = os.path.split(modname)
@@ -93,7 +93,7 @@ class Importer(object):
         with the instance of the :class:`Importer`. Can be ``None``
         when *store_modules* was passed ``False`` on initialization.
 
-    *New in 1.2.9*:
+    *New in 1.3.0*:
 
         - Moved to :mod:`c4dtools.importer`
         - Added :attr:`modules` attribute
@@ -154,7 +154,7 @@ class Importer(object):
 
     def protected(self):
         r"""
-        New in 1.2.9. Return an object implementing the with-interface
+        New in 1.3.0. Return an object implementing the with-interface
         creating a protected environment for importing modules. The
         with-entrance does not return any value.
 

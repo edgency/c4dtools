@@ -45,9 +45,10 @@ import time
 import threading
 import collections
 
-# Backwards compatibility for < 1.2.9
-from c4dtools.decorators import f_attrs as func_attr
+# Backwards compatibility for < 1.3.0
+from c4dtools.math import vmin, vmax, vbbmid
 from c4dtools.importer import Importer
+from c4dtools.decorators import f_attrs as func_attr
 
 # =============================================================================
 #                                Path operations
@@ -56,13 +57,19 @@ from c4dtools.importer import Importer
 def change_suffix(filename, new_suffix):
     r"""
     Replaces the suffix of the passed filename with *new_suffix*.
+
+    *Changed in 1.3.0*: If *new_suffix* evaluates to False, the
+    basename of the file is returned (ie. without suffix).
     """
 
     index = filename.rfind('.')
     if index >= 0:
         filename = filename[:index]
 
-    return '%s.%s' % (filename, new_suffix)
+    if new_suffix:
+        return '%s.%s' % (filename, new_suffix)
+    else:
+        return filename
 
 def file_changed(original, copy):
     r"""
@@ -71,60 +78,6 @@ def file_changed(original, copy):
     """
 
     return os.path.getmtime(original) > os.path.getmtime(copy)
-
-# =============================================================================
-#                               Vector operations
-# =============================================================================
-
-def vmin(a, b):
-    r"""
-    Combines the lowest components of the two vectors *a* and *b* into
-    a new vector. Returns the new vector.
-
-    *Changed in 1.2.9*: The new vector is now returned instead of
-    stored in *a*.
-    """
-
-    c = c4d.Vector(a)
-    if b.x < a.x: c.x = b.x
-    if b.y < a.y: c.y = b.y
-    if b.z < a.z: c.z = b.z
-    return c
-
-def vmax(a, b):
-    r"""
-    Combines the highest components of the two vectors *a* and *b* into
-    a new vector. Returns the new vector.
-
-    *Changed in 1.2.9*: The new vector is now returned instead of
-    stored in *a*.
-    """
-
-    c = c4d.Vector(a)
-    if b.x > a.x: c.x = b.x
-    if b.y > a.y: c.y = b.y
-    if b.z > a.z: c.z = b.z
-    return c
-
-def vbbmid(vectors):
-    r"""
-    Returns the mid-point of the bounding box spanned by the list
-    of vectors. This is different to the arithmetic middle of the
-    points.
-
-    Returns: :class:`c4d.Vector`
-    """
-
-    if not vectors:
-        return c4d.Vector(0)
-
-    min = c4d.Vector(vectors[0])
-    max = c4d.Vector(min)
-    for v in vectors:
-        vmin(min, v)
-        vmax(max, v)
-
-    return (min + max) * 0.5
 
 # =============================================================================
 #                               Several utilities
@@ -157,7 +110,7 @@ def candidates(value, obj, callback=lambda vref, vcmp, kcmp: vref == vcmp):
 
 def ensure_type(x, *types, **kwargs):
     r"""
-    New in 1.2.5.
+    *New in 1.2.5*.
 
     This function is similar to the built-in :func:`isinstance` function
     in Python. It accepts an instance of a class as first argument, namely
@@ -170,7 +123,7 @@ def ensure_type(x, *types, **kwargs):
 
     *Changed in 1.2.8*: Renamed from *assert_type* to *ensure_type*. Added
     *\*\*kwargs* parameter.
-    *New in 1.2.9*: Added *subclass* paramater to *\*\*kwargs*.
+    *New in 1.3.0*: Added *subclass* paramater to *\*\*kwargs*.
 
     :param x: The value to check.
     :param *types: The types that *x* is allowed to be an instance of.
@@ -226,7 +179,7 @@ assert_type = ensure_type
 
 def ensure_value(x, *values, **kwargs):
     r"""
-    New in 1.2.8.
+    *New in 1.2.8*.
 
     This function checks if the value *x* is in *\*values*. If this does
     not result in True, :class:`ValueError` is raised.
@@ -373,7 +326,7 @@ def current_state_to_object(op, container=c4d.BaseContainer()):
 
 def join_polygon_objects(objects, dest_mat=None):
     r"""
-    New in 1.2.8.
+    *New in 1.2.8*.
     This function creates one polygon object from the passed list
     *objects* containing :class:`c4d.PolygonObject` instances. Any other
     type of object is ignored.
@@ -454,7 +407,7 @@ def join_polygon_objects(objects, dest_mat=None):
 
 def serial_info():
     r"""
-    New in 1.2.7.
+    *New in 1.2.7*.
 
     Returns serial-information of the user. Returns ``(sinfo, is_multi)``.
     *is_multi* indicates whether the *sinfo* is a multilicense information
@@ -491,7 +444,7 @@ def get_shader_bitmap(shader, irs=None):
 
 def get_material_objects(doc):
     r"""
-    New in 1.2.6.
+    *New in 1.2.6*.
 
     This function goes through the complete object hierarchy of the
     passed :class:`c4d.BaseDocument` and all materials with the objects
@@ -524,14 +477,23 @@ def get_material_objects(doc):
 
     return data
 
-def get_real_descid(descid, index=0):
-    if index < 0:
+def get_real_descid(descid, level=0):
+    r"""
+    *New in 1.2.9*. Returns the integer description id of the passed
+    :class:`c4d.DescID` object at a certain level.
+
+    :param descid: :class:`c4d.DescID`
+    :param level: The level of the integer id to obtain. May be a negative
+            value to subscript from the right-hand side.
+    """
+
+    if level < 0:
         index = descid.GetDepth() + index
-    return descid[index].id
+    return descid[level].id
 
 def bl_iterator(obj, safe=False):
     r"""
-    New in 1.2.8. Yields the passed object and all following objects
+    *New in 1.2.8*. Yields the passed object and all following objects
     in the hierarchy (retrieved via :func:`~c4d.BaseList2D.GetNext`). When
     the *safe* parameter is True, the next object will be retrieved before
     yielding to allow the yielded object to be moved in the hierarchy and
@@ -550,7 +512,7 @@ def bl_iterator(obj, safe=False):
 
 def iter_inexclude(inexclude, doc=None):
     r"""
-    *New in 1.2.9*. A generator yielding all objects in an
+    *New in 1.3.0*. A generator yielding all objects in an
     :class:`c4d.InExcludeData` instance passing *doc* as the document
     parameter.
     """
@@ -562,7 +524,7 @@ def iter_inexclude(inexclude, doc=None):
 
 def move_axis(obj, new_matrix=c4d.Matrix()):
     r"""
-    *New in 1.2.9*: Normalize the axis of an object by adjusting the local
+    *New in 1.3.0*: Normalize the axis of an object by adjusting the local
     matrix of the child objects and, if *obj* is a polygon object, it's
     points. Simulates the 'Axis Move' mode in Cinema.
 
@@ -587,7 +549,7 @@ def move_axis(obj, new_matrix=c4d.Matrix()):
 
 class AtomDict(object):
     r"""
-    New in 1.2.6.
+    *New in 1.2.6*.
 
     This class implements a subset of the dictionary interface but without the
     requirement of the :func:`__hash__` method to be implemented. It is using
@@ -1083,7 +1045,7 @@ class Filename(object):
 
 class PolygonObjectInfo(object):
     r"""
-    New in 1.2.5.
+    *New in 1.2.5*.
 
     This class stores the points and polygons of a polygon-object and
     additionally computes it's normals and polygon-midpoints.
