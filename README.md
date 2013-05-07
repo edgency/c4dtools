@@ -17,7 +17,7 @@ The `c4dtools` is **not a plugin**. It is "add on" code that can be used by devl
 to make their life easier. A plugin that relies on this library requires you to install
 `c4dtools` before it can be used (the plugin will not even register to Cinema4D).
 
-## Installation
+### Installation
 
 The `c4dtools` library is casual Python package. For the Python interpreter
 embedded into Cinema 4D to find it, you need to install it into the preferences
@@ -34,7 +34,7 @@ folder of your Cinema 4D installation.
 To install a new version of the library, simply delete the old `c4dtools` folder
 and paste the new one.
 
-## Alternative Installation
+### Alternative Installation
 
 Add a directory to the `PYTHONPATH` environment variable where you put in the
 `c4dtools` library folder. Again, the library folder is *only* the one containing
@@ -47,11 +47,18 @@ import c4d
 import c4dtools
 import c4dtools.resource.menuparser as menuparser
 
-res, importer = c4dtools.prepare(__file__, __res__)
+res, importer = c4dtools.prepare()
 
 # Import libraries from the `lib` folder relative to the plugins
 # directory, 100% self-contained and independent from `sys.path`.
-mylib = importer.import_('mylib')
+with importer.protected():
+   import mylib
+
+# Ensure that `mylibb` is not in the cached modules. Just for
+# demonstrational purpose, does not need to be done in a plugin.
+assert 'mylib' not in sys.modules
+
+# An arbitrary function from the imported module.
 mylib.do_stuff()
 
 class MyDialog(c4d.gui.GeDialog):
@@ -76,8 +83,9 @@ class MyDialog(c4d.gui.GeDialog):
         #     }
         # }
         #
+        # IDs and strings are taken from c4d_symbols.h/c4d_strings.str respectively.
         if success:
-           menuparser.parse_and_prepare(res.file('menus', 'mymenu.menu'), self, res)
+           menuparser.parse_and_prepare(res.file('menus', 'main.mnu'), self, res)
 
         return success
 
@@ -88,19 +96,23 @@ class MyDialog(c4d.gui.GeDialog):
         self.SetString(res.EDT_STRING1, string)
 
         # New in version 1.1.0, but does not allow string-argument substitution.
+        # (Replacing the `#` which is default for Cinema resource files, see
+        # `c4d.plugins.GeLoadString()`)
         self.SetString(*res.string.EDT_STRING2.both)
+
+        # New shortcut for acessing resource strings in 1.3.0:
+        arg1 = 'Argument 1 Text'
+        arg2 = 'and Argument 2 Text'
+        c4d.gui.MessageDialog(res['IDS_MESSAGE_INITIALIZED', arg1, arg2])
 
         return True
 
-# As of the current release, the only wrapped plugin class is
-# `c4d.plugins.CommandData`. The plugin is registered automatically
-# in `c4dtools.plugins.main()`, the information for registration
-# is defined on class-level.
 class MyCommand(c4dtools.plugins.Command):
 
     PLUGIN_ID = 100008 # !! Must be obtained from the plugincafe !!
     PLUGIN_NAME = res.string.IDC_MYCOMMAND()
     PLUGIN_HELP = res.string.IDC_MYCOMMAND_HELP()
+    PLUGIN_ICON = res.file('icons', 'command.png')
 
     def Execute(self, doc):
         dlg = MyDialog()
@@ -110,6 +122,9 @@ class MyCommand(c4dtools.plugins.Command):
 # on the main-run of the python-plugin.
 if __name__ == '__main__':
     c4dtools.plugins.main()
+
+    # Alternative:
+    MyCommand().register()
 ```
 
 ## Important notice for developers
@@ -169,5 +184,4 @@ The `c4dtools` library is licensed under the Simplified BSD License since
 version 1.1.0. It was licensed under the GNU General Public License before.
 
   [1]: https://github.com/NiklasRosenstein/XPAT
-
 
