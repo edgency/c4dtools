@@ -319,64 +319,23 @@ def current_state_to_object(op, container=c4d.BaseContainer()):
 
     return result
 
-def join_polygon_objects(objects, dest_mat=None):
+def join_polygon_objects(objects, doc):
     r"""
-    *New in 1.2.8*.
-    This function creates one polygon object from the passed list
-    *objects* containing :class:`c4d.PolygonObject` instances. Any other
-    type of object is ignored.
+    Joins the passed objects by using the Cinema 4D Connect + Delete
+    command. *doc* must be a document that will be used temporarily.
+    It must be inserted in Cinema 4D's document list!
 
-    The returned polygon-object is located at the global world
-    center.
+    One should not pass the document the objects are stored in, since
+    this would mess up the undo chain.
 
-    # TODO: Add description for parameters.
+    *Changed in 1.3.0*: The second argument is no more a matrix but
+    a :class:`c4d.documents.BaseDocument` that will be used temporarily.
     """
-
-    # Filter all polygon-objects from the passed sequence.
-    objects = filter(lambda x: x.CheckType(c4d.Opolygon), objects)
-    if not objects:
-        return None
-
-    if dest_mat is None:
-        dest_mat = objects[0].GetMg()
-
-    # Merge points and polygons into single lists and collect
-    # all tags.
-    points = []
-    polys = []
-    tags = []
-    for obj in objects:
-        mg = obj.GetMg() * ~dest_mat
-
-        point_offset = len(points)
-        for poly in obj.GetAllPolygons():
-            poly.a += point_offset
-            poly.b += point_offset
-            poly.c += point_offset
-            poly.d += point_offset
-            polys.append(poly)
-
-        for point in obj.GetAllPoints():
-            point = point * mg
-            points.append(point)
-
-        tags.extend(obj.GetTags())
-
-    # No points, no luck.
-    if not points:
-        return None
-
-    # Create a polygon-object from the points and polygons.
-    object = c4d.PolygonObject(len(points), len(polys))
-    object.SetAllPoints(points)
-    for i, poly in enumerate(polys):
-        object.SetPolygon(i, poly)
-
-    # Tell the object about the change.
-    object.Message(c4d.MSG_UPDATE)
 
     # Create a list of unique tags for the object.
     new_tags = []
+    tags = []
+    [tags.extend(obj.GetTags()) for obj in objects]
     for tag in tags:
         # Skip variable tags as they do not match the new
         # number of datasets anymore.
@@ -394,11 +353,33 @@ def join_polygon_objects(objects, dest_mat=None):
         if not exists:
             new_tags.append(tag.GetClone(c4d.COPYFLAGS_0))
 
-    for tag in new_tags:
-        object.InsertTag(tag)
+    doc.SetActiveObject(None)
+    pred = None
+    for obj in objects:
+        obj = obj.GetClone(c4d.COPYFLAGS_NO_HIERARCHY)
+        doc.InsertObject(obj, None, pred)
+        obj.SetBit(c4d.BIT_ACTIVE)
+        pred = obj
 
-    object.SetMg(dest_mat)
-    return object
+    doc.Message(c4d.MSG_CHANGE)
+
+    # To make the call-command work.
+    c4d.documents.SetActiveDocument(doc)
+    c4d.CallCommand(16768) # Connect + Delete
+
+    obj = doc.GetActiveObject()
+
+    # Remove all tags from the object.
+    for tag in obj.GetTags():
+        if not tag.CheckType(c4d.Tvariable):
+            tag.Remove()
+
+    # Insert the new tags.
+    for tag in reversed(new_tags):
+        obj.InsertTag(tag)
+
+    obj.Remove()
+    return obj
 
 def serial_info():
     r"""
