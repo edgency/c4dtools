@@ -61,6 +61,8 @@ class Command(c4d.plugins.CommandData):
     detected = False
     is_registered = False
     tried_register = False
+    registered_instance = None
+
     autoregister = True
 
     PLUGIN_INFO = c4d.PLUGINFLAG_COMMAND_HOTKEY
@@ -72,11 +74,10 @@ class Command(c4d.plugins.CommandData):
         set in the instances attributes. See the class-documentation
         for more information.
         """
-
         cls = self.__class__
 
         # Do not register if already tried or is already registered.
-        if cls.tried_register or cls.is_registered:
+        if cls.tried_register:
             return self.is_registered
 
         if self.PLUGIN_ICON:
@@ -88,13 +89,14 @@ class Command(c4d.plugins.CommandData):
         else:
             icon = None
 
+        cls.tried_register = True
         result = c4d.plugins.RegisterCommandPlugin(
             self.PLUGIN_ID, self.PLUGIN_NAME, self.PLUGIN_INFO, icon,
             self.PLUGIN_HELP, self)
-
+        cls.is_registered = bool(result)
         if result:
             cls.is_registered = True
-        cls.tried_register = True
+            cls.registered_instance = self
         return result
 
 def gather_subclasses(clazz):
@@ -121,3 +123,5 @@ def main():
     for command_class in gather_subclasses(Command):
         command = command_class()
         command.register()
+
+
