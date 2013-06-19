@@ -510,9 +510,8 @@ def move_axis(obj, new_matrix=c4d.Matrix()):
 
     mat = ~new_matrix * obj.GetMl()
     if obj.CheckType(c4d.Opoint):
-        points = obj.GetAllPoints()
-        for i, p in enumerate(points):
-            obj.SetPoint(i, p * mat)
+        points = [p * mat for p in obj.GetAllPoints()]
+        obj.SetAllPoints(points)
         obj.Message(c4d.MSG_UPDATE)
 
     for child in obj.GetChildren():
