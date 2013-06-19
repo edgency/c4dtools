@@ -75,7 +75,7 @@ class UserDataManager(object):
         super(UserDataSetAndGet, self).__init__()
 
         ensure_type(fields, dict)
-        ensure_type(op, c4d.BaseObject)
+        ensure_type(op, c4d.BaseList2D)
 
         self._fields = copy.copy(fields)
         self._op = op
