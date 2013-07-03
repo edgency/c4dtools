@@ -536,7 +536,7 @@ class AtomDict(object):
         self.__data = []
 
     def __getitem__(self, x):
-        self.__get_item(x)[1]
+        return self.__get_item(x)[1]
 
     def __setitem__(self, x, v):
         try:
