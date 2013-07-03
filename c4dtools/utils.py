@@ -39,6 +39,8 @@ c4dtools.utils
 import os
 import sys
 import c4d
+import copy
+import glob
 import time
 import threading
 import collections
@@ -50,13 +52,19 @@ import collections
 def change_suffix(filename, new_suffix):
     r"""
     Replaces the suffix of the passed filename with *new_suffix*.
+
+    *Changed in 1.3.0*: If *new_suffix* evaluates to False, the
+    basename of the file is returned (ie. without suffix).
     """
 
     index = filename.rfind('.')
     if index >= 0:
         filename = filename[:index]
 
-    return '%s.%s' % (filename, new_suffix)
+    if new_suffix:
+        return '%s.%s' % (filename, new_suffix)
+    else:
+        return filename
 
 def file_changed(original, copy):
     r"""
@@ -65,52 +73,6 @@ def file_changed(original, copy):
     """
 
     return os.path.getmtime(original) > os.path.getmtime(copy)
-
-# =============================================================================
-#                               Vector operations
-# =============================================================================
-
-def vmin(dest, test):
-    r"""
-    For each component of the vectors *dest* and *test*, this function
-    writes the lower value of each pairs into the respective component
-    of *dest*.
-    """
-
-    if test.x < dest.x: dest.x = test.x
-    if test.y < dest.y: dest.y = test.y
-    if test.z < dest.z: dest.z = test.z
-
-def vmax(dest, test):
-    r"""
-    For each component of the vectors *dest* and *test*, this function
-    writes the upper value of each pairs into the respective component
-    of *dest*.
-    """
-
-    if test.x > dest.x: dest.x = test.x
-    if test.y > dest.y: dest.y = test.y
-    if test.z > dest.z: dest.z = test.z
-
-def vbbmid(vectors):
-    r"""
-    Returns the mid-point of the bounding box spanned by the list
-    of vectors. This is different to the arithmetic middle of the
-    points.
-
-    Returns: :class:`c4d.Vector`
-    """
-
-    if not vectors:
-        return c4d.Vector(0)
-
-    min = c4d.Vector(vectors[0])
-    max = c4d.Vector(min)
-    for v in vectors:
-        vmin(min, v)
-        vmax(max, v)
-
-    return (min + max) * 0.5
 
 # =============================================================================
 #                               Several utilities
@@ -143,7 +105,7 @@ def candidates(value, obj, callback=lambda vref, vcmp, kcmp: vref == vcmp):
 
 def ensure_type(x, *types, **kwargs):
     r"""
-    New in 1.2.5.
+    *New in 1.2.5*.
 
     This function is similar to the built-in :func:`isinstance` function
     in Python. It accepts an instance of a class as first argument, namely
@@ -155,26 +117,47 @@ def ensure_type(x, *types, **kwargs):
     error message when *x* is not an instance of the passed *\*types*.
 
     *Changed in 1.2.8*: Renamed from *assert_type* to *ensure_type*. Added
-    *\*\*kwargs* parameter. Pass ``name`` as keyword-argument for adding
-    the parameter    name that was wrong in the message.
+    *\*\*kwargs* parameter.
+    *New in 1.3.0*: Added *subclass* paramater to *\*\*kwargs*.
+
+    :param x: The value to check.
+    :param *types: The types that *x* is allowed to be an instance of.
+    :param **kwargs:
+
+        - *name*: If given, the string passed by this argument will be
+        assumed to be the parameter that was passed wrong.
+        - *subclass*: Pass True if :func:`issubclass` should be used instead
+        of :func:`isinstance`.
+    :raise TypeError:
+
+        - When an invalid keyword-argument was given
+        - When *x* is not an instance of any of the passed types
     """
 
     name = kwargs.pop('name', None)
-    for k, v in kwargs:
+    subclass = kwargs.pop('subclass', False)
+    for k in kwargs:
         raise TypeError("unexpected keyword argument '%r'" % k)
+
+    func = issubclass if subclass else isinstance
+    if subclass and not isinstance(x, type):
+        message = 'Expected type instance'
+        if name:
+            message += ' for paramter %s' % name
+        raise TypeError(message)
 
     if not types:
         pass
-    elif not isinstance(x, types):
+    elif not func(x, types):
         names = []
         for t in types:
             names.append(t.__module__ + '.' + t.__name__)
 
         if len(names) > 1:
-            message = 'xpected instance of %s, got %s'
+            message = 'xpected instance of %s, got %s instead'
             first = ', '.join(names[:-1]) + ' or ' + names[-1]
         else:
-            message = 'xpected instance of type %s, got %s'
+            message = 'xpected instance of type %s, got %s instead'
             first = names[0]
 
         if name:
@@ -186,17 +169,26 @@ def ensure_type(x, *types, **kwargs):
         message = message % (first, cls.__module__ + '.' + cls.__name__)
         raise TypeError(message)
 
-assert_type = ensure_type # Backwards compatibility for < 1.2.8
+# Backwards compatibility for < 1.2.8
+assert_type = ensure_type
 
 def ensure_value(x, *values, **kwargs):
     r"""
-    New in 1.2.8.
+    *New in 1.2.8*.
 
     This function checks if the value *x* is in *\*values*. If this does
     not result in True, :class:`ValueError` is raised.
 
-    Pass ``name`` as keyword-argument to specify the parameter name that
-    was given wrong in the message.
+    :param x: The value to check.
+    :param *values: The values *x* is allowed to be one of.
+    :param **kwargs*:
+
+        - *name*: If given, the string passed by this argument will be
+        assumed to be the parameter that was passed wrong.
+    :raise TypeError:
+
+        - When an invalid keyword-argument was given
+        - When *x* is not a value of any of the passed values.
     """
 
     name = kwargs.pop('name', None)
@@ -217,50 +209,6 @@ def ensure_value(x, *values, **kwargs):
             message = message % name
 
         raise ValueError(message)
-
-def get_root_module(modname, suffixes='pyc pyo py'.split()):
-    r"""
-    New in 1.2.6.
-
-    Returns the root-file or folder of a module filename. The return-value
-    is a tuple of ``(root_path, is_file)``.
-    """
-
-    dirname, basename = os.path.split(modname)
-
-    # Check if the module-filename is part of a Python package.
-    in_package =  False
-    for sufx in suffixes:
-        init_mod = os.path.join(dirname, '__init__.%s' % sufx)
-        if os.path.exists(init_mod):
-            in_package = True
-            break
-
-    # Go on recursively if the module is in a package or return the
-    # module path and if it is a file.
-    if in_package:
-        return get_root_module(dirname)
-    else:
-        return os.path.normpath(modname), os.path.isfile(modname)
-
-# =============================================================================
-#                                  Decorators
-# =============================================================================
-
-def func_attr(**attrs):
-    r"""
-    New in 1.2.6.
-
-    This decorator must be called, passing attributes to be stored in the
-    decorated function.
-    """
-
-    def wrapper(func):
-        for k, v in attrs.iteritems():
-            setattr(func, k, v)
-        return func
-
-    return wrapper
 
 # =============================================================================
 #              Cinema 4D related stuff, making common things easy
@@ -371,64 +319,23 @@ def current_state_to_object(op, container=c4d.BaseContainer()):
 
     return result
 
-def join_polygon_objects(objects, dest_mat=None):
+def join_polygon_objects(objects, doc):
     r"""
-    New in 1.2.8.
-    This function creates one polygon object from the passed list
-    *objects* containing :class:`c4d.PolygonObject` instances. Any other
-    type of object is ignored.
+    Joins the passed objects by using the Cinema 4D Connect + Delete
+    command. *doc* must be a document that will be used temporarily.
+    It must be inserted in Cinema 4D's document list!
 
-    The returned polygon-object is located at the global world
-    center.
+    One should not pass the document the objects are stored in, since
+    this would mess up the undo chain.
 
-    # TODO: Add description for parameters.
+    *Changed in 1.3.0*: The second argument is no more a matrix but
+    a :class:`c4d.documents.BaseDocument` that will be used temporarily.
     """
-
-    # Filter all polygon-objects from the passed sequence.
-    objects = filter(lambda x: x.CheckType(c4d.Opolygon), objects)
-    if not objects:
-        return None
-
-    if dest_mat is None:
-        dest_mat = objects[0].GetMg()
-
-    # Merge points and polygons into single lists and collect
-    # all tags.
-    points = []
-    polys = []
-    tags = []
-    for obj in objects:
-        mg = obj.GetMg() * ~dest_mat
-
-        point_offset = len(points)
-        for poly in obj.GetAllPolygons():
-            poly.a += point_offset
-            poly.b += point_offset
-            poly.c += point_offset
-            poly.d += point_offset
-            polys.append(poly)
-
-        for point in obj.GetAllPoints():
-            point = point * mg
-            points.append(point)
-
-        tags.extend(obj.GetTags())
-
-    # No points, no luck.
-    if not points:
-        return None
-
-    # Create a polygon-object from the points and polygons.
-    object = c4d.PolygonObject(len(points), len(polys))
-    object.SetAllPoints(points)
-    for i, poly in enumerate(polys):
-        object.SetPolygon(i, poly)
-
-    # Tell the object about the change.
-    object.Message(c4d.MSG_UPDATE)
 
     # Create a list of unique tags for the object.
     new_tags = []
+    tags = []
+    [tags.extend(obj.GetTags()) for obj in objects]
     for tag in tags:
         # Skip variable tags as they do not match the new
         # number of datasets anymore.
@@ -446,15 +353,37 @@ def join_polygon_objects(objects, dest_mat=None):
         if not exists:
             new_tags.append(tag.GetClone(c4d.COPYFLAGS_0))
 
-    for tag in new_tags:
-        object.InsertTag(tag)
+    doc.SetActiveObject(None)
+    pred = None
+    for obj in objects:
+        obj = obj.GetClone(c4d.COPYFLAGS_NO_HIERARCHY)
+        doc.InsertObject(obj, None, pred)
+        obj.SetBit(c4d.BIT_ACTIVE)
+        pred = obj
 
-    object.SetMg(dest_mat)
-    return object
+    doc.Message(c4d.MSG_CHANGE)
+
+    # To make the call-command work.
+    c4d.documents.SetActiveDocument(doc)
+    c4d.CallCommand(16768) # Connect + Delete
+
+    obj = doc.GetActiveObject()
+
+    # Remove all tags from the object.
+    for tag in obj.GetTags():
+        if not tag.CheckType(c4d.Tvariable):
+            tag.Remove()
+
+    # Insert the new tags.
+    for tag in reversed(new_tags):
+        obj.InsertTag(tag)
+
+    obj.Remove()
+    return obj
 
 def serial_info():
     r"""
-    New in 1.2.7.
+    *New in 1.2.7*.
 
     Returns serial-information of the user. Returns ``(sinfo, is_multi)``.
     *is_multi* indicates whether the *sinfo* is a multilicense information
@@ -491,7 +420,7 @@ def get_shader_bitmap(shader, irs=None):
 
 def get_material_objects(doc):
     r"""
-    New in 1.2.6.
+    *New in 1.2.6*.
 
     This function goes through the complete object hierarchy of the
     passed :class:`c4d.BaseDocument` and all materials with the objects
@@ -524,9 +453,23 @@ def get_material_objects(doc):
 
     return data
 
+def get_real_descid(descid, level=0):
+    r"""
+    *New in 1.2.9*. Returns the integer description id of the passed
+    :class:`c4d.DescID` object at a certain level.
+
+    :param descid: :class:`c4d.DescID`
+    :param level: The level of the integer id to obtain. May be a negative
+            value to subscript from the right-hand side.
+    """
+
+    if level < 0:
+        index = descid.GetDepth() + index
+    return descid[level].id
+
 def bl_iterator(obj, safe=False):
     r"""
-    New in 1.2.8. Yields the passed object and all following objects
+    *New in 1.2.8*. Yields the passed object and all following objects
     in the hierarchy (retrieved via :func:`~c4d.BaseList2D.GetNext`). When
     the *safe* parameter is True, the next object will be retrieved before
     yielding to allow the yielded object to be moved in the hierarchy and
@@ -543,13 +486,45 @@ def bl_iterator(obj, safe=False):
             yield obj
             obj = obj.GetNext()
 
+def iter_inexclude(inexclude, doc=None):
+    r"""
+    *New in 1.3.0*. A generator yielding all objects in an
+    :class:`c4d.InExcludeData` instance passing *doc* as the document
+    parameter.
+    """
+
+    ensure_type(inexclude, c4d.InExcludeData)
+    for i in xrange(inexclude.GetObjectCount()):
+        object = inexclude.ObjectFromIndex(doc, i)
+        if object: yield object
+
+def move_axis(obj, new_matrix=c4d.Matrix()):
+    r"""
+    *New in 1.3.0*: Normalize the axis of an object by adjusting the local
+    matrix of the child objects and, if *obj* is a polygon object, it's
+    points. Simulates the 'Axis Move' mode in Cinema.
+
+    :param obj: :class:`c4d.BaseObject`
+    :param new_matrix: :class:`c4d.Matrix`
+    """
+
+    mat = ~new_matrix * obj.GetMl()
+    if obj.CheckType(c4d.Opoint):
+        points = [p * mat for p in obj.GetAllPoints()]
+        obj.SetAllPoints(points)
+        obj.Message(c4d.MSG_UPDATE)
+
+    for child in obj.GetChildren():
+        child.SetMl(mat * child.GetMl())
+    obj.SetMl(new_matrix)
+
 # =============================================================================
 #                                Utility classes
 # =============================================================================
 
 class AtomDict(object):
     r"""
-    New in 1.2.6.
+    *New in 1.2.6*.
 
     This class implements a subset of the dictionary interface but without the
     requirement of the :func:`__hash__` method to be implemented. It is using
@@ -561,7 +536,7 @@ class AtomDict(object):
         self.__data = []
 
     def __getitem__(self, x):
-        self.__get_item(x)[1]
+        return self.__get_item(x)[1]
 
     def __setitem__(self, x, v):
         try:
@@ -583,11 +558,39 @@ class AtomDict(object):
         except KeyError:
             return False
 
+    def __copy__(self):
+        dict_ = AtomDict()
+        dict_.__data = copy.copy(self.__data)
+        return dict_
+
+    def __deepcopy__(self):
+        dict_ = AtomDict()
+        dict_.__data = copy.deepcopy(self.__data)
+        return dict_
+
     def __get_item(self, x):
         for item in self.__data:
             if item[0] == x:
                 return item
         raise KeyError(x)
+
+    def __len__(self):
+        return len(self.__data)
+
+    def clear(self, filter_=None):
+        r"""
+        Clear all elements in the dictionary. If *filter_* is passed, it
+        must be a callable object accepting ``(key, value)`` as arguments and
+        return True when the entry should be kept and False otherwise.
+        """
+        if not filter_:
+            self.__data[:] = []
+        else:
+            newdat = []
+            for key, value in self.__data:
+                if filter_(key, value):
+                    newdat.append((key, value))
+            self.__data[:] = newdat
 
     def setdefault(self, x, v):
         try:
@@ -638,97 +641,8 @@ class AtomDict(object):
             else:
                 return args[0]
 
-class Importer(object):
-    r"""
-    Use this class to enable importing modules from specific
-    directories independent from ``sys.path``.
-
-    .. attribute:: high_priority
-
-        When this value is True, the paths defined in the importer are
-        prepended to the original paths in ``sys.path``. If False, they
-        will be appended. Does only have an effect when :attr:`use_sys_path`
-        is True.
-
-    .. attribute:: use_sys_path
-
-        When this value is ``True``, the original paths from ``sys.path``
-        are used additionally to the paths defined in the imported.
-    """
-
-    def __init__(self, high_priority=False, use_sys_path=True):
-        super(Importer, self).__init__()
-        self.path = []
-        self.use_sys_path = use_sys_path
-        self.high_priority = high_priority
-
-    def add(self, *paths):
-        r"""
-        Add the passed strings to the search-path for importing
-        modules. Raises TypeError if non-string object was passed.
-        Passed paths are automatically expanded.
-        """
-
-        new_paths = []
-        for path in paths:
-            if not isinstance(path, basestring):
-                raise TypeError('passed argument must be string.')
-            path = os.path.expanduser(path)
-            new_paths.append(os.path.normpath(path))
-
-        self.path.extend(new_paths)
-
-    def is_local(self, module):
-        r"""
-        Returns True if the passed module object can be found in the
-        paths defined in the importer, False if not.
-        """
-
-        if not hasattr(module, '__file__'):
-            return False
-
-        modpath = os.path.dirname(get_root_module(module.__file__)[0])
-        return modpath in self.path
-
-    def import_(self, name):
-        r"""
-        Import the module with the given name from the directories
-        added to the Importer. The loaded module will not be inserted
-        into `sys.modules`.
-        """
-
-        prev_path = sys.path
-        if self.use_sys_path:
-            if self.high_priority:
-                sys.path = self.path + sys.path
-            else:
-                sys.path = sys.path + self.path
-
-        prev_modules = sys.modules.copy()
-
-        # Remove any existing modules with the passed name from
-        # sys.modules.
-        for k in sys.modules.keys():
-            if k == name or k.startswith('%s.' % name):
-                del sys.modules[k]
-
-        try:
-            m = __import__(name)
-            for n in name.split('.')[1:]:
-                m = getattr(m, n)
-            return m
-        except:
-            raise
-        finally:
-            sys.path = prev_path
-
-            # Restore the old module configuration. Only modules that have
-            # not been in sys.path before will be removed.
-            for k, v in sys.modules.items():
-                if k not in prev_modules and self.is_local(v) or not v:
-                    del sys.modules[k]
-                else:
-                    sys.modules[k] = v
+    def copy(self):
+        return copy.copy(self)
 
 class Watch(object):
     r"""
@@ -1106,7 +1020,7 @@ class Filename(object):
 
 class PolygonObjectInfo(object):
     r"""
-    New in 1.2.5.
+    *New in 1.2.5*.
 
     This class stores the points and polygons of a polygon-object and
     additionally computes it's normals and polygon-midpoints.
@@ -1158,5 +1072,11 @@ class PolygonObjectInfo(object):
         self.midpoints = midpoints
         self.pointcount = len(points)
         self.polycount = len(polygons)
+
+
+# Backwards compatibility for < 1.3.0
+from c4dtools.math import vmin, vmax, vbbmid
+from c4dtools.importer import Importer
+from c4dtools.decorators import f_attrs as func_attr
 
 

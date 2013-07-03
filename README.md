@@ -47,7 +47,7 @@ import c4d
 import c4dtools
 import c4dtools.resource.menuparser as menuparser
 
-res, importer = c4dtools.prepare(__file__, __res__)
+res, importer = c4dtools.prepare()
 
 # Import libraries from the `lib` folder relative to the plugins
 # directory, 100% self-contained and independent from `sys.path`.
@@ -85,7 +85,7 @@ class MyDialog(c4d.gui.GeDialog):
         #
         # IDs and strings are taken from c4d_symbols.h/c4d_strings.str respectively.
         if success:
-           menuparser.parse_and_prepare(res.file('menus', 'mymenu.menu'), self, res)
+           menuparser.parse_and_prepare(res.file('menus', 'main.mnu'), self, res)
 
         return success
 
@@ -100,6 +100,11 @@ class MyDialog(c4d.gui.GeDialog):
         # `c4d.plugins.GeLoadString()`)
         self.SetString(*res.string.EDT_STRING2.both)
 
+        # New shortcut for acessing resource strings in 1.3.0:
+        arg1 = 'Argument 1 Text'
+        arg2 = 'and Argument 2 Text'
+        c4d.gui.MessageDialog(res['IDS_MESSAGE_INITIALIZED', arg1, arg2])
+
         return True
 
 class MyCommand(c4dtools.plugins.Command):
@@ -107,6 +112,7 @@ class MyCommand(c4dtools.plugins.Command):
     PLUGIN_ID = 100008 # !! Must be obtained from the plugincafe !!
     PLUGIN_NAME = res.string.IDC_MYCOMMAND()
     PLUGIN_HELP = res.string.IDC_MYCOMMAND_HELP()
+    PLUGIN_ICON = res.file('icons', 'command.png')
 
     def Execute(self, doc):
         dlg = MyDialog()
@@ -116,6 +122,9 @@ class MyCommand(c4dtools.plugins.Command):
 # on the main-run of the python-plugin.
 if __name__ == '__main__':
     c4dtools.plugins.main()
+
+    # Alternative:
+    MyCommand().register()
 ```
 
 ## Important notice for developers
@@ -175,5 +184,4 @@ The `c4dtools` library is licensed under the Simplified BSD License since
 version 1.1.0. It was licensed under the GNU General Public License before.
 
   [1]: https://github.com/NiklasRosenstein/XPAT
-
 

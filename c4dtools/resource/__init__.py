@@ -217,6 +217,21 @@ class Resource(object):
     def __getattr__(self, name):
         return self.symbols[name]
 
+    def __getitem__(self, name):
+        r"""
+        *New in 1.3.0*: Shortcut for accessing the :class:`StringLoader`
+        in the :class:`Resource` instance. Returns a :class.`ResourceString`
+        instance. You can pass a tuple where the first element is a the
+        name of the resource symbol and the others serve as substitution.
+        """
+
+        if isinstance(name, tuple):
+            name, args = name[0], name[1:]
+        else:
+            args = ()
+
+        return self.string.get(name)(*args)
+
     @property
     def symbols(self):
         return self._symbols
@@ -250,6 +265,8 @@ class Resource(object):
 
         res_symbols = self.symbols
         for key, value in symbols.iteritems():
+            utils.ensure_type(key, basestring, name='dict-key')
+            utils.ensure_type(value, int, name='dict-value')
             if key in res_symbols and res_symbols[key] != value:
                 msg = 'key %r already defined in the resource and ' \
                       'the value differs from the updating symbols.'
@@ -258,6 +275,29 @@ class Resource(object):
                 self.highest_symbol = value
 
         res_symbols.update(symbols)
+
+    def new_symbols(self, *symbols):   
+        r"""
+        *New in 1.3.0*. Adds new symbols to the :class:`Resource` instance.
+        Each element in the *\*symbols* parameter may be a string or a tuple.   
+        If it's a tuple, the name of the symbol is the first name, otherwise
+        it will be the string itself. The second element in the tuple must be
+        the value.
+        """
+
+        l = []
+        for symbol in symbols:
+            if isinstance(symbol, tuple):
+                symbol, value = symbol
+            else:
+                if self.symbols:
+                    value = max(self.symbols.itervalues()) + 1
+                else:
+                    value = 10000
+
+            self.add_symbols({symbol: value})
+            l.append(self.get(symbol))
+        return l
 
     def get_symbol_name(self, id_):
         r"""
@@ -310,6 +350,7 @@ class StringLoader(object):
             # same as
             id, name = res.string.IDC_MYSTRING.tuple
         """
+
         symbol_id = self.resource.get(name)
         return ResourceString(symbol_id, self.resource.c4dres)
 
@@ -337,6 +378,7 @@ class ResourceString(object):
         Wrapper for the :func:`c4d.plugins.GeLoadString` function for
         loading the actual string from the resource.    
         """
+
         string = self.c4dres.LoadString(self.id)
 
         # Simulate the behaviour of c4d.plugins.GeLoadString by replacing
