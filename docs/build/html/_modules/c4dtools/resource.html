@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -214,19 +213,23 @@
 <span class="sd">    that folder, etc.</span>
 
 <span class="sd">    .. attribute:: dirname</span>
+
 <span class="sd">        The directory name of the resource-folder. Not garuanteed to</span>
 <span class="sd">        exist!</span>
 
 <span class="sd">    .. attribute:: c4dres</span>
+
 <span class="sd">        The :class:`c4d.plugins.GeResource` object passed on construction.</span>
 <span class="sd">        This is usually the ``__res__`` variable passed through from a</span>
 <span class="sd">        Python plugin.</span>
 
 <span class="sd">    .. attribute:: string</span>
+
 <span class="sd">        A :class:`StringLoader` instance associated with the resource</span>
 <span class="sd">        object. Used to load resource strings.</span>
 
 <span class="sd">        .. code-block:: python</span>
+
 <span class="sd">            # Load a resource-string with the IDC_MYSTRING symbol-name</span>
 <span class="sd">            # without formatting arguments.</span>
 <span class="sd">            res.string.IDC_MYSTRING()</span>
@@ -247,6 +250,7 @@
 <span class="sd">            container.SetString(*res.string.IDC_CONTEXTMENU_1.both)</span>
 
 <span class="sd">    .. attribute:: changed</span>
+
 <span class="sd">        This attribute is set by the :func:`load` function and is only</span>
 <span class="sd">        True when the resource was cached *and* has changed, therefore</span>
 <span class="sd">        the cache was rebuilt. When symbol-caching is deactivated,</span>
@@ -263,6 +267,21 @@
 
     <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        *New in 1.3.0*: Shortcut for accessing the :class:`StringLoader`</span>
+<span class="sd">        in the :class:`Resource` instance. Returns a :class.`ResourceString`</span>
+<span class="sd">        instance. You can pass a tuple where the first element is a the</span>
+<span class="sd">        name of the resource symbol and the others serve as substitution.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">string</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -297,6 +316,8 @@
 
         <span class="n">res_symbols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbols</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">symbols</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">utils</span><span class="o">.</span><span class="n">ensure_type</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;dict-key&#39;</span><span class="p">)</span>
+            <span class="n">utils</span><span class="o">.</span><span class="n">ensure_type</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;dict-value&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">res_symbols</span> <span class="ow">and</span> <span class="n">res_symbols</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">value</span><span class="p">:</span>
                 <span class="n">msg</span> <span class="o">=</span> <span class="s">&#39;key </span><span class="si">%r</span><span class="s"> already defined in the resource and &#39;</span> \
                       <span class="s">&#39;the value differs from the updating symbols.&#39;</span>
@@ -305,6 +326,29 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">highest_symbol</span> <span class="o">=</span> <span class="n">value</span>
 
         <span class="n">res_symbols</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Resource.new_symbols"><a class="viewcode-back" href="../../index.html#c4dtools.resource.Resource.new_symbols">[docs]</a>    <span class="k">def</span> <span class="nf">new_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">symbols</span><span class="p">):</span>   
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        *New in 1.3.0*. Adds new symbols to the :class:`Resource` instance.</span>
+<span class="sd">        Each element in the *\*symbols* parameter may be a string or a tuple.   </span>
+<span class="sd">        If it&#39;s a tuple, the name of the symbol is the first name, otherwise</span>
+<span class="sd">        it will be the string itself. The second element in the tuple must be</span>
+<span class="sd">        the value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">l</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="n">symbol</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">symbol</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbols</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbols</span><span class="o">.</span><span class="n">itervalues</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="mi">10000</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_symbols</span><span class="p">({</span><span class="n">symbol</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">symbol</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">l</span>
 </div>
 <div class="viewcode-block" id="Resource.get_symbol_name"><a class="viewcode-back" href="../../index.html#c4dtools.resource.Resource.get_symbol_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_symbol_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_</span><span class="p">):</span>
         <span class="sd">r&quot;&quot;&quot;</span>
@@ -357,6 +401,7 @@
 <span class="sd">            # same as</span>
 <span class="sd">            id, name = res.string.IDC_MYSTRING.tuple</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">symbol_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resource</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ResourceString</span><span class="p">(</span><span class="n">symbol_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resource</span><span class="o">.</span><span class="n">c4dres</span><span class="p">)</span>
 
@@ -384,6 +429,7 @@
 <span class="sd">        Wrapper for the :func:`c4d.plugins.GeLoadString` function for</span>
 <span class="sd">        loading the actual string from the resource.    </span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">string</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c4dres</span><span class="o">.</span><span class="n">LoadString</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 
         <span class="c"># Simulate the behaviour of c4d.plugins.GeLoadString by replacing</span>
@@ -447,7 +493,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2013, Niklas Rosenstein.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
     </div>
   </body>
 </html>

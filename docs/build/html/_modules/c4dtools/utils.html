@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -91,6 +90,8 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">c4d</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">threading</span>
 <span class="kn">import</span> <span class="nn">collections</span>
@@ -102,13 +103,19 @@
 <div class="viewcode-block" id="change_suffix"><a class="viewcode-back" href="../../index.html#c4dtools.utils.change_suffix">[docs]</a><span class="k">def</span> <span class="nf">change_suffix</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">new_suffix</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
 <span class="sd">    Replaces the suffix of the passed filename with *new_suffix*.</span>
+
+<span class="sd">    *Changed in 1.3.0*: If *new_suffix* evaluates to False, the</span>
+<span class="sd">    basename of the file is returned (ie. without suffix).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">index</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="p">[:</span><span class="n">index</span><span class="p">]</span>
 
-    <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">new_suffix</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">new_suffix</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">new_suffix</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">filename</span>
 </div>
 <div class="viewcode-block" id="file_changed"><a class="viewcode-back" href="../../index.html#c4dtools.utils.file_changed">[docs]</a><span class="k">def</span> <span class="nf">file_changed</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="n">copy</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
@@ -117,52 +124,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">original</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">copy</span><span class="p">)</span>
-
-<span class="c"># =============================================================================</span>
-<span class="c">#                               Vector operations</span>
-<span class="c"># =============================================================================</span>
-</div>
-<div class="viewcode-block" id="vmin"><a class="viewcode-back" href="../../index.html#c4dtools.utils.vmin">[docs]</a><span class="k">def</span> <span class="nf">vmin</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">test</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    For each component of the vectors *dest* and *test*, this function</span>
-<span class="sd">    writes the lower value of each pairs into the respective component</span>
-<span class="sd">    of *dest*.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="n">test</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">dest</span><span class="o">.</span><span class="n">x</span><span class="p">:</span> <span class="n">dest</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">x</span>
-    <span class="k">if</span> <span class="n">test</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">dest</span><span class="o">.</span><span class="n">y</span><span class="p">:</span> <span class="n">dest</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">y</span>
-    <span class="k">if</span> <span class="n">test</span><span class="o">.</span><span class="n">z</span> <span class="o">&lt;</span> <span class="n">dest</span><span class="o">.</span><span class="n">z</span><span class="p">:</span> <span class="n">dest</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">z</span>
-</div>
-<div class="viewcode-block" id="vmax"><a class="viewcode-back" href="../../index.html#c4dtools.utils.vmax">[docs]</a><span class="k">def</span> <span class="nf">vmax</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">test</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    For each component of the vectors *dest* and *test*, this function</span>
-<span class="sd">    writes the upper value of each pairs into the respective component</span>
-<span class="sd">    of *dest*.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="n">test</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">dest</span><span class="o">.</span><span class="n">x</span><span class="p">:</span> <span class="n">dest</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">x</span>
-    <span class="k">if</span> <span class="n">test</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">dest</span><span class="o">.</span><span class="n">y</span><span class="p">:</span> <span class="n">dest</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">y</span>
-    <span class="k">if</span> <span class="n">test</span><span class="o">.</span><span class="n">z</span> <span class="o">&gt;</span> <span class="n">dest</span><span class="o">.</span><span class="n">z</span><span class="p">:</span> <span class="n">dest</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">z</span>
-</div>
-<div class="viewcode-block" id="vbbmid"><a class="viewcode-back" href="../../index.html#c4dtools.utils.vbbmid">[docs]</a><span class="k">def</span> <span class="nf">vbbmid</span><span class="p">(</span><span class="n">vectors</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    Returns the mid-point of the bounding box spanned by the list</span>
-<span class="sd">    of vectors. This is different to the arithmetic middle of the</span>
-<span class="sd">    points.</span>
-
-<span class="sd">    Returns: :class:`c4d.Vector`</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">vectors</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">c4d</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
-    <span class="nb">min</span> <span class="o">=</span> <span class="n">c4d</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="n">vectors</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="nb">max</span> <span class="o">=</span> <span class="n">c4d</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="nb">min</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vectors</span><span class="p">:</span>
-        <span class="n">vmin</span><span class="p">(</span><span class="nb">min</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-        <span class="n">vmax</span><span class="p">(</span><span class="nb">max</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="p">(</span><span class="nb">min</span> <span class="o">+</span> <span class="nb">max</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
 
 <span class="c"># =============================================================================</span>
 <span class="c">#                               Several utilities</span>
@@ -195,7 +156,7 @@
 </div>
 <div class="viewcode-block" id="ensure_type"><a class="viewcode-back" href="../../index.html#c4dtools.utils.ensure_type">[docs]</a><span class="k">def</span> <span class="nf">ensure_type</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">types</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    New in 1.2.5.</span>
+<span class="sd">    *New in 1.2.5*.</span>
 
 <span class="sd">    This function is similar to the built-in :func:`isinstance` function</span>
 <span class="sd">    in Python. It accepts an instance of a class as first argument, namely</span>
@@ -207,26 +168,47 @@
 <span class="sd">    error message when *x* is not an instance of the passed *\*types*.</span>
 
 <span class="sd">    *Changed in 1.2.8*: Renamed from *assert_type* to *ensure_type*. Added</span>
-<span class="sd">    *\*\*kwargs* parameter. Pass ``name`` as keyword-argument for adding</span>
-<span class="sd">    the parameter    name that was wrong in the message.</span>
+<span class="sd">    *\*\*kwargs* parameter.</span>
+<span class="sd">    *New in 1.3.0*: Added *subclass* paramater to *\*\*kwargs*.</span>
+
+<span class="sd">    :param x: The value to check.</span>
+<span class="sd">    :param *types: The types that *x* is allowed to be an instance of.</span>
+<span class="sd">    :param **kwargs:</span>
+
+<span class="sd">        - *name*: If given, the string passed by this argument will be</span>
+<span class="sd">        assumed to be the parameter that was passed wrong.</span>
+<span class="sd">        - *subclass*: Pass True if :func:`issubclass` should be used instead</span>
+<span class="sd">        of :func:`isinstance`.</span>
+<span class="sd">    :raise TypeError:</span>
+
+<span class="sd">        - When an invalid keyword-argument was given</span>
+<span class="sd">        - When *x* is not an instance of any of the passed types</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+    <span class="n">subclass</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;subclass&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;unexpected keyword argument &#39;</span><span class="si">%r</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">k</span><span class="p">)</span>
+
+    <span class="n">func</span> <span class="o">=</span> <span class="nb">issubclass</span> <span class="k">if</span> <span class="n">subclass</span> <span class="k">else</span> <span class="nb">isinstance</span>
+    <span class="k">if</span> <span class="n">subclass</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;Expected type instance&#39;</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">+=</span> <span class="s">&#39; for paramter </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">name</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">types</span><span class="p">:</span>
         <span class="k">pass</span>
-    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">types</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">types</span><span class="p">):</span>
         <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
             <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">__module__</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">t</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;xpected instance of </span><span class="si">%s</span><span class="s">, got </span><span class="si">%s</span><span class="s">&#39;</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;xpected instance of </span><span class="si">%s</span><span class="s">, got </span><span class="si">%s</span><span class="s"> instead&#39;</span>
             <span class="n">first</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">names</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39; or &#39;</span> <span class="o">+</span> <span class="n">names</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;xpected instance of type </span><span class="si">%s</span><span class="s">, got </span><span class="si">%s</span><span class="s">&#39;</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;xpected instance of type </span><span class="si">%s</span><span class="s">, got </span><span class="si">%s</span><span class="s"> instead&#39;</span>
             <span class="n">first</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
@@ -237,18 +219,27 @@
         <span class="n">cls</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">__class__</span>
         <span class="n">message</span> <span class="o">=</span> <span class="n">message</span> <span class="o">%</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__module__</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-</div>
-<span class="n">assert_type</span> <span class="o">=</span> <span class="n">ensure_type</span> <span class="c"># Backwards compatibility for &lt; 1.2.8</span>
+
+<span class="c"># Backwards compatibility for &lt; 1.2.8</span></div>
+<span class="n">assert_type</span> <span class="o">=</span> <span class="n">ensure_type</span>
 
 <div class="viewcode-block" id="ensure_value"><a class="viewcode-back" href="../../index.html#c4dtools.utils.ensure_value">[docs]</a><span class="k">def</span> <span class="nf">ensure_value</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">values</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    New in 1.2.8.</span>
+<span class="sd">    *New in 1.2.8*.</span>
 
 <span class="sd">    This function checks if the value *x* is in *\*values*. If this does</span>
 <span class="sd">    not result in True, :class:`ValueError` is raised.</span>
 
-<span class="sd">    Pass ``name`` as keyword-argument to specify the parameter name that</span>
-<span class="sd">    was given wrong in the message.</span>
+<span class="sd">    :param x: The value to check.</span>
+<span class="sd">    :param *values: The values *x* is allowed to be one of.</span>
+<span class="sd">    :param **kwargs*:</span>
+
+<span class="sd">        - *name*: If given, the string passed by this argument will be</span>
+<span class="sd">        assumed to be the parameter that was passed wrong.</span>
+<span class="sd">    :raise TypeError:</span>
+
+<span class="sd">        - When an invalid keyword-argument was given</span>
+<span class="sd">        - When *x* is not a value of any of the passed values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
@@ -269,50 +260,6 @@
             <span class="n">message</span> <span class="o">=</span> <span class="n">message</span> <span class="o">%</span> <span class="n">name</span>
 
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-</div>
-<div class="viewcode-block" id="get_root_module"><a class="viewcode-back" href="../../index.html#c4dtools.utils.get_root_module">[docs]</a><span class="k">def</span> <span class="nf">get_root_module</span><span class="p">(</span><span class="n">modname</span><span class="p">,</span> <span class="n">suffixes</span><span class="o">=</span><span class="s">&#39;pyc pyo py&#39;</span><span class="o">.</span><span class="n">split</span><span class="p">()):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    New in 1.2.6.</span>
-
-<span class="sd">    Returns the root-file or folder of a module filename. The return-value</span>
-<span class="sd">    is a tuple of ``(root_path, is_file)``.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">dirname</span><span class="p">,</span> <span class="n">basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">modname</span><span class="p">)</span>
-
-    <span class="c"># Check if the module-filename is part of a Python package.</span>
-    <span class="n">in_package</span> <span class="o">=</span>  <span class="bp">False</span>
-    <span class="k">for</span> <span class="n">sufx</span> <span class="ow">in</span> <span class="n">suffixes</span><span class="p">:</span>
-        <span class="n">init_mod</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="s">&#39;__init__.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">sufx</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">init_mod</span><span class="p">):</span>
-            <span class="n">in_package</span> <span class="o">=</span> <span class="bp">True</span>
-            <span class="k">break</span>
-
-    <span class="c"># Go on recursively if the module is in a package or return the</span>
-    <span class="c"># module path and if it is a file.</span>
-    <span class="k">if</span> <span class="n">in_package</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">get_root_module</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">modname</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">modname</span><span class="p">)</span>
-
-<span class="c"># =============================================================================</span>
-<span class="c">#                                  Decorators</span>
-<span class="c"># =============================================================================</span>
-</div>
-<div class="viewcode-block" id="func_attr"><a class="viewcode-back" href="../../index.html#c4dtools.utils.func_attr">[docs]</a><span class="k">def</span> <span class="nf">func_attr</span><span class="p">(</span><span class="o">**</span><span class="n">attrs</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    New in 1.2.6.</span>
-
-<span class="sd">    This decorator must be called, passing attributes to be stored in the</span>
-<span class="sd">    decorated function.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">attrs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">func</span>
-
-    <span class="k">return</span> <span class="n">wrapper</span>
 
 <span class="c"># =============================================================================</span>
 <span class="c">#              Cinema 4D related stuff, making common things easy</span>
@@ -423,64 +370,23 @@
 
     <span class="k">return</span> <span class="n">result</span>
 </div>
-<div class="viewcode-block" id="join_polygon_objects"><a class="viewcode-back" href="../../index.html#c4dtools.utils.join_polygon_objects">[docs]</a><span class="k">def</span> <span class="nf">join_polygon_objects</span><span class="p">(</span><span class="n">objects</span><span class="p">,</span> <span class="n">dest_mat</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="join_polygon_objects"><a class="viewcode-back" href="../../index.html#c4dtools.utils.join_polygon_objects">[docs]</a><span class="k">def</span> <span class="nf">join_polygon_objects</span><span class="p">(</span><span class="n">objects</span><span class="p">,</span> <span class="n">doc</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    New in 1.2.8.</span>
-<span class="sd">    This function creates one polygon object from the passed list</span>
-<span class="sd">    *objects* containing :class:`c4d.PolygonObject` instances. Any other</span>
-<span class="sd">    type of object is ignored.</span>
+<span class="sd">    Joins the passed objects by using the Cinema 4D Connect + Delete</span>
+<span class="sd">    command. *doc* must be a document that will be used temporarily.</span>
+<span class="sd">    It must be inserted in Cinema 4D&#39;s document list!</span>
 
-<span class="sd">    The returned polygon-object is located at the global world</span>
-<span class="sd">    center.</span>
+<span class="sd">    One should not pass the document the objects are stored in, since</span>
+<span class="sd">    this would mess up the undo chain.</span>
 
-<span class="sd">    # TODO: Add description for parameters.</span>
+<span class="sd">    *Changed in 1.3.0*: The second argument is no more a matrix but</span>
+<span class="sd">    a :class:`c4d.documents.BaseDocument` that will be used temporarily.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c"># Filter all polygon-objects from the passed sequence.</span>
-    <span class="n">objects</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">CheckType</span><span class="p">(</span><span class="n">c4d</span><span class="o">.</span><span class="n">Opolygon</span><span class="p">),</span> <span class="n">objects</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">objects</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span>
-
-    <span class="k">if</span> <span class="n">dest_mat</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">dest_mat</span> <span class="o">=</span> <span class="n">objects</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">GetMg</span><span class="p">()</span>
-
-    <span class="c"># Merge points and polygons into single lists and collect</span>
-    <span class="c"># all tags.</span>
-    <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">polys</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">tags</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">:</span>
-        <span class="n">mg</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetMg</span><span class="p">()</span> <span class="o">*</span> <span class="o">~</span><span class="n">dest_mat</span>
-
-        <span class="n">point_offset</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">poly</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetAllPolygons</span><span class="p">():</span>
-            <span class="n">poly</span><span class="o">.</span><span class="n">a</span> <span class="o">+=</span> <span class="n">point_offset</span>
-            <span class="n">poly</span><span class="o">.</span><span class="n">b</span> <span class="o">+=</span> <span class="n">point_offset</span>
-            <span class="n">poly</span><span class="o">.</span><span class="n">c</span> <span class="o">+=</span> <span class="n">point_offset</span>
-            <span class="n">poly</span><span class="o">.</span><span class="n">d</span> <span class="o">+=</span> <span class="n">point_offset</span>
-            <span class="n">polys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetAllPoints</span><span class="p">():</span>
-            <span class="n">point</span> <span class="o">=</span> <span class="n">point</span> <span class="o">*</span> <span class="n">mg</span>
-            <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
-
-        <span class="n">tags</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">GetTags</span><span class="p">())</span>
-
-    <span class="c"># No points, no luck.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">points</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">None</span>
-
-    <span class="c"># Create a polygon-object from the points and polygons.</span>
-    <span class="nb">object</span> <span class="o">=</span> <span class="n">c4d</span><span class="o">.</span><span class="n">PolygonObject</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">polys</span><span class="p">))</span>
-    <span class="nb">object</span><span class="o">.</span><span class="n">SetAllPoints</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">poly</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">polys</span><span class="p">):</span>
-        <span class="nb">object</span><span class="o">.</span><span class="n">SetPolygon</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">poly</span><span class="p">)</span>
-
-    <span class="c"># Tell the object about the change.</span>
-    <span class="nb">object</span><span class="o">.</span><span class="n">Message</span><span class="p">(</span><span class="n">c4d</span><span class="o">.</span><span class="n">MSG_UPDATE</span><span class="p">)</span>
 
     <span class="c"># Create a list of unique tags for the object.</span>
     <span class="n">new_tags</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="p">[</span><span class="n">tags</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">GetTags</span><span class="p">())</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
         <span class="c"># Skip variable tags as they do not match the new</span>
         <span class="c"># number of datasets anymore.</span>
@@ -498,15 +404,37 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">:</span>
             <span class="n">new_tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">GetClone</span><span class="p">(</span><span class="n">c4d</span><span class="o">.</span><span class="n">COPYFLAGS_0</span><span class="p">))</span>
 
-    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">new_tags</span><span class="p">:</span>
-        <span class="nb">object</span><span class="o">.</span><span class="n">InsertTag</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">SetActiveObject</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetClone</span><span class="p">(</span><span class="n">c4d</span><span class="o">.</span><span class="n">COPYFLAGS_NO_HIERARCHY</span><span class="p">)</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">InsertObject</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">pred</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">SetBit</span><span class="p">(</span><span class="n">c4d</span><span class="o">.</span><span class="n">BIT_ACTIVE</span><span class="p">)</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">obj</span>
 
-    <span class="nb">object</span><span class="o">.</span><span class="n">SetMg</span><span class="p">(</span><span class="n">dest_mat</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">object</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">Message</span><span class="p">(</span><span class="n">c4d</span><span class="o">.</span><span class="n">MSG_CHANGE</span><span class="p">)</span>
+
+    <span class="c"># To make the call-command work.</span>
+    <span class="n">c4d</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">SetActiveDocument</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+    <span class="n">c4d</span><span class="o">.</span><span class="n">CallCommand</span><span class="p">(</span><span class="mi">16768</span><span class="p">)</span> <span class="c"># Connect + Delete</span>
+
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">GetActiveObject</span><span class="p">()</span>
+
+    <span class="c"># Remove all tags from the object.</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetTags</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tag</span><span class="o">.</span><span class="n">CheckType</span><span class="p">(</span><span class="n">c4d</span><span class="o">.</span><span class="n">Tvariable</span><span class="p">):</span>
+            <span class="n">tag</span><span class="o">.</span><span class="n">Remove</span><span class="p">()</span>
+
+    <span class="c"># Insert the new tags.</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">new_tags</span><span class="p">):</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">InsertTag</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+
+    <span class="n">obj</span><span class="o">.</span><span class="n">Remove</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">obj</span>
 </div>
 <div class="viewcode-block" id="serial_info"><a class="viewcode-back" href="../../index.html#c4dtools.utils.serial_info">[docs]</a><span class="k">def</span> <span class="nf">serial_info</span><span class="p">():</span>
     <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    New in 1.2.7.</span>
+<span class="sd">    *New in 1.2.7*.</span>
 
 <span class="sd">    Returns serial-information of the user. Returns ``(sinfo, is_multi)``.</span>
 <span class="sd">    *is_multi* indicates whether the *sinfo* is a multilicense information</span>
@@ -543,7 +471,7 @@
 </div>
 <div class="viewcode-block" id="get_material_objects"><a class="viewcode-back" href="../../index.html#c4dtools.utils.get_material_objects">[docs]</a><span class="k">def</span> <span class="nf">get_material_objects</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    New in 1.2.6.</span>
+<span class="sd">    *New in 1.2.6*.</span>
 
 <span class="sd">    This function goes through the complete object hierarchy of the</span>
 <span class="sd">    passed :class:`c4d.BaseDocument` and all materials with the objects</span>
@@ -576,9 +504,23 @@
 
     <span class="k">return</span> <span class="n">data</span>
 </div>
+<div class="viewcode-block" id="get_real_descid"><a class="viewcode-back" href="../../index.html#c4dtools.utils.get_real_descid">[docs]</a><span class="k">def</span> <span class="nf">get_real_descid</span><span class="p">(</span><span class="n">descid</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    *New in 1.2.9*. Returns the integer description id of the passed</span>
+<span class="sd">    :class:`c4d.DescID` object at a certain level.</span>
+
+<span class="sd">    :param descid: :class:`c4d.DescID`</span>
+<span class="sd">    :param level: The level of the integer id to obtain. May be a negative</span>
+<span class="sd">            value to subscript from the right-hand side.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">level</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">descid</span><span class="o">.</span><span class="n">GetDepth</span><span class="p">()</span> <span class="o">+</span> <span class="n">index</span>
+    <span class="k">return</span> <span class="n">descid</span><span class="p">[</span><span class="n">level</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
+</div>
 <div class="viewcode-block" id="bl_iterator"><a class="viewcode-back" href="../../index.html#c4dtools.utils.bl_iterator">[docs]</a><span class="k">def</span> <span class="nf">bl_iterator</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    New in 1.2.8. Yields the passed object and all following objects</span>
+<span class="sd">    *New in 1.2.8*. Yields the passed object and all following objects</span>
 <span class="sd">    in the hierarchy (retrieved via :func:`~c4d.BaseList2D.GetNext`). When</span>
 <span class="sd">    the *safe* parameter is True, the next object will be retrieved before</span>
 <span class="sd">    yielding to allow the yielded object to be moved in the hierarchy and</span>
@@ -594,6 +536,38 @@
         <span class="k">while</span> <span class="n">obj</span><span class="p">:</span>
             <span class="k">yield</span> <span class="n">obj</span>
             <span class="n">obj</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetNext</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="iter_inexclude"><a class="viewcode-back" href="../../index.html#c4dtools.utils.iter_inexclude">[docs]</a><span class="k">def</span> <span class="nf">iter_inexclude</span><span class="p">(</span><span class="n">inexclude</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    *New in 1.3.0*. A generator yielding all objects in an</span>
+<span class="sd">    :class:`c4d.InExcludeData` instance passing *doc* as the document</span>
+<span class="sd">    parameter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ensure_type</span><span class="p">(</span><span class="n">inexclude</span><span class="p">,</span> <span class="n">c4d</span><span class="o">.</span><span class="n">InExcludeData</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">inexclude</span><span class="o">.</span><span class="n">GetObjectCount</span><span class="p">()):</span>
+        <span class="nb">object</span> <span class="o">=</span> <span class="n">inexclude</span><span class="o">.</span><span class="n">ObjectFromIndex</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">object</span><span class="p">:</span> <span class="k">yield</span> <span class="nb">object</span>
+</div>
+<div class="viewcode-block" id="move_axis"><a class="viewcode-back" href="../../index.html#c4dtools.utils.move_axis">[docs]</a><span class="k">def</span> <span class="nf">move_axis</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">new_matrix</span><span class="o">=</span><span class="n">c4d</span><span class="o">.</span><span class="n">Matrix</span><span class="p">()):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    *New in 1.3.0*: Normalize the axis of an object by adjusting the local</span>
+<span class="sd">    matrix of the child objects and, if *obj* is a polygon object, it&#39;s</span>
+<span class="sd">    points. Simulates the &#39;Axis Move&#39; mode in Cinema.</span>
+
+<span class="sd">    :param obj: :class:`c4d.BaseObject`</span>
+<span class="sd">    :param new_matrix: :class:`c4d.Matrix`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mat</span> <span class="o">=</span> <span class="o">~</span><span class="n">new_matrix</span> <span class="o">*</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetMl</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">CheckType</span><span class="p">(</span><span class="n">c4d</span><span class="o">.</span><span class="n">Opoint</span><span class="p">):</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="o">*</span> <span class="n">mat</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetAllPoints</span><span class="p">()]</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">SetAllPoints</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">Message</span><span class="p">(</span><span class="n">c4d</span><span class="o">.</span><span class="n">MSG_UPDATE</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetChildren</span><span class="p">():</span>
+        <span class="n">child</span><span class="o">.</span><span class="n">SetMl</span><span class="p">(</span><span class="n">mat</span> <span class="o">*</span> <span class="n">child</span><span class="o">.</span><span class="n">GetMl</span><span class="p">())</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">SetMl</span><span class="p">(</span><span class="n">new_matrix</span><span class="p">)</span>
 
 <span class="c"># =============================================================================</span>
 <span class="c">#                                Utility classes</span>
@@ -601,7 +575,7 @@
 </div>
 <div class="viewcode-block" id="AtomDict"><a class="viewcode-back" href="../../index.html#c4dtools.utils.AtomDict">[docs]</a><span class="k">class</span> <span class="nc">AtomDict</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    New in 1.2.6.</span>
+<span class="sd">    *New in 1.2.6*.</span>
 
 <span class="sd">    This class implements a subset of the dictionary interface but without the</span>
 <span class="sd">    requirement of the :func:`__hash__` method to be implemented. It is using</span>
@@ -613,7 +587,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__get_item</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_item</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -635,12 +609,40 @@
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">False</span>
 
+    <span class="k">def</span> <span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dict_</span> <span class="o">=</span> <span class="n">AtomDict</span><span class="p">()</span>
+        <span class="n">dict_</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dict_</span>
+
+    <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dict_</span> <span class="o">=</span> <span class="n">AtomDict</span><span class="p">()</span>
+        <span class="n">dict_</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dict_</span>
+
     <span class="k">def</span> <span class="nf">__get_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">item</span>
         <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AtomDict.clear"><a class="viewcode-back" href="../../index.html#c4dtools.utils.AtomDict.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filter_</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        Clear all elements in the dictionary. If *filter_* is passed, it</span>
+<span class="sd">        must be a callable object accepting ``(key, value)`` as arguments and</span>
+<span class="sd">        return True when the entry should be kept and False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">filter_</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">newdat</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">filter_</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+                    <span class="n">newdat</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">newdat</span>
+</div>
     <span class="k">def</span> <span class="nf">setdefault</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_item</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -689,99 +691,10 @@
                 <span class="k">raise</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="Importer"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Importer">[docs]</a><span class="k">class</span> <span class="nc">Importer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    Use this class to enable importing modules from specific</span>
-<span class="sd">    directories independent from ``sys.path``.</span>
-
-<span class="sd">    .. attribute:: high_priority</span>
-
-<span class="sd">        When this value is True, the paths defined in the importer are</span>
-<span class="sd">        prepended to the original paths in ``sys.path``. If False, they</span>
-<span class="sd">        will be appended. Does only have an effect when :attr:`use_sys_path`</span>
-<span class="sd">        is True.</span>
-
-<span class="sd">    .. attribute:: use_sys_path</span>
-
-<span class="sd">        When this value is ``True``, the original paths from ``sys.path``</span>
-<span class="sd">        are used additionally to the paths defined in the imported.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">high_priority</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">use_sys_path</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Importer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">use_sys_path</span> <span class="o">=</span> <span class="n">use_sys_path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">high_priority</span> <span class="o">=</span> <span class="n">high_priority</span>
-
-<div class="viewcode-block" id="Importer.add"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Importer.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">paths</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">        Add the passed strings to the search-path for importing</span>
-<span class="sd">        modules. Raises TypeError if non-string object was passed.</span>
-<span class="sd">        Passed paths are automatically expanded.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">new_paths</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;passed argument must be string.&#39;</span><span class="p">)</span>
-            <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-            <span class="n">new_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">new_paths</span><span class="p">)</span>
-</div>
-<div class="viewcode-block" id="Importer.is_local"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Importer.is_local">[docs]</a>    <span class="k">def</span> <span class="nf">is_local</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">        Returns True if the passed module object can be found in the</span>
-<span class="sd">        paths defined in the importer, False if not.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s">&#39;__file__&#39;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">False</span>
-
-        <span class="n">modpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">get_root_module</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">__file__</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">modpath</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span>
-</div>
-<div class="viewcode-block" id="Importer.import_"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Importer.import_">[docs]</a>    <span class="k">def</span> <span class="nf">import_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">        Import the module with the given name from the directories</span>
-<span class="sd">        added to the Importer. The loaded module will not be inserted</span>
-<span class="sd">        into `sys.modules`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">prev_path</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_sys_path</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">high_priority</span><span class="p">:</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span>
-
-        <span class="n">prev_modules</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-
-        <span class="c"># Remove any existing modules with the passed name from</span>
-        <span class="c"># sys.modules.</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">):</span>
-                <span class="k">del</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">m</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]:</span>
-                <span class="n">m</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">m</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="k">raise</span>
-        <span class="k">finally</span><span class="p">:</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">prev_path</span>
-
-            <span class="c"># Restore the old module configuration. Only modules that have</span>
-            <span class="c"># not been in sys.path before will be removed.</span>
-            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">prev_modules</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_local</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">v</span><span class="p">:</span>
-                    <span class="k">del</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
-</div></div>
 <div class="viewcode-block" id="Watch"><a class="viewcode-back" href="../../index.html#c4dtools.utils.Watch">[docs]</a><span class="k">class</span> <span class="nc">Watch</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
 <span class="sd">    Utility class for measuring execution-time of code-blocks</span>
@@ -1158,7 +1071,7 @@
 </div></div>
 <div class="viewcode-block" id="PolygonObjectInfo"><a class="viewcode-back" href="../../index.html#c4dtools.utils.PolygonObjectInfo">[docs]</a><span class="k">class</span> <span class="nc">PolygonObjectInfo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    New in 1.2.5.</span>
+<span class="sd">    *New in 1.2.5*.</span>
 
 <span class="sd">    This class stores the points and polygons of a polygon-object and</span>
 <span class="sd">    additionally computes it&#39;s normals and polygon-midpoints.</span>
@@ -1210,7 +1123,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">midpoints</span> <span class="o">=</span> <span class="n">midpoints</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pointcount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">polycount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">polygons</span><span class="p">)</span>
-</pre></div></div></div>
+
+
+<span class="c"># Backwards compatibility for &lt; 1.3.0</span></div></div>
+<span class="kn">from</span> <span class="nn">c4dtools.math</span> <span class="kn">import</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">,</span> <span class="n">vbbmid</span>
+<span class="kn">from</span> <span class="nn">c4dtools.importer</span> <span class="kn">import</span> <span class="n">Importer</span>
+<span class="kn">from</span> <span class="nn">c4dtools.decorators</span> <span class="kn">import</span> <span class="n">f_attrs</span> <span class="k">as</span> <span class="n">func_attr</span>
+</pre></div>
 
           </div>
         </div>
@@ -1250,7 +1169,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2013, Niklas Rosenstein.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
     </div>
   </body>
 </html>

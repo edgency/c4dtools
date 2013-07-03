@@ -88,7 +88,7 @@ def vbbmid(vectors):
 
     *Changed in 1.3.0*:
 
-        -Moved to :mod:`c4dtools.math`.
+        - Moved to :mod:`c4dtools.math`.
         - Raises *ValueError* if *vectors* is not a sequence type
           or is empty.
 

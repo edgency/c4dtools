@@ -10,7 +10,16 @@ Welcome to the ``c4dtools`` documentation!
 .. automodule:: c4dtools.helpers
     :members:
 
+.. automodule:: c4dtools.math
+    :members:
+
 .. automodule:: c4dtools.plugins
+    :members:
+
+.. automodule:: c4dtools.decorators
+    :members:
+
+.. automodule:: c4dtools.importer
     :members:
 
 .. automodule:: c4dtools.library
@@ -24,6 +33,9 @@ Welcome to the ``c4dtools`` documentation!
 
 
 .. automodule:: c4dtools.misc
+    :members:
+
+.. automodule:: c4dtools.misc.aabb
     :members:
 
 .. automodule:: c4dtools.misc.boundingbox

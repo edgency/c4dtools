@@ -69,34 +69,6 @@ def prepare(filename=None, c4dres=None, cache=True,
 
         # ...
 
-<<<<<<< HEAD
-    :Parameters:
-
-        - filename: Just pass the ``__file__`` variable from the plugins
-          global scope.
-        - c4dres: The :class:`c4d.plugins.GeResource` instance from the
-          plugin's scope.
-        - cache_symbols: True by default. Defines wether the resource
-          symbols will be cached.
-        - libfolder_name: The name of the folder the plugin related
-          libraries are stored. The returned Importer instance will
-          be able to load python modules and packages from this
-          directory.
-        - resfolder_name: The name of the plugins resource folder. This
-          usually does not need to be changed as the name of this folder
-          is defined by Cinema 4D.
-        - parse_descriptions: False by default. When True, description
-          resource symbols will parsed additionally to the dialog
-          resource symbols. Note that strings can *not* be loaded from
-          symbols of description resources.
-
-    :return:
-
-        A tuple of two elements.
-
-        0. :class:`c4dtools.resource.Resource` instance.
-        1. :class:`c4dtools.utils.Importer` instance.
-=======
     :param filename:
 
         Just pass the ``__file__`` variable from the plugins global
@@ -152,7 +124,6 @@ def prepare(filename=None, c4dres=None, cache=True,
         - :class:`c4dtools.utils.Importer`
 
     *New in 1.3.0*: Added *imp_store_modules* parameter.
->>>>>>> origin/development
     """
 
     globals_ = sys._getframe().f_back.f_globals

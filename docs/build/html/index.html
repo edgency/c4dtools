@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -14,7 +13,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '1.2.8',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -56,7 +55,7 @@ Cinema 4D. The most significant feature is the cached parsing of dialog
 symbols, see <a class="reference internal" href="#c4dtools.prepare" title="c4dtools.prepare"><tt class="xref py py-func docutils literal"><span class="pre">c4dtools.prepare()</span></tt></a>.</p>
 <dl class="function">
 <dt id="c4dtools.prepare">
-<tt class="descclassname">c4dtools.</tt><tt class="descname">prepare</tt><big>(</big><em>filename</em>, <em>c4dres</em>, <em>cache_symbols=True</em>, <em>libfolder_name='lib'</em>, <em>resfolder_name='res'</em>, <em>parse_descriptions=False</em><big>)</big><a class="reference internal" href="_modules/c4dtools.html#prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.prepare" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">c4dtools.</tt><tt class="descname">prepare</tt><big>(</big><em>filename=None</em>, <em>c4dres=None</em>, <em>cache=True</em>, <em>libfolder_name='lib'</em>, <em>resfolder_name='res'</em>, <em>parse_description=False</em>, <em>imp_store_modules=True</em><big>)</big><a class="reference internal" href="_modules/c4dtools.html#prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.prepare" title="Permalink to this definition">¶</a></dt>
 <dd><p>Call this function from a Cinema 4D python plugin-file (<tt class="docutils literal"><span class="pre">*.pyp</span></tt>) to
 set up convenient data that can be used from the plugin.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">c4d</span>
@@ -71,37 +70,47 @@ set up convenient data that can be used from the plugin.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><ul class="first simple">
-<li>filename: Just pass the <tt class="docutils literal"><span class="pre">__file__</span></tt> variable from the plugins
-global scope.</li>
-<li>c4dres: The <tt class="xref py py-class docutils literal"><span class="pre">c4d.plugins.GeResource</span></tt> instance from the
-plugin&#8217;s scope.</li>
-<li>cache_symbols: True by default. Defines wether the resource
-symbols will be cached.</li>
-<li>libfolder_name: The name of the folder the plugin related
-libraries are stored. The returned Importer instance will
-be able to load python modules and packages from this
-directory.</li>
-<li>resfolder_name: The name of the plugins resource folder. This
-usually does not need to be changed as the name of this folder
-is defined by Cinema 4D.</li>
-<li>parse_descriptions: False by default. When True, description
-resource symbols will parsed additionally to the dialog
-resource symbols. Note that strings can <em>not</em> be loaded from
-symbols of description resources.</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> &#8211; <p>Just pass the <tt class="docutils literal"><span class="pre">__file__</span></tt> variable from the plugins global
+scope.</p>
+<p><em>New in 1.3.0</em>: Default value added. The filename will
+be retrieved using the globals of the frame that has called
+the function if <em>None</em> was passed.</p>
+</li>
+<li><strong>c4dres</strong> &#8211; <p>The <tt class="xref py py-class docutils literal"><span class="pre">c4d.plugins.GeResource</span></tt> instance from the
+plugin&#8217;s scope.</p>
+<p><em>New in 1.2.6</em>: Default value added. The plugin resource
+will be retrieved using the globals of the frame that
+has called the function if <em>None</em> was passed.</p>
+</li>
+<li><strong>cache</strong> &#8211; True by default. Defines wether the resource symbols will
+be cached.</li>
+<li><strong>libfolder_name</strong> &#8211; The name of the folder the plugin related libraries are
+stored. The returned Importer instance will be able to load
+python modules and packages from this directory.</li>
+<li><strong>resfolder_name</strong> &#8211; The name of the plugins resource folder. This usually does
+not need to be changed as the name of this folder is defined
+by Cinema 4D.</li>
+<li><strong>parse_description</strong> &#8211; False by default. When True, description resource symbols will
+parsed additionally to the dialog resource symbols. Note that
+strings can <em>not</em> be loaded from symbols of description
+resources.</li>
+<li><strong>imp_store_modules</strong> &#8211; Passed to the constructor of the returned <tt class="xref py py-class docutils literal"><span class="pre">Importer</span></tt>,
+defining whether imported modules are stored or not.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>A tuple of two elements.</p>
-<ol class="arabic simple" start="0">
-<li><a class="reference internal" href="#c4dtools.resource.Resource" title="c4dtools.resource.Resource"><tt class="xref py py-class docutils literal"><span class="pre">c4dtools.resource.Resource</span></tt></a> instance.</li>
-<li><a class="reference internal" href="#c4dtools.utils.Importer" title="c4dtools.utils.Importer"><tt class="xref py py-class docutils literal"><span class="pre">c4dtools.utils.Importer</span></tt></a> instance.</li>
-</ol>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p>A tuple of two elements:</p>
+<ul class="simple">
+<li><a class="reference internal" href="#c4dtools.resource.Resource" title="c4dtools.resource.Resource"><tt class="xref py py-class docutils literal"><span class="pre">c4dtools.resource.Resource</span></tt></a></li>
+<li><tt class="xref py py-class docutils literal"><span class="pre">c4dtools.utils.Importer</span></tt></li>
+</ul>
 </p>
 </td>
 </tr>
 </tbody>
 </table>
+<p><em>New in 1.3.0</em>: Added <em>imp_store_modules</em> parameter.</p>
 </dd></dl>
 
 </div>
@@ -110,10 +119,18 @@ symbols of description resources.</li>
 <dl class="class">
 <dt id="c4dtools.utils.AtomDict">
 <em class="property">class </em><tt class="descclassname">c4dtools.utils.</tt><tt class="descname">AtomDict</tt><a class="reference internal" href="_modules/c4dtools/utils.html#AtomDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.AtomDict" title="Permalink to this definition">¶</a></dt>
-<dd><p>New in 1.2.6.</p>
+<dd><p><em>New in 1.2.6</em>.</p>
 <p>This class implements a subset of the dictionary interface but without the
 requirement of the <tt class="xref py py-func docutils literal"><span class="pre">__hash__()</span></tt> method to be implemented. It is using
 comparing objects directly with the <tt class="docutils literal"><span class="pre">==</span></tt> operator instead.</p>
+<dl class="method">
+<dt id="c4dtools.utils.AtomDict.clear">
+<tt class="descname">clear</tt><big>(</big><em>filter_=None</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#AtomDict.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.AtomDict.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear all elements in the dictionary. If <em>filter_</em> is passed, it
+must be a callable object accepting <tt class="docutils literal"><span class="pre">(key,</span> <span class="pre">value)</span></tt> as arguments and
+return True when the entry should be kept and False otherwise.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -226,55 +243,9 @@ to the passed suffix.</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="c4dtools.utils.Importer">
-<em class="property">class </em><tt class="descclassname">c4dtools.utils.</tt><tt class="descname">Importer</tt><big>(</big><em>high_priority=False</em>, <em>use_sys_path=True</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#Importer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Importer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use this class to enable importing modules from specific
-directories independent from <tt class="docutils literal"><span class="pre">sys.path</span></tt>.</p>
-<dl class="attribute">
-<dt id="c4dtools.utils.Importer.high_priority">
-<tt class="descname">high_priority</tt><a class="headerlink" href="#c4dtools.utils.Importer.high_priority" title="Permalink to this definition">¶</a></dt>
-<dd><p>When this value is True, the paths defined in the importer are
-prepended to the original paths in <tt class="docutils literal"><span class="pre">sys.path</span></tt>. If False, they
-will be appended. Does only have an effect when <a class="reference internal" href="#c4dtools.utils.Importer.use_sys_path" title="c4dtools.utils.Importer.use_sys_path"><tt class="xref py py-attr docutils literal"><span class="pre">use_sys_path</span></tt></a>
-is True.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="c4dtools.utils.Importer.use_sys_path">
-<tt class="descname">use_sys_path</tt><a class="headerlink" href="#c4dtools.utils.Importer.use_sys_path" title="Permalink to this definition">¶</a></dt>
-<dd><p>When this value is <tt class="docutils literal"><span class="pre">True</span></tt>, the original paths from <tt class="docutils literal"><span class="pre">sys.path</span></tt>
-are used additionally to the paths defined in the imported.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="c4dtools.utils.Importer.add">
-<tt class="descname">add</tt><big>(</big><em>*paths</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#Importer.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Importer.add" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add the passed strings to the search-path for importing
-modules. Raises TypeError if non-string object was passed.
-Passed paths are automatically expanded.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="c4dtools.utils.Importer.import_">
-<tt class="descname">import_</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#Importer.import_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Importer.import_" title="Permalink to this definition">¶</a></dt>
-<dd><p>Import the module with the given name from the directories
-added to the Importer. The loaded module will not be inserted
-into <cite>sys.modules</cite>.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="c4dtools.utils.Importer.is_local">
-<tt class="descname">is_local</tt><big>(</big><em>module</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#Importer.is_local"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.Importer.is_local" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns True if the passed module object can be found in the
-paths defined in the importer, False if not.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
 <dt id="c4dtools.utils.PolygonObjectInfo">
 <em class="property">class </em><tt class="descclassname">c4dtools.utils.</tt><tt class="descname">PolygonObjectInfo</tt><a class="reference internal" href="_modules/c4dtools/utils.html#PolygonObjectInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.PolygonObjectInfo" title="Permalink to this definition">¶</a></dt>
-<dd><p>New in 1.2.5.</p>
+<dd><p><em>New in 1.2.5</em>.</p>
 <p>This class stores the points and polygons of a polygon-object and
 additionally computes it&#8217;s normals and polygon-midpoints.</p>
 <dl class="method">
@@ -355,7 +326,7 @@ called before.</td>
 <dl class="function">
 <dt id="c4dtools.utils.assert_type">
 <tt class="descclassname">c4dtools.utils.</tt><tt class="descname">assert_type</tt><big>(</big><em>x</em>, <em>*types</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#c4dtools.utils.assert_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>New in 1.2.5.</p>
+<dd><p><em>New in 1.2.5</em>.</p>
 <p>This function is similar to the built-in <a class="reference external" href="http://docs.python.org/library/functions.html#isinstance" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">isinstance()</span></tt></a> function
 in Python. It accepts an instance of a class as first argument, namely
 <em>x</em>, and checks if it is an instance of one of the passed types. The
@@ -364,14 +335,51 @@ the <a class="reference external" href="http://docs.python.org/library/functions
 <p>This function raises a <tt class="xref py py-class docutils literal"><span class="pre">TypeError</span></tt> exception with a proper
 error message when <em>x</em> is not an instance of the passed <em>*types</em>.</p>
 <p><em>Changed in 1.2.8</em>: Renamed from <em>assert_type</em> to <em>ensure_type</em>. Added
-<em>**kwargs</em> parameter. Pass <tt class="docutils literal"><span class="pre">name</span></tt> as keyword-argument for adding
-the parameter    name that was wrong in the message.</p>
+<em>**kwargs</em> parameter.
+<em>New in 1.3.0</em>: Added <em>subclass</em> paramater to <em>**kwargs</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; The value to check.</li>
+<li><strong>*types</strong> &#8211; The types that <em>x</em> is allowed to be an instance of.</li>
+<li><strong>**kwargs</strong> &#8211; <table border="1" class="docutils">
+<colgroup>
+<col width="22%" />
+<col width="78%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>name</td>
+<td>If given, the string passed by this argument will be
+assumed to be the parameter that was passed wrong.</td>
+</tr>
+<tr class="row-even"><td>subclass</td>
+<td>Pass True if <a class="reference external" href="http://docs.python.org/library/functions.html#issubclass" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">issubclass()</span></tt></a> should be used instead
+of <a class="reference external" href="http://docs.python.org/library/functions.html#isinstance" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">isinstance()</span></tt></a>.</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises TypeError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last"><ul class="simple">
+<li>When an invalid keyword-argument was given</li>
+<li>When <em>x</em> is not an instance of any of the passed types</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="c4dtools.utils.bl_iterator">
 <tt class="descclassname">c4dtools.utils.</tt><tt class="descname">bl_iterator</tt><big>(</big><em>obj</em>, <em>safe=False</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#bl_iterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.bl_iterator" title="Permalink to this definition">¶</a></dt>
-<dd><p>New in 1.2.8. Yields the passed object and all following objects
+<dd><p><em>New in 1.2.8</em>. Yields the passed object and all following objects
 in the hierarchy (retrieved via <tt class="xref py py-func docutils literal"><span class="pre">GetNext()</span></tt>). When
 the <em>safe</em> parameter is True, the next object will be retrieved before
 yielding to allow the yielded object to be moved in the hierarchy and
@@ -380,7 +388,7 @@ iteration continues as if the object was not moved in hierarchy.</p>
 
 <dl class="function">
 <dt id="c4dtools.utils.candidates">
-<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">candidates</tt><big>(</big><em>value</em>, <em>obj</em>, <em>callback=&lt;function &lt;lambda&gt; at 0x03AE0670&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#candidates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.candidates" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">candidates</tt><big>(</big><em>value</em>, <em>obj</em>, <em>callback=&lt;function &lt;lambda&gt; at 0x03B4AEB0&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#candidates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.candidates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Searches for <em>value</em> in <em>obj</em> and returns a list of all keys where
 the callback returns True, being passed <em>value</em> as first argument,
 the value to compare it with as the second argument and the name
@@ -392,6 +400,8 @@ of the attribute as the third.</p>
 <dt id="c4dtools.utils.change_suffix">
 <tt class="descclassname">c4dtools.utils.</tt><tt class="descname">change_suffix</tt><big>(</big><em>filename</em>, <em>new_suffix</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#change_suffix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.change_suffix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Replaces the suffix of the passed filename with <em>new_suffix</em>.</p>
+<p><em>Changed in 1.3.0</em>: If <em>new_suffix</em> evaluates to False, the
+basename of the file is returned (ie. without suffix).</p>
 </dd></dl>
 
 <dl class="function">
@@ -403,7 +413,7 @@ for <tt class="docutils literal"><span class="pre">obj.__class__.__name__</span>
 
 <dl class="function">
 <dt id="c4dtools.utils.current_state_to_object">
-<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">current_state_to_object</tt><big>(</big><em>op</em>, <em>container=&lt;c4d.BaseContainer instance at 0x03B8A0D0&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#current_state_to_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.current_state_to_object" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">current_state_to_object</tt><big>(</big><em>op</em>, <em>container=&lt;c4d.BaseContainer instance at 0x03B70AD0&gt;</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#current_state_to_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.current_state_to_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Makes the passed <cite>c4d.BaseObject</cite> instance an editable object by
 applieng a modeling command on it. The returned object&#8217;s hierarchy
 will consist of Null-Objects and editable objects only.</p>
@@ -429,7 +439,7 @@ Returns: c4d.BaseObject</p>
 <dl class="function">
 <dt id="c4dtools.utils.ensure_type">
 <tt class="descclassname">c4dtools.utils.</tt><tt class="descname">ensure_type</tt><big>(</big><em>x</em>, <em>*types</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#ensure_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.ensure_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>New in 1.2.5.</p>
+<dd><p><em>New in 1.2.5</em>.</p>
 <p>This function is similar to the built-in <a class="reference external" href="http://docs.python.org/library/functions.html#isinstance" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">isinstance()</span></tt></a> function
 in Python. It accepts an instance of a class as first argument, namely
 <em>x</em>, and checks if it is an instance of one of the passed types. The
@@ -438,18 +448,86 @@ the <a class="reference external" href="http://docs.python.org/library/functions
 <p>This function raises a <tt class="xref py py-class docutils literal"><span class="pre">TypeError</span></tt> exception with a proper
 error message when <em>x</em> is not an instance of the passed <em>*types</em>.</p>
 <p><em>Changed in 1.2.8</em>: Renamed from <em>assert_type</em> to <em>ensure_type</em>. Added
-<em>**kwargs</em> parameter. Pass <tt class="docutils literal"><span class="pre">name</span></tt> as keyword-argument for adding
-the parameter    name that was wrong in the message.</p>
+<em>**kwargs</em> parameter.
+<em>New in 1.3.0</em>: Added <em>subclass</em> paramater to <em>**kwargs</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; The value to check.</li>
+<li><strong>*types</strong> &#8211; The types that <em>x</em> is allowed to be an instance of.</li>
+<li><strong>**kwargs</strong> &#8211; <table border="1" class="docutils">
+<colgroup>
+<col width="22%" />
+<col width="78%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>name</td>
+<td>If given, the string passed by this argument will be
+assumed to be the parameter that was passed wrong.</td>
+</tr>
+<tr class="row-even"><td>subclass</td>
+<td>Pass True if <a class="reference external" href="http://docs.python.org/library/functions.html#issubclass" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">issubclass()</span></tt></a> should be used instead
+of <a class="reference external" href="http://docs.python.org/library/functions.html#isinstance" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">isinstance()</span></tt></a>.</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises TypeError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last"><ul class="simple">
+<li>When an invalid keyword-argument was given</li>
+<li>When <em>x</em> is not an instance of any of the passed types</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="c4dtools.utils.ensure_value">
 <tt class="descclassname">c4dtools.utils.</tt><tt class="descname">ensure_value</tt><big>(</big><em>x</em>, <em>*values</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#ensure_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.ensure_value" title="Permalink to this definition">¶</a></dt>
-<dd><p>New in 1.2.8.</p>
+<dd><p><em>New in 1.2.8</em>.</p>
 <p>This function checks if the value <em>x</em> is in <em>*values</em>. If this does
 not result in True, <tt class="xref py py-class docutils literal"><span class="pre">ValueError</span></tt> is raised.</p>
-<p>Pass <tt class="docutils literal"><span class="pre">name</span></tt> as keyword-argument to specify the parameter name that
-was given wrong in the message.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; The value to check.</li>
+<li><strong>*values</strong> &#8211; The values <em>x</em> is allowed to be one of.</li>
+<li><strong>**kwargs*</strong> &#8211; <table border="1" class="docutils">
+<colgroup>
+<col width="17%" />
+<col width="83%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>name</td>
+<td>If given, the string passed by this argument will be
+assumed to be the parameter that was passed wrong.</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises TypeError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last"><ul class="simple">
+<li>When an invalid keyword-argument was given</li>
+<li>When <em>x</em> is not a value of any of the passed values.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -466,17 +544,9 @@ before the last time <em>copy</em> was modified, False otherwise.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="c4dtools.utils.func_attr">
-<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">func_attr</tt><big>(</big><em>**attrs</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#func_attr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.func_attr" title="Permalink to this definition">¶</a></dt>
-<dd><p>New in 1.2.6.</p>
-<p>This decorator must be called, passing attributes to be stored in the
-decorated function.</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="c4dtools.utils.get_material_objects">
 <tt class="descclassname">c4dtools.utils.</tt><tt class="descname">get_material_objects</tt><big>(</big><em>doc</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#get_material_objects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.get_material_objects" title="Permalink to this definition">¶</a></dt>
-<dd><p>New in 1.2.6.</p>
+<dd><p><em>New in 1.2.6</em>.</p>
 <p>This function goes through the complete object hierarchy of the
 passed <tt class="xref py py-class docutils literal"><span class="pre">c4d.BaseDocument</span></tt> and all materials with the objects
 that carry a texture-tag with that material. The returnvalue is an
@@ -498,11 +568,23 @@ it.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="c4dtools.utils.get_root_module">
-<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">get_root_module</tt><big>(</big><em>modname, suffixes=['pyc', 'pyo', 'py']</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#get_root_module"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.get_root_module" title="Permalink to this definition">¶</a></dt>
-<dd><p>New in 1.2.6.</p>
-<p>Returns the root-file or folder of a module filename. The return-value
-is a tuple of <tt class="docutils literal"><span class="pre">(root_path,</span> <span class="pre">is_file)</span></tt>.</p>
+<dt id="c4dtools.utils.get_real_descid">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">get_real_descid</tt><big>(</big><em>descid</em>, <em>level=0</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#get_real_descid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.get_real_descid" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>New in 1.2.9</em>. Returns the integer description id of the passed
+<tt class="xref py py-class docutils literal"><span class="pre">c4d.DescID</span></tt> object at a certain level.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>descid</strong> &#8211; <tt class="xref py py-class docutils literal"><span class="pre">c4d.DescID</span></tt></li>
+<li><strong>level</strong> &#8211; The level of the integer id to obtain. May be a negative
+value to subscript from the right-hand side.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -544,21 +626,49 @@ pair. The default callback will print out the values in the container.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="c4dtools.utils.iter_inexclude">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">iter_inexclude</tt><big>(</big><em>inexclude</em>, <em>doc=None</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#iter_inexclude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.iter_inexclude" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>New in 1.3.0</em>. A generator yielding all objects in an
+<tt class="xref py py-class docutils literal"><span class="pre">c4d.InExcludeData</span></tt> instance passing <em>doc</em> as the document
+parameter.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="c4dtools.utils.join_polygon_objects">
-<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">join_polygon_objects</tt><big>(</big><em>objects</em>, <em>dest_mat=None</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#join_polygon_objects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.join_polygon_objects" title="Permalink to this definition">¶</a></dt>
-<dd><p>New in 1.2.8.
-This function creates one polygon object from the passed list
-<em>objects</em> containing <tt class="xref py py-class docutils literal"><span class="pre">c4d.PolygonObject</span></tt> instances. Any other
-type of object is ignored.</p>
-<p>The returned polygon-object is located at the global world
-center.</p>
-<p># TODO: Add description for parameters.</p>
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">join_polygon_objects</tt><big>(</big><em>objects</em>, <em>doc</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#join_polygon_objects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.join_polygon_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Joins the passed objects by using the Cinema 4D Connect + Delete
+command. <em>doc</em> must be a document that will be used temporarily.
+It must be inserted in Cinema 4D&#8217;s document list!</p>
+<p>One should not pass the document the objects are stored in, since
+this would mess up the undo chain.</p>
+<p><em>Changed in 1.3.0</em>: The second argument is no more a matrix but
+a <tt class="xref py py-class docutils literal"><span class="pre">c4d.documents.BaseDocument</span></tt> that will be used temporarily.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.utils.move_axis">
+<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">move_axis</tt><big>(</big><em>obj</em>, <em>new_matrix=Matrix()</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#move_axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.move_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>New in 1.3.0</em>: Normalize the axis of an object by adjusting the local
+matrix of the child objects and, if <em>obj</em> is a polygon object, it&#8217;s
+points. Simulates the &#8216;Axis Move&#8217; mode in Cinema.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>obj</strong> &#8211; <tt class="xref py py-class docutils literal"><span class="pre">c4d.BaseObject</span></tt></li>
+<li><strong>new_matrix</strong> &#8211; <tt class="xref py py-class docutils literal"><span class="pre">c4d.Matrix</span></tt></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="c4dtools.utils.serial_info">
 <tt class="descclassname">c4dtools.utils.</tt><tt class="descname">serial_info</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#serial_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.serial_info" title="Permalink to this definition">¶</a></dt>
-<dd><p>New in 1.2.7.</p>
+<dd><p><em>New in 1.2.7</em>.</p>
 <p>Returns serial-information of the user. Returns <tt class="docutils literal"><span class="pre">(sinfo,</span> <span class="pre">is_multi)</span></tt>.
 <em>is_multi</em> indicates whether the <em>sinfo</em> is a multilicense information
 or not.</p>
@@ -585,31 +695,6 @@ of a document and doing backing or similar stuff.</p>
 </table>
 </dd></dl>
 
-<dl class="function">
-<dt id="c4dtools.utils.vbbmid">
-<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">vbbmid</tt><big>(</big><em>vectors</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#vbbmid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.vbbmid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the mid-point of the bounding box spanned by the list
-of vectors. This is different to the arithmetic middle of the
-points.</p>
-<p>Returns: <tt class="xref py py-class docutils literal"><span class="pre">c4d.Vector</span></tt></p>
-</dd></dl>
-
-<dl class="function">
-<dt id="c4dtools.utils.vmax">
-<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">vmax</tt><big>(</big><em>dest</em>, <em>test</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#vmax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.vmax" title="Permalink to this definition">¶</a></dt>
-<dd><p>For each component of the vectors <em>dest</em> and <em>test</em>, this function
-writes the upper value of each pairs into the respective component
-of <em>dest</em>.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="c4dtools.utils.vmin">
-<tt class="descclassname">c4dtools.utils.</tt><tt class="descname">vmin</tt><big>(</big><em>dest</em>, <em>test</em><big>)</big><a class="reference internal" href="_modules/c4dtools/utils.html#vmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.utils.vmin" title="Permalink to this definition">¶</a></dt>
-<dd><p>For each component of the vectors <em>dest</em> and <em>test</em>, this function
-writes the lower value of each pairs into the respective component
-of <em>dest</em>.</p>
-</dd></dl>
-
 </div>
 <span class="target" id="module-c4dtools.helpers"></span><div class="section" id="c4dtools-helpers">
 <h2>c4dtools.helpers<a class="headerlink" href="#c4dtools-helpers" title="Permalink to this headline">¶</a></h2>
@@ -621,6 +706,162 @@ the contents of the <a class="reference internal" href="#module-c4dtools.utils" 
 <dd><p>Instances of this class will allow setting and getting any value
 from the dictionary passed on construction. The dictionary is
 stored in the <cite>dict_</cite> slot of the instance.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-c4dtools.math"></span><div class="section" id="c4dtools-math">
+<h2>c4dtools.math<a class="headerlink" href="#c4dtools-math" title="Permalink to this headline">¶</a></h2>
+<p><em>New in 1.3.0</em>. This module contains helpers for mathematical operations.</p>
+<dl class="class">
+<dt id="c4dtools.math.Line">
+<em class="property">class </em><tt class="descclassname">c4dtools.math.</tt><tt class="descname">Line</tt><big>(</big><em>p</em>, <em>d</em><big>)</big><a class="reference internal" href="_modules/c4dtools/math.html#Line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.math.Line" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>New in 1.3.0</em>.</p>
+<p>This class represents a parametrical representation of a line in 3
+dimensional space.</p>
+<dl class="attribute">
+<dt id="c4dtools.math.Line.p">
+<tt class="descname">p</tt><a class="headerlink" href="#c4dtools.math.Line.p" title="Permalink to this definition">¶</a></dt>
+<dd><p>A <tt class="xref py py-class docutils literal"><span class="pre">c4d.Vector</span></tt> being an element of the line.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="c4dtools.math.Line.d">
+<tt class="descname">d</tt><a class="headerlink" href="#c4dtools.math.Line.d" title="Permalink to this definition">¶</a></dt>
+<dd><p>The direction vector of the line. It is <strong>not</strong> necessarily
+normalized.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.math.Line.eval">
+<tt class="descname">eval</tt><big>(</big><em>a</em><big>)</big><a class="reference internal" href="_modules/c4dtools/math.html#Line.eval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.math.Line.eval" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>New in 1.3.0</em>.</p>
+<p>Returns a <tt class="xref py py-class docutils literal"><span class="pre">c4d.Vector</span></tt> resulting in solving the parametrical
+equation of the line using the parameter <em>a</em>.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="c4dtools.math.Line.from_2">
+<em class="property">classmethod </em><tt class="descname">from_2</tt><big>(</big><em>p1</em>, <em>p2</em><big>)</big><a class="reference internal" href="_modules/c4dtools/math.html#Line.from_2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.math.Line.from_2" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>New in 1.3.0</em>.</p>
+<p>Creates a <a class="reference internal" href="#c4dtools.math.Line" title="c4dtools.math.Line"><tt class="xref py py-class docutils literal"><span class="pre">Line</span></tt></a> object from two points in three dimensional 
+space.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>p1</strong> &#8211; The first point of the line (<tt class="xref py py-class docutils literal"><span class="pre">c4d.Vector</span></tt>)</li>
+<li><strong>p2</strong> &#8211; The second point of the line (<tt class="xref py py-class docutils literal"><span class="pre">c4d.Vector</span></tt>)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.math.Line.intersection">
+<tt class="descname">intersection</tt><big>(</big><em>line</em>, <em>precision=1e-06</em><big>)</big><a class="reference internal" href="_modules/c4dtools/math.html#Line.intersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.math.Line.intersection" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>New in 1.3.0</em>.</p>
+<p>Calculates the intersection point of the calling and the passed
+<em>line</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>line</strong> &#8211; The complementary line to check for intersection with
+the calling line.</li>
+<li><strong>precision</strong> &#8211; The allowed deviation between the components of
+the linear factors.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><tt class="xref py py-class docutils literal"><span class="pre">c4d.Vector</span></tt> if the lines intersect, <tt class="docutils literal"><span class="pre">None</span></tt> if
+they do not.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#c4dtools.math.line_intersection" title="c4dtools.math.line_intersection"><tt class="xref py py-func docutils literal"><span class="pre">line_intersection()</span></tt></a></p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.math.line_intersection">
+<tt class="descclassname">c4dtools.math.</tt><tt class="descname">line_intersection</tt><big>(</big><em>p1</em>, <em>d1</em>, <em>p2</em>, <em>d2</em>, <em>precision=1e-06</em><big>)</big><a class="reference internal" href="_modules/c4dtools/math.html#line_intersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.math.line_intersection" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>New in 1.3.0</em>.</p>
+<p>Calculates the intersection point of two lines defined by <em>p1</em>,
+<em>d1</em>, <em>p2</em> and <em>d2</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>p1</strong> &#8211; A point on the first line (<tt class="xref py py-class docutils literal"><span class="pre">c4d.Vector</span></tt>)</li>
+<li><strong>d1</strong> &#8211; The direction of the first line  (<tt class="xref py py-class docutils literal"><span class="pre">c4d.Vector</span></tt>)</li>
+<li><strong>p2</strong> &#8211; A point on the second line  (<tt class="xref py py-class docutils literal"><span class="pre">c4d.Vector</span></tt>)</li>
+<li><strong>d2</strong> &#8211; The direction of the second line  (<tt class="xref py py-class docutils literal"><span class="pre">c4d.Vector</span></tt>)</li>
+<li><strong>precision</strong> &#8211; The allowed deviation between the components of
+the linear factors.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><tt class="xref py py-class docutils literal"><span class="pre">c4d.Vector</span></tt> if the lines intersect, <tt class="docutils literal"><span class="pre">None</span></tt> if they
+do not.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.math.vbbmid">
+<tt class="descclassname">c4dtools.math.</tt><tt class="descname">vbbmid</tt><big>(</big><em>vectors</em><big>)</big><a class="reference internal" href="_modules/c4dtools/math.html#vbbmid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.math.vbbmid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the mid-point of the bounding box spanned by the list
+of vectors. This is different to the arithmetic middle of the
+points.</p>
+<p><em>Changed in 1.3.0</em>:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Moved to <a class="reference internal" href="#module-c4dtools.math" title="c4dtools.math"><tt class="xref py py-mod docutils literal"><span class="pre">c4dtools.math</span></tt></a>.</li>
+<li>Raises <em>ValueError</em> if <em>vectors</em> is not a sequence type
+or is empty.</li>
+</ul>
+</div></blockquote>
+<p>Returns: <tt class="xref py py-class docutils literal"><span class="pre">c4d.Vector</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.math.vmax">
+<tt class="descclassname">c4dtools.math.</tt><tt class="descname">vmax</tt><big>(</big><em>a</em>, <em>b</em><big>)</big><a class="reference internal" href="_modules/c4dtools/math.html#vmax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.math.vmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combines the highest components of the two vectors <em>a</em> and <em>b</em> into
+a new vector. Returns the new vector.</p>
+<p><em>Changed in 1.3.0</em>:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The new vector is now returned instead of stored in <em>a</em>.</li>
+<li>Moved to <a class="reference internal" href="#module-c4dtools.math" title="c4dtools.math"><tt class="xref py py-mod docutils literal"><span class="pre">c4dtools.math</span></tt></a>.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.math.vmin">
+<tt class="descclassname">c4dtools.math.</tt><tt class="descname">vmin</tt><big>(</big><em>a</em>, <em>b</em><big>)</big><a class="reference internal" href="_modules/c4dtools/math.html#vmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.math.vmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combines the lowest components of the two vectors <em>a</em> and <em>b</em> into
+a new vector. Returns the new vector.</p>
+<p><em>Changed in 1.3.0</em>:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The new vector is now returned instead of stored in <em>a</em>.</li>
+<li>Moved to <a class="reference internal" href="#module-c4dtools.math" title="c4dtools.math"><tt class="xref py py-mod docutils literal"><span class="pre">c4dtools.math</span></tt></a>.</li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 </div>
@@ -664,6 +905,158 @@ for more information.</p>
 <dd><p>Gathers all subclasses of the plugin classes in this module and
 registers them to Cinema 4D unless <cite>autoregister</cite> evaluates to
 False.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-c4dtools.decorators"></span><div class="section" id="c4dtools-decorators">
+<h2>c4dtools.decorators<a class="headerlink" href="#c4dtools-decorators" title="Permalink to this headline">¶</a></h2>
+<p><em>New in 1.3.0</em>. Implements usefuly decorator functions and classes.</p>
+<dl class="function">
+<dt id="c4dtools.decorators.f_attrs">
+<tt class="descclassname">c4dtools.decorators.</tt><tt class="descname">f_attrs</tt><big>(</big><em>self=False</em>, <em>**attrs</em><big>)</big><a class="reference internal" href="_modules/c4dtools/decorators.html#f_attrs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.decorators.f_attrs" title="Permalink to this definition">¶</a></dt>
+<dd><ul>
+<li><p class="first"><em>New in 1.2.6</em>.</p>
+</li>
+<li><p class="first"><em>Changed in 1.3.0</em></p>
+<blockquote>
+<div><ul class="simple">
+<li>Moved from <tt class="docutils literal"><span class="pre">utils</span></tt> to <tt class="docutils literal"><span class="pre">decorators</span></tt></li>
+<li>Added <em>self</em> parameter.</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>This function returns a decorator adding all passed keyword arguments
+as attributes to the decorated function. If the parameter <em>self</em> is
+given True, the function object itself will be passed as first argument
+to the function.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@f_attrs</span><span class="p">(</span><span class="n">attr</span><span class="o">=</span><span class="s">&#39;value here&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">func1</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+    <span class="k">print</span> <span class="n">func1</span><span class="o">.</span><span class="n">attr</span>
+    <span class="k">return</span> <span class="n">arg</span> <span class="o">**</span> <span class="mi">2</span>
+
+<span class="nd">@f_attrs</span><span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="n">attr</span><span class="o">=</span><span class="s">&#39;value here&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">func2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+    <span class="k">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">attr</span>
+    <span class="k">return</span> <span class="n">arg</span> <span class="o">**</span> <span class="mi">2</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.decorators.override">
+<tt class="descclassname">c4dtools.decorators.</tt><tt class="descname">override</tt><big>(</big><em>fnc=None</em><big>)</big><a class="reference internal" href="_modules/c4dtools/decorators.html#override"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.decorators.override" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>New in 1.3.0</em>. Decorator for class-methods. Use in combination with
+the <a class="reference internal" href="#c4dtools.decorators.subclass" title="c4dtools.decorators.subclass"><tt class="xref py py-func docutils literal"><span class="pre">subclass()</span></tt></a> decorator.</p>
+<p>This decorator will raise a <tt class="xref py py-class docutils literal"><span class="pre">NotImplementedError</span></tt>
+when the decorated function does not override a method implemented
+in one of the base classes.</p>
+<p>Call without arguments before decorating to prevent the checking and
+use it as code annotation only.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.decorators.subclass">
+<tt class="descclassname">c4dtools.decorators.</tt><tt class="descname">subclass</tt><big>(</big><em>cls</em><big>)</big><a class="reference internal" href="_modules/c4dtools/decorators.html#subclass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.decorators.subclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class decorator checking each <a class="reference internal" href="#c4dtools.decorators.override" title="c4dtools.decorators.override"><tt class="xref py py-class docutils literal"><span class="pre">override</span></tt></a> decorated
+function. Use it as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@subclass</span>
+<span class="k">class</span> <span class="nc">Subclass</span><span class="p">(</span><span class="n">Superclass</span><span class="p">):</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span> <span class="nf">overriden_function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># ...</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<span class="target" id="module-c4dtools.importer"></span><div class="section" id="c4dtools-importer">
+<h2>c4dtools.importer<a class="headerlink" href="#c4dtools-importer" title="Permalink to this headline">¶</a></h2>
+<p><em>New in 1.3.0</em>. Implements a class for safely importing packages. The
+contents of this package was previously defined in :mod`c4dtools.utils`.</p>
+<dl class="class">
+<dt id="c4dtools.importer.Importer">
+<em class="property">class </em><tt class="descclassname">c4dtools.importer.</tt><tt class="descname">Importer</tt><big>(</big><em>high_priority=False</em>, <em>use_sys_path=True</em>, <em>store_modules=True</em><big>)</big><a class="reference internal" href="_modules/c4dtools/importer.html#Importer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.importer.Importer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use this class to enable importing modules from specific
+directories independent from <tt class="docutils literal"><span class="pre">sys.path</span></tt>.</p>
+<dl class="attribute">
+<dt id="c4dtools.importer.Importer.high_priority">
+<tt class="descname">high_priority</tt><a class="headerlink" href="#c4dtools.importer.Importer.high_priority" title="Permalink to this definition">¶</a></dt>
+<dd><p>When this value is True, the paths defined in the importer are
+prepended to the original paths in <tt class="docutils literal"><span class="pre">sys.path</span></tt>. If False, they
+will be appended. Does only have an effect when <a class="reference internal" href="#c4dtools.importer.Importer.use_sys_path" title="c4dtools.importer.Importer.use_sys_path"><tt class="xref py py-attr docutils literal"><span class="pre">use_sys_path</span></tt></a>
+is True.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="c4dtools.importer.Importer.use_sys_path">
+<tt class="descname">use_sys_path</tt><a class="headerlink" href="#c4dtools.importer.Importer.use_sys_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>When this value is <tt class="docutils literal"><span class="pre">True</span></tt>, the original paths from <tt class="docutils literal"><span class="pre">sys.path</span></tt>
+are used additionally to the paths defined in the imported.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="c4dtools.importer.Importer.modules">
+<tt class="descname">modules</tt><a class="headerlink" href="#c4dtools.importer.Importer.modules" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary containing the modules that have been imported
+with the instance of the <a class="reference internal" href="#c4dtools.importer.Importer" title="c4dtools.importer.Importer"><tt class="xref py py-class docutils literal"><span class="pre">Importer</span></tt></a>. Can be <tt class="docutils literal"><span class="pre">None</span></tt>
+when <em>store_modules</em> was passed <tt class="docutils literal"><span class="pre">False</span></tt> on initialization.</p>
+</dd></dl>
+
+<p><em>New in 1.3.0</em>:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Moved to <a class="reference internal" href="#module-c4dtools.importer" title="c4dtools.importer"><tt class="xref py py-mod docutils literal"><span class="pre">c4dtools.importer</span></tt></a></li>
+<li>Added <a class="reference internal" href="#c4dtools.importer.Importer.modules" title="c4dtools.importer.Importer.modules"><tt class="xref py py-attr docutils literal"><span class="pre">modules</span></tt></a> attribute</li>
+</ul>
+</div></blockquote>
+<dl class="method">
+<dt id="c4dtools.importer.Importer.add">
+<tt class="descname">add</tt><big>(</big><em>*paths</em><big>)</big><a class="reference internal" href="_modules/c4dtools/importer.html#Importer.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.importer.Importer.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the passed strings to the search-path for importing
+modules. Raises TypeError if non-string object was passed.
+Passed paths are automatically expanded.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.importer.Importer.import_">
+<tt class="descname">import_</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/c4dtools/importer.html#Importer.import_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.importer.Importer.import_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import the module with the given name from the directories
+added to the Importer. The loaded module will not be inserted
+into <cite>sys.modules</cite>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.importer.Importer.is_local">
+<tt class="descname">is_local</tt><big>(</big><em>module</em><big>)</big><a class="reference internal" href="_modules/c4dtools/importer.html#Importer.is_local"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.importer.Importer.is_local" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if the passed module object can be found in the
+paths defined in the importer, False if not.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="c4dtools.importer.Importer.protected">
+<tt class="descname">protected</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/c4dtools/importer.html#Importer.protected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.importer.Importer.protected" title="Permalink to this definition">¶</a></dt>
+<dd><p>New in 1.3.0. Return an object implementing the with-interface
+creating a protected environment for importing modules. The
+with-entrance does not return any value.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">with</span> <span class="n">imp</span><span class="o">.</span><span class="n">protected</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">module_a</span>
+    <span class="kn">import</span> <span class="nn">module_b</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="c4dtools.importer.get_root_module">
+<tt class="descclassname">c4dtools.importer.</tt><tt class="descname">get_root_module</tt><big>(</big><em>modname, suffixes=['pyc', 'pyo', 'py']</em><big>)</big><a class="reference internal" href="_modules/c4dtools/importer.html#get_root_module"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.importer.get_root_module" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>New in 1.2.6</em>.</p>
+<p>Returns the root-file or folder of a module filename. The return-value
+is a tuple of <tt class="docutils literal"><span class="pre">(root_path,</span> <span class="pre">is_file)</span></tt>.</p>
+<p><em>New in 1.3.0</em>: Moved to <a class="reference internal" href="#module-c4dtools.importer" title="c4dtools.importer"><tt class="xref py py-mod docutils literal"><span class="pre">c4dtools.importer</span></tt></a>.</p>
 </dd></dl>
 
 </div>
@@ -874,6 +1267,16 @@ KeyError if no symbol was found.</p>
 <dd><p>Returns the name of the passed symbol id.</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="c4dtools.resource.Resource.new_symbols">
+<tt class="descname">new_symbols</tt><big>(</big><em>*symbols</em><big>)</big><a class="reference internal" href="_modules/c4dtools/resource.html#Resource.new_symbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.resource.Resource.new_symbols" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>New in 1.3.0</em>. Adds new symbols to the <a class="reference internal" href="#c4dtools.resource.Resource" title="c4dtools.resource.Resource"><tt class="xref py py-class docutils literal"><span class="pre">Resource</span></tt></a> instance.
+Each element in the <em>*symbols</em> parameter may be a string or a tuple.   
+If it&#8217;s a tuple, the name of the symbol is the first name, otherwise
+it will be the string itself. The second element in the tuple must be
+the value.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -1065,74 +1468,32 @@ objects.</p>
 <h2>c4dtools.misc<a class="headerlink" href="#c4dtools-misc" title="Permalink to this headline">¶</a></h2>
 <p>Miscellaneous packages.</p>
 </div>
-<span class="target" id="module-c4dtools.misc.boundingbox"></span><div class="section" id="c4dtools-misc-boundingbox">
-<h2>c4dtools.misc.boundingbox<a class="headerlink" href="#c4dtools-misc-boundingbox" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-c4dtools.misc.aabb"></span><div class="section" id="c4dtools-misc-aabb">
+<h2>c4dtools.misc.aabb<a class="headerlink" href="#c4dtools-misc-aabb" title="Permalink to this headline">¶</a></h2>
 <p>Utility for computing the bounding-box spanned by a couple of vectors
 or by <tt class="xref py py-class docutils literal"><span class="pre">c4d.BaseObject</span></tt> instances.</p>
+<p><em>Changed in 1.3.0</em>: Renamed from <tt class="docutils literal"><span class="pre">boundingbox</span></tt> to <tt class="docutils literal"><span class="pre">aabb</span></tt>.</p>
 <dl class="class">
-<dt id="c4dtools.misc.boundingbox.AABB">
-<em class="property">class </em><tt class="descclassname">c4dtools.misc.boundingbox.</tt><tt class="descname">AABB</tt><big>(</big><em>min_v=Vector()</em>, <em>max_v=Vector()</em>, <em>translation_matrix=Matrix()</em><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/boundingbox.html#AABB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.boundingbox.AABB" title="Permalink to this definition">¶</a></dt>
-<dd><p>This class makes it easy to compute the bounding-box of a set of
-points or even objects. AABB is short for &#8220;axis-aligned bounding-box&#8221;.</p>
-<p>Example for Script Manager:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">c4dtools.misc.boundingbox</span> <span class="kn">import</span> <span class="n">AABB</span>
-<span class="n">box</span> <span class="o">=</span> <span class="n">AABB</span><span class="p">()</span>
-<span class="n">box</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="k">print</span> <span class="n">box</span><span class="o">.</span><span class="n">midpoint</span>
-<span class="k">print</span> <span class="n">box</span><span class="o">.</span><span class="n">size</span>
-</pre></div>
+<dt id="c4dtools.misc.aabb.AABB">
+<em class="property">class </em><tt class="descclassname">c4dtools.misc.aabb.</tt><tt class="descname">AABB</tt><big>(</big><em>translation=None</em><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/aabb.html#AABB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.aabb.AABB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expandable bounding-box system.</p>
+<p><em>Changed in 1.2.9</em>: Re-implementation, interface has changed.</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">expand()</span></tt> is now called <tt class="docutils literal"><span class="pre">expand_object()</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">expand_point()</span></tt> is now called <tt class="docutils literal"><span class="pre">expand()</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">translation_matrix</span></tt> is not called <tt class="docutils literal"><span class="pre">translation</span></tt></li>
+<li>Initialization is done with the first call to <tt class="xref py py-meth docutils literal"><span class="pre">expand()</span></tt></li>
+<li>Polygon objects are now treated in a special way</li>
+</ul>
+</dd></dl>
+
 </div>
-<p>The bounding box is <em>always</em> calculated from global coordinates and
-is translated with the matrix in the translation_matrix slot. The
-translation can not be performed after expansion of the bounding-
-box, the translation_matrix must therefore be set <em>before</em>
-expand() or expand_point() is called.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">c4dtools.misc.boundingbox</span> <span class="kn">import</span> <span class="n">AABB</span>
-<span class="n">box</span> <span class="o">=</span> <span class="n">AABB</span><span class="p">(</span><span class="n">translation_matrix</span><span class="o">=~</span><span class="n">op</span><span class="o">.</span><span class="n">GetMg</span><span class="p">())</span>
-<span class="n">box</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">mg</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="k">print</span> <span class="n">box</span><span class="o">.</span><span class="n">midpoint</span>
-<span class="k">print</span> <span class="n">box</span><span class="o">.</span><span class="n">size</span>
-</pre></div>
+<span class="target" id="module-c4dtools.misc.boundingbox"></span><div class="section" id="c4dtools-misc-boundingbox">
+<h2>c4dtools.misc.boundingbox<a class="headerlink" href="#c4dtools-misc-boundingbox" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">deprecated since 1.2.9, use <a class="reference internal" href="#module-c4dtools.misc.aabb" title="c4dtools.misc.aabb"><tt class="xref py py-mod docutils literal"><span class="pre">c4dtools.misc.aabb</span></tt></a> instead.</p>
 </div>
-<dl class="method">
-<dt id="c4dtools.misc.boundingbox.AABB.expand">
-<tt class="descname">expand</tt><big>(</big><em>obj</em>, <em>recursive=False</em><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/boundingbox.html#AABB.expand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.boundingbox.AABB.expand" title="Permalink to this definition">¶</a></dt>
-<dd><p>Expand the bounding-box by the passed <tt class="xref py py-class docutils literal"><span class="pre">c4d.BaseObject</span></tt>
-instance. The method can optionally continue recursively.</p>
-<dl class="docutils">
-<dt>Raises: TypeError when <em>obj</em> is not an instance of</dt>
-<dd><tt class="xref py py-class docutils literal"><span class="pre">c4d.BaseObject</span></tt>.</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="c4dtools.misc.boundingbox.AABB.expand_point">
-<tt class="descname">expand_point</tt><big>(</big><em>point</em><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/boundingbox.html#AABB.expand_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.boundingbox.AABB.expand_point" title="Permalink to this definition">¶</a></dt>
-<dd><p>Expand the bounding-box by the passed c4d.Vector representing
-a point in the 3-dimensional space.</p>
-<dl class="docutils">
-<dt>Raises: TypeError when <em>point</em> is not an instance of</dt>
-<dd>c4d.Vector.</dd>
-</dl>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="c4dtools.misc.boundingbox.AABB.midpoint">
-<tt class="descname">midpoint</tt><a class="reference internal" href="_modules/c4dtools/misc/boundingbox.html#AABB.midpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.boundingbox.AABB.midpoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calcuates and returns the midpoint of the bounding-box yet
-created.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="c4dtools.misc.boundingbox.AABB.size">
-<tt class="descname">size</tt><a class="reference internal" href="_modules/c4dtools/misc/boundingbox.html#AABB.size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.boundingbox.AABB.size" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the size of the bounding-box yet created. The size
-plus the midpoint of the bounding-box is the upper-right-front
-corner of the box.</p>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 <span class="target" id="module-c4dtools.misc.graphnode"></span><div class="section" id="c4dtools-misc-graphnode">
 <h2>c4dtools.misc.graphnode<a class="headerlink" href="#c4dtools-misc-graphnode" title="Permalink to this headline">¶</a></h2>
@@ -1213,8 +1574,8 @@ a list of GvNode objects.</p>
 <h2>c4dtools.misc.userdata<a class="headerlink" href="#c4dtools-misc-userdata" title="Permalink to this headline">¶</a></h2>
 <p>Module for interacting with Cinema 4D&#8217;s UserData interface.</p>
 <dl class="class">
-<dt id="c4dtools.misc.userdata.UserDataSetAndGet">
-<em class="property">class </em><tt class="descclassname">c4dtools.misc.userdata.</tt><tt class="descname">UserDataSetAndGet</tt><big>(</big><em>fields</em>, <em>op</em>, <em>do_caching=True</em><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/userdata.html#UserDataSetAndGet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.userdata.UserDataSetAndGet" title="Permalink to this definition">¶</a></dt>
+<dt id="c4dtools.misc.userdata.UserDataManager">
+<em class="property">class </em><tt class="descclassname">c4dtools.misc.userdata.</tt><tt class="descname">UserDataManager</tt><big>(</big><em>fields</em>, <em>op</em>, <em>do_caching=True</em><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/userdata.html#UserDataManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.userdata.UserDataManager" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class manages userdata-value retrieval and storing.
 It accepts a dictionary associating the attribute-name and
 the userdata&#8217;s sub-id on initialization and the c4d.BaseList2D
@@ -1232,13 +1593,21 @@ object to use for retrival and storing.</p>
 <span class="k">print</span> <span class="n">op</span><span class="p">[</span><span class="n">c4d</span><span class="o">.</span><span class="n">ID_USERDATA</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
 </pre></div>
 </div>
+<p><em>New in 1.3.0</em>: Renamed to <tt class="docutils literal"><span class="pre">UserDataManager</span></tt> and added
+type-safety for constructor.</p>
 <dl class="method">
-<dt id="c4dtools.misc.userdata.UserDataSetAndGet.clear_cache">
-<tt class="descname">clear_cache</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/userdata.html#UserDataSetAndGet.clear_cache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.userdata.UserDataSetAndGet.clear_cache" title="Permalink to this definition">¶</a></dt>
+<dt id="c4dtools.misc.userdata.UserDataManager.clear_cache">
+<tt class="descname">clear_cache</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/c4dtools/misc/userdata.html#UserDataManager.clear_cache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#c4dtools.misc.userdata.UserDataManager.clear_cache" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clear the cached values. Call this in case the host object&#8217;s
 parameters have changed by not using the instance of this class.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="attribute">
+<dt id="c4dtools.misc.userdata.UserDataSetAndGet">
+<tt class="descclassname">c4dtools.misc.userdata.</tt><tt class="descname">UserDataSetAndGet</tt><a class="headerlink" href="#c4dtools.misc.userdata.UserDataSetAndGet" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#c4dtools.misc.userdata.UserDataManager" title="c4dtools.misc.userdata.UserDataManager"><tt class="xref py py-class docutils literal"><span class="pre">UserDataManager</span></tt></a></p>
 </dd></dl>
 
 </div>
@@ -1308,11 +1677,15 @@ instance.</p>
 <li><a class="reference internal" href="#c4dtools-a-utility-library-for-the-cinema-4d-python-api">c4dtools - A utility library for the Cinema 4D Python API</a></li>
 <li><a class="reference internal" href="#c4dtools-utils">c4dtools.utils</a></li>
 <li><a class="reference internal" href="#c4dtools-helpers">c4dtools.helpers</a></li>
+<li><a class="reference internal" href="#c4dtools-math">c4dtools.math</a></li>
 <li><a class="reference internal" href="#c4dtools-plugins">c4dtools.plugins</a></li>
+<li><a class="reference internal" href="#c4dtools-decorators">c4dtools.decorators</a></li>
+<li><a class="reference internal" href="#c4dtools-importer">c4dtools.importer</a></li>
 <li><a class="reference internal" href="#c4dtools-library">c4dtools.library</a></li>
 <li><a class="reference internal" href="#c4dtools-resource">c4dtools.resource</a></li>
 <li><a class="reference internal" href="#c4dtools-resource-menuparser">c4dtools.resource.menuparser</a></li>
 <li><a class="reference internal" href="#c4dtools-misc">c4dtools.misc</a></li>
+<li><a class="reference internal" href="#c4dtools-misc-aabb">c4dtools.misc.aabb</a></li>
 <li><a class="reference internal" href="#c4dtools-misc-boundingbox">c4dtools.misc.boundingbox</a></li>
 <li><a class="reference internal" href="#c4dtools-misc-graphnode">c4dtools.misc.graphnode</a></li>
 <li><a class="reference internal" href="#c4dtools-misc-userdata">c4dtools.misc.userdata</a></li>
@@ -1358,7 +1731,7 @@ instance.</p>
     </div>
     <div class="footer">
         &copy; Copyright 2013, Niklas Rosenstein.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
     </div>
   </body>
 </html>

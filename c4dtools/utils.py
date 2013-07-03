@@ -69,7 +69,7 @@ def change_suffix(filename, new_suffix):
 def file_changed(original, copy):
     r"""
     Returns True when the filename pointed by *original* was modified
-    before the last time *copy* was modified, False otherwise.
+    before the last time *copy* was modified, False otherwise. 
     """
 
     return os.path.getmtime(original) > os.path.getmtime(copy)
@@ -121,13 +121,16 @@ def ensure_type(x, *types, **kwargs):
     *New in 1.3.0*: Added *subclass* paramater to *\*\*kwargs*.
 
     :param x: The value to check.
-    :param *types: The types that *x* is allowed to be an instance of.
-    :param **kwargs:
+    :param \*types: The types that *x* is allowed to be an instance of.
+    :param \*\*kwargs:
 
-        - *name*: If given, the string passed by this argument will be
-        assumed to be the parameter that was passed wrong.
-        - *subclass*: Pass True if :func:`issubclass` should be used instead
-        of :func:`isinstance`.
+        =============== ======================================================
+        name            If given, the string passed by this argument will be
+                        assumed to be the parameter that was passed wrong.
+        subclass        Pass True if :func:`issubclass` should be used instead
+                        of :func:`isinstance`.
+        =============== ======================================================
+
     :raise TypeError:
 
         - When an invalid keyword-argument was given
@@ -180,11 +183,14 @@ def ensure_value(x, *values, **kwargs):
     not result in True, :class:`ValueError` is raised.
 
     :param x: The value to check.
-    :param *values: The values *x* is allowed to be one of.
-    :param **kwargs*:
+    :param \*values: The values *x* is allowed to be one of.
+    :param \*\*kwargs*:
 
-        - *name*: If given, the string passed by this argument will be
-        assumed to be the parameter that was passed wrong.
+        =========== =====================================================
+        name        If given, the string passed by this argument will be
+                    assumed to be the parameter that was passed wrong.
+        =========== =====================================================
+
     :raise TypeError:
 
         - When an invalid keyword-argument was given

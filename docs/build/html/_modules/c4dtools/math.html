@@ -1,0 +1,325 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>c4dtools.math &mdash; c4dtools 1.2.8 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.2.8',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="c4dtools 1.2.8 documentation" href="../../index.html" />
+    <link rel="up" title="c4dtools" href="../c4dtools.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">c4dtools 1.2.8 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../c4dtools.html" accesskey="U">c4dtools</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for c4dtools.math</h1><div class="highlight"><pre>
+<span class="c"># coding: utf-8</span>
+<span class="c">#</span>
+<span class="c"># Copyright (c) 2012-2013, Niklas Rosenstein</span>
+<span class="c"># All rights reserved.</span>
+<span class="c">#</span>
+<span class="c"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c"># modification, are permitted provided that the following conditions</span>
+<span class="c"># are met:</span>
+<span class="c">#</span>
+<span class="c"># 1. Redistributions of source code must retain the above copyright</span>
+<span class="c">#    notice, this list of conditions and the following disclaimer.</span>
+<span class="c"># 2. Redistributions in binary form must reproduce the above copyright</span>
+<span class="c">#    notice, this list of conditions and the following disclaimer in</span>
+<span class="c">#    the documentation and/or other materials provided with the</span>
+<span class="c">#    distribution.</span>
+<span class="c">#</span>
+<span class="c"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<span class="c"># &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<span class="c"># LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS</span>
+<span class="c"># FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE</span>
+<span class="c"># COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,</span>
+<span class="c"># INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,</span>
+<span class="c"># BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;</span>
+<span class="c"># LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER</span>
+<span class="c"># CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT</span>
+<span class="c"># LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN</span>
+<span class="c"># ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span>
+<span class="c"># POSSIBILITY OF SUCH DAMAGE.</span>
+<span class="c">#</span>
+<span class="c"># The views and conclusions contained in the software and</span>
+<span class="c"># documentation are those of the authors and should not be interpreted</span>
+<span class="c"># as representing official policies,  either expressed or implied, of</span>
+<span class="c"># the FreeBSD Project.</span>
+<span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">c4dtools.math</span>
+<span class="sd">~~~~~~~~~~~~~</span>
+
+<span class="sd">*New in 1.3.0*. This module contains helpers for mathematical operations.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">c4d</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="kn">from</span> <span class="nn">c4d</span> <span class="kn">import</span> <span class="n">Vector</span>
+<span class="kn">from</span> <span class="nn">c4dtools.utils</span> <span class="kn">import</span> <span class="n">ensure_type</span>
+
+<span class="n">PRECISION</span> <span class="o">=</span> <span class="mf">0.000001</span>
+
+<div class="viewcode-block" id="vmin"><a class="viewcode-back" href="../../index.html#c4dtools.math.vmin">[docs]</a><span class="k">def</span> <span class="nf">vmin</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Combines the lowest components of the two vectors *a* and *b* into</span>
+<span class="sd">    a new vector. Returns the new vector.</span>
+
+<span class="sd">    *Changed in 1.3.0*:</span>
+
+<span class="sd">        - The new vector is now returned instead of stored in *a*.</span>
+<span class="sd">        - Moved to :mod:`c4dtools.math`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">c</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">a</span><span class="o">.</span><span class="n">x</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">x</span>
+    <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">a</span><span class="o">.</span><span class="n">y</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">y</span>
+    <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">z</span> <span class="o">&lt;</span> <span class="n">a</span><span class="o">.</span><span class="n">z</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">z</span>
+    <span class="k">return</span> <span class="n">c</span>
+</div>
+<div class="viewcode-block" id="vmax"><a class="viewcode-back" href="../../index.html#c4dtools.math.vmax">[docs]</a><span class="k">def</span> <span class="nf">vmax</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Combines the highest components of the two vectors *a* and *b* into</span>
+<span class="sd">    a new vector. Returns the new vector.</span>
+
+<span class="sd">    *Changed in 1.3.0*:</span>
+
+<span class="sd">        - The new vector is now returned instead of stored in *a*.</span>
+<span class="sd">        - Moved to :mod:`c4dtools.math`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">c</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">a</span><span class="o">.</span><span class="n">x</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">x</span>
+    <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">a</span><span class="o">.</span><span class="n">y</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">y</span>
+    <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">z</span> <span class="o">&gt;</span> <span class="n">a</span><span class="o">.</span><span class="n">z</span><span class="p">:</span> <span class="n">c</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">z</span>
+    <span class="k">return</span> <span class="n">c</span>
+</div>
+<div class="viewcode-block" id="vbbmid"><a class="viewcode-back" href="../../index.html#c4dtools.math.vbbmid">[docs]</a><span class="k">def</span> <span class="nf">vbbmid</span><span class="p">(</span><span class="n">vectors</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Returns the mid-point of the bounding box spanned by the list</span>
+<span class="sd">    of vectors. This is different to the arithmetic middle of the</span>
+<span class="sd">    points.</span>
+
+<span class="sd">    *Changed in 1.3.0*:</span>
+
+<span class="sd">        -Moved to :mod:`c4dtools.math`.</span>
+<span class="sd">        - Raises *ValueError* if *vectors* is not a sequence type</span>
+<span class="sd">          or is empty.</span>
+
+<span class="sd">    Returns: :class:`c4d.Vector`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ensure_type</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;vectors&#39;</span><span class="p">)</span>
+    <span class="n">vectors</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">vectors</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">vectors</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;An empty sequence is not accepted.&#39;</span><span class="p">)</span>
+
+    <span class="nb">min</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">vectors</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="nb">max</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="nb">min</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vectors</span><span class="p">:</span>
+        <span class="n">vmin</span><span class="p">(</span><span class="nb">min</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+        <span class="n">vmax</span><span class="p">(</span><span class="nb">max</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="nb">min</span> <span class="o">+</span> <span class="nb">max</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+</div>
+<div class="viewcode-block" id="Line"><a class="viewcode-back" href="../../index.html#c4dtools.math.Line">[docs]</a><span class="k">class</span> <span class="nc">Line</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    *New in 1.3.0*.</span>
+
+<span class="sd">    This class represents a parametrical representation of a line in 3</span>
+<span class="sd">    dimensional space.</span>
+
+<span class="sd">    .. attribute:: p</span>
+
+<span class="sd">        A :class:`c4d.Vector` being an element of the line.</span>
+
+<span class="sd">    .. attribute:: d</span>
+
+<span class="sd">        The direction vector of the line. It is **not** necessarily</span>
+<span class="sd">        normalized.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Line.from_2"><a class="viewcode-back" href="../../index.html#c4dtools.math.Line.from_2">[docs]</a>    <span class="k">def</span> <span class="nf">from_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        *New in 1.3.0*.</span>
+
+<span class="sd">        Creates a :class:`Line` object from two points in three dimensional </span>
+<span class="sd">        space.</span>
+
+<span class="sd">        :param p1: The first point of the line (:class:`c4d.Vector`)</span>
+<span class="sd">        :param p2: The second point of the line (:class:`c4d.Vector`)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="p">(</span><span class="n">p2</span> <span class="o">-</span> <span class="n">p1</span><span class="p">))</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        *New in 1.3.0*.</span>
+
+<span class="sd">        Initialize the line with one point on the line and its direction</span>
+<span class="sd">        vector. Both, *p* and *d* may be iterables. In this case, they must</span>
+<span class="sd">        be iterables with one to three elements because they will be extracted</span>
+<span class="sd">        to the :class:`c4d.Vector` constructor.</span>
+
+<span class="sd">        The direction vector is normalized. The vectors are copied internally.</span>
+
+<span class="sd">        :param p: An element of the line (:class:`c4d.Vector`)</span>
+<span class="sd">        :param d: The direction vector of the line (:class:`c4d.Vector`)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="o">*</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="o">*</span><span class="n">d</span><span class="p">)</span>
+
+        <span class="n">ensure_type</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">Vector</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;p&#39;</span><span class="p">)</span>
+        <span class="n">ensure_type</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">Vector</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;d&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">GetNormalized</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;Line(p:[</span><span class="si">%s</span><span class="s">], d:[</span><span class="si">%s</span><span class="s">])&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Line.eval"><a class="viewcode-back" href="../../index.html#c4dtools.math.Line.eval">[docs]</a>    <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        *New in 1.3.0*.</span>
+
+<span class="sd">        Returns a :class:`c4d.Vector` resulting in solving the parametrical</span>
+<span class="sd">        equation of the line using the parameter *a*.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">*</span> <span class="n">a</span>
+</div>
+<div class="viewcode-block" id="Line.intersection"><a class="viewcode-back" href="../../index.html#c4dtools.math.Line.intersection">[docs]</a>    <span class="k">def</span> <span class="nf">intersection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="n">PRECISION</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">        *New in 1.3.0*.</span>
+
+<span class="sd">        Calculates the intersection point of the calling and the passed</span>
+<span class="sd">        *line*.</span>
+
+<span class="sd">        :param line: The complementary line to check for intersection with</span>
+<span class="sd">                the calling line.</span>
+<span class="sd">        :param precision: The allowed deviation between the components of</span>
+<span class="sd">                the linear factors.</span>
+<span class="sd">        :return: :class:`c4d.Vector` if the lines intersect, ``None`` if</span>
+<span class="sd">                they do not.</span>
+
+<span class="sd">        .. seealso:: :func:`line_intersection`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ensure_type</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;line&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">line_intersection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="n">precision</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="line_intersection"><a class="viewcode-back" href="../../index.html#c4dtools.math.line_intersection">[docs]</a><span class="k">def</span> <span class="nf">line_intersection</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="n">PRECISION</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    *New in 1.3.0*.</span>
+
+<span class="sd">    Calculates the intersection point of two lines defined by *p1*,</span>
+<span class="sd">    *d1*, *p2* and *d2*.</span>
+
+<span class="sd">    :param p1: A point on the first line (:class:`c4d.Vector`)</span>
+<span class="sd">    :param d1: The direction of the first line  (:class:`c4d.Vector`)</span>
+<span class="sd">    :param p2: A point on the second line  (:class:`c4d.Vector`)</span>
+<span class="sd">    :param d2: The direction of the second line  (:class:`c4d.Vector`)</span>
+<span class="sd">    :param precision: The allowed deviation between the components of</span>
+<span class="sd">            the linear factors.</span>
+<span class="sd">    :return: :class:`c4d.Vector` if the lines intersect, ``None`` if they</span>
+<span class="sd">            do not.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="n">d1</span><span class="o">.</span><span class="n">Cross</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="n">p2</span> <span class="o">-</span> <span class="n">p1</span><span class="p">)</span><span class="o">.</span><span class="n">Cross</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">Vector</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">x</span> <span class="o">/</span> <span class="n">a</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">y</span> <span class="o">/</span> <span class="n">a</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">z</span> <span class="o">/</span> <span class="n">a</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+
+    <span class="c"># Now check if the resulting deviation can be accepted.</span>
+    <span class="n">ref</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">x</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">ref</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">z</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">v</span> <span class="o">-</span> <span class="n">ref</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">precision</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="n">val</span> <span class="o">+=</span> <span class="n">v</span>
+
+    <span class="k">return</span> <span class="n">p1</span> <span class="o">+</span> <span class="n">d1</span> <span class="o">*</span> <span class="n">val</span> <span class="o">/</span> <span class="mf">3.0</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">c4dtools 1.2.8 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../c4dtools.html" >c4dtools</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Niklas Rosenstein.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

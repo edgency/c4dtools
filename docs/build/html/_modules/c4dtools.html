@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -92,45 +91,102 @@
 <span class="sd">symbols, see :func:`c4dtools.prepare`.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="n">__version__</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;dev&#39;</span><span class="p">)</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;Niklas Rosenstein&#39;</span><span class="p">,</span>
               <span class="s">&#39;email&#39;</span><span class="p">:</span> <span class="s">&#39;rosensteinniklas@gmail.com&#39;</span><span class="p">}</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">c4d</span>
 <span class="kn">import</span> <span class="nn">glob</span>
 
-<span class="kn">from</span> <span class="nn">c4dtools</span> <span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">resource</span><span class="p">,</span> <span class="n">helpers</span><span class="p">,</span> <span class="n">plugins</span><span class="p">,</span> <span class="n">library</span>
+<span class="kn">from</span> <span class="nn">c4dtools</span> <span class="kn">import</span> <span class="n">utils</span><span class="p">,</span> <span class="n">resource</span><span class="p">,</span> <span class="n">helpers</span><span class="p">,</span> <span class="n">plugins</span><span class="p">,</span> <span class="n">library</span><span class="p">,</span> <span class="n">importer</span>
 <span class="kn">from</span> <span class="nn">c4dtools.library</span> <span class="kn">import</span> <span class="n">load_library</span>
 
-<div class="viewcode-block" id="prepare"><a class="viewcode-back" href="../index.html#c4dtools.prepare">[docs]</a><span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">c4dres</span><span class="p">,</span> <span class="n">cache_symbols</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">libfolder_name</span><span class="o">=</span><span class="s">&#39;lib&#39;</span><span class="p">,</span>
-            <span class="n">resfolder_name</span><span class="o">=</span><span class="s">&#39;res&#39;</span><span class="p">,</span> <span class="n">parse_descriptions</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="prepare"><a class="viewcode-back" href="../index.html#c4dtools.prepare">[docs]</a><span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">c4dres</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+            <span class="n">libfolder_name</span><span class="o">=</span><span class="s">&#39;lib&#39;</span><span class="p">,</span> <span class="n">resfolder_name</span><span class="o">=</span><span class="s">&#39;res&#39;</span><span class="p">,</span>
+            <span class="n">parse_description</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">imp_store_modules</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    Call this function from a Cinema 4D python plugin-file (\*.pyp) to</span>
+<span class="sd">    Call this function from a Cinema 4D python plugin-file (``*.pyp``) to</span>
 <span class="sd">    set up convenient data that can be used from the plugin.</span>
 
-<span class="sd">    :Parameters:</span>
-<span class="sd">        - filename: Just pass the ``__file__`` variable from the plugins</span>
-<span class="sd">          global scope.</span>
-<span class="sd">        - c4dres: The :class:`c4d.plugins.GeResource` instance from the</span>
-<span class="sd">          plugin&#39;s scope.</span>
-<span class="sd">        - cache_symbols: True by default. Defines wether the resource</span>
-<span class="sd">          symbols will be cached.</span>
-<span class="sd">        - libfolder_name: The name of the folder the plugin related</span>
-<span class="sd">          libraries are stored. The returned Importer instance will</span>
-<span class="sd">          be able to load python modules and packages from this</span>
-<span class="sd">          directory.</span>
-<span class="sd">        - resfolder_name: The name of the plugins resource folder. This</span>
-<span class="sd">          usually does not need to be changed as the name of this folder</span>
-<span class="sd">          is defined by Cinema 4D.</span>
-<span class="sd">        - parse_descriptions: False by default. When True, description</span>
-<span class="sd">          resource symbols will parsed additionally to the dialog</span>
-<span class="sd">          resource symbols. Note that strings can *not* be loaded from</span>
-<span class="sd">          symbols of description resources.</span>
-<span class="sd">    :Returns: A tuple of two elements.</span>
+<span class="sd">    .. code-block:: python</span>
 
-<span class="sd">             0. :class:`c4dtools.resource.Resource` instance.</span>
-<span class="sd">             1. :class:`c4dtools.utils.Importer` instance.</span>
+<span class="sd">        import c4d</span>
+<span class="sd">        import c4dtools</span>
+
+<span class="sd">        res, imp = c4dtools.prepare(__file__, __res__)</span>
+
+<span class="sd">        # ...</span>
+
+<span class="sd">    :param filename:</span>
+
+<span class="sd">        Just pass the ``__file__`` variable from the plugins global</span>
+<span class="sd">        scope.</span>
+
+<span class="sd">        *New in 1.3.0*: Default value added. The filename will</span>
+<span class="sd">        be retrieved using the globals of the frame that has called</span>
+<span class="sd">        the function if *None* was passed.</span>
+
+<span class="sd">    :param c4dres:</span>
+
+<span class="sd">        The :class:`c4d.plugins.GeResource` instance from the</span>
+<span class="sd">        plugin&#39;s scope.</span>
+
+<span class="sd">        *New in 1.2.6*: Default value added. The plugin resource</span>
+<span class="sd">        will be retrieved using the globals of the frame that</span>
+<span class="sd">        has called the function if *None* was passed.</span>
+
+<span class="sd">    :param cache:</span>
+
+<span class="sd">        True by default. Defines wether the resource symbols will</span>
+<span class="sd">        be cached.</span>
+
+<span class="sd">    :param libfolder_name:</span>
+
+<span class="sd">        The name of the folder the plugin related libraries are</span>
+<span class="sd">        stored. The returned Importer instance will be able to load</span>
+<span class="sd">        python modules and packages from this directory.</span>
+
+<span class="sd">    :param resfolder_name:</span>
+
+<span class="sd">        The name of the plugins resource folder. This usually does</span>
+<span class="sd">        not need to be changed as the name of this folder is defined</span>
+<span class="sd">        by Cinema 4D.</span>
+
+<span class="sd">    :param parse_description:</span>
+
+<span class="sd">        False by default. When True, description resource symbols will</span>
+<span class="sd">        parsed additionally to the dialog resource symbols. Note that</span>
+<span class="sd">        strings can *not* be loaded from symbols of description</span>
+<span class="sd">        resources.</span>
+
+<span class="sd">    :param imp_store_modules:</span>
+
+<span class="sd">        Passed to the constructor of the returned :class:`Importer`,</span>
+<span class="sd">        defining whether imported modules are stored or not.</span>
+
+<span class="sd">    :return:</span>
+
+<span class="sd">        A tuple of two elements:</span>
+
+<span class="sd">        - :class:`c4dtools.resource.Resource`</span>
+<span class="sd">        - :class:`c4dtools.utils.Importer`</span>
+
+<span class="sd">    *New in 1.3.0*: Added *imp_store_modules* parameter.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">globals_</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_back</span><span class="o">.</span><span class="n">f_globals</span>
+    <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">globals_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;__file__&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">filename</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;filename could not be retrieved from the &#39;</span>
+                             <span class="s">&#39;calling frame.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">c4dres</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">c4dres</span> <span class="o">=</span> <span class="n">globals_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;__res__&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+    <span class="n">utils</span><span class="o">.</span><span class="n">ensure_type</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;filename&#39;</span><span class="p">)</span>
+    <span class="n">utils</span><span class="o">.</span><span class="n">ensure_type</span><span class="p">(</span><span class="n">c4dres</span><span class="p">,</span> <span class="n">c4d</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">GeResource</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">None</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;c4dres&#39;</span><span class="p">)</span>
 
     <span class="n">path</span> <span class="o">=</span> <span class="n">helpers</span><span class="o">.</span><span class="n">Attributor</span><span class="p">()</span>
     <span class="n">path</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -145,26 +201,26 @@
     <span class="n">path</span><span class="o">.</span><span class="n">c4d_symbols</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">res</span><span class="p">,</span> <span class="s">&#39;c4d_symbols.h&#39;</span><span class="p">)</span>
     <span class="n">path</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">res</span><span class="p">,</span> <span class="s">&#39;description&#39;</span><span class="p">)</span>
 
-    <span class="n">importer</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">Importer</span><span class="p">()</span>
+    <span class="n">imp</span> <span class="o">=</span> <span class="n">importer</span><span class="o">.</span><span class="n">Importer</span><span class="p">(</span><span class="n">store_modules</span><span class="o">=</span><span class="n">imp_store_modules</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">lib</span><span class="p">):</span>
-        <span class="n">importer</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">lib</span><span class="p">)</span>
+        <span class="n">imp</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">lib</span><span class="p">)</span>
 
     <span class="n">symbols_container</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">Resource</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">res</span><span class="p">,</span> <span class="n">c4dres</span><span class="p">,</span> <span class="p">{})</span>
 
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">c4d_symbols</span><span class="p">):</span>
-        <span class="n">symbols</span><span class="p">,</span> <span class="n">changed</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">c4d_symbols</span><span class="p">,</span> <span class="n">cache_symbols</span><span class="p">)</span>
+        <span class="n">symbols</span><span class="p">,</span> <span class="n">changed</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">c4d_symbols</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
         <span class="n">symbols_container</span><span class="o">.</span><span class="n">add_symbols</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
         <span class="n">symbols_container</span><span class="o">.</span><span class="n">changed</span> <span class="o">|=</span> <span class="n">changed</span>
 
-    <span class="k">if</span> <span class="n">parse_descriptions</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">parse_description</span><span class="p">:</span>
         <span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="s">&#39;*.h&#39;</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-            <span class="n">symbols</span><span class="p">,</span> <span class="n">changed</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">cache_symbols</span><span class="p">)</span>
+            <span class="n">symbols</span><span class="p">,</span> <span class="n">changed</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">cache</span><span class="p">)</span>
             <span class="n">symbols_container</span><span class="o">.</span><span class="n">add_symbols</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
             <span class="n">symbols_container</span><span class="o">.</span><span class="n">changed</span> <span class="o">|=</span> <span class="n">changed</span>
 
-    <span class="k">return</span> <span class="p">(</span><span class="n">symbols_container</span><span class="p">,</span> <span class="n">importer</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">symbols_container</span><span class="p">,</span> <span class="n">imp</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -204,7 +260,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2013, Niklas Rosenstein.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
     </div>
   </body>
 </html>
