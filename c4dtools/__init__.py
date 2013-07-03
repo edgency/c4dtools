@@ -41,7 +41,7 @@ Cinema 4D. The most significant feature is the cached parsing of dialog
 symbols, see :func:`c4dtools.prepare`.
 """
 
-__version__ = (1, 3, 0, 'dev')
+__version__ = (1, 3, 0, 'final')
 __author__ = {'name': 'Niklas Rosenstein',
               'email': 'rosensteinniklas@gmail.com'}
 
