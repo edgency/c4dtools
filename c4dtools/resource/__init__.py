@@ -350,6 +350,7 @@ class StringLoader(object):
             # same as
             id, name = res.string.IDC_MYSTRING.tuple
         """
+
         symbol_id = self.resource.get(name)
         return ResourceString(symbol_id, self.resource.c4dres)
 
@@ -377,6 +378,7 @@ class ResourceString(object):
         Wrapper for the :func:`c4d.plugins.GeLoadString` function for
         loading the actual string from the resource.    
         """
+
         string = self.c4dres.LoadString(self.id)
 
         # Simulate the behaviour of c4d.plugins.GeLoadString by replacing
