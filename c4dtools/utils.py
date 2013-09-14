@@ -304,6 +304,12 @@ def current_state_to_object(op, container=c4d.BaseContainer()):
 
     doc = op.GetDocument()
 
+    # The node could be in a hierarchy, even without a document. In this case,
+    # we'll create a clone of the object.
+    if not doc and (op.GetNext() or op.GetPred() or op.GetUp()):
+        flags = c4d.COPYFLAGS_NO_ANIMATION | c4d.COPYFLAGS_NO_BITS | c4d.COPYFLAGS_NO_MATERIALPREVIEW
+        op = op.GetClone(flags)
+
     if not doc:
         csto_doc = c4d.documents.BaseDocument()
         csto_doc.InsertObject(op)
