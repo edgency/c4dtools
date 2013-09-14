@@ -356,7 +356,10 @@ def join_polygon_objects(objects, doc):
     doc.SetActiveObject(None)
     pred = None
     for obj in objects:
+        mat = obj.GetMg()
         obj = obj.GetClone(c4d.COPYFLAGS_NO_HIERARCHY)
+        obj.SetMl(mat)
+
         doc.InsertObject(obj, None, pred)
         obj.SetBit(c4d.BIT_ACTIVE)
         pred = obj
