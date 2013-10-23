@@ -44,8 +44,10 @@ def f_attrs(self=False, **attrs):
     r"""
     - *New in 1.2.6*.
     - *Changed in 1.3.0*
+
         - Moved from ``utils`` to ``decorators``
         - Added *self* parameter.
+
     This function returns a decorator adding all passed keyword arguments
     as attributes to the decorated function. If the parameter *self* is
     given True, the function object itself will be passed as first argument

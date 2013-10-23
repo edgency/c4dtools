@@ -31,6 +31,12 @@
 # documentation are those of the authors and should not be interpreted
 # as representing official policies,  either expressed or implied, of
 # the FreeBSD Project.
+r"""
+c4dtools.misc.boundingbox
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. warning:: deprecated since 1.2.9, use :mod:`c4dtools.misc.aabb` instead.
+"""
 
 # Serving for backwards compatibility with < 1.3.0
 from c4dtools.misc.aabb import *
