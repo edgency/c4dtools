@@ -2,18 +2,18 @@
 #
 # Copyright (c) 2012-2013, Niklas Rosenstein
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
-# are met: 
-# 
+# are met:
+#
 # 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer. 
+#    notice, this list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in
 #    the documentation and/or other materials provided with the
-#    distribution. 
-# 
+#    distribution.
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -26,7 +26,7 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 # The views and conclusions contained in the software and
 # documentation are those of the authors and should not be interpreted
 # as representing official policies,  either expressed or implied, of
@@ -59,6 +59,16 @@ def load(filename, use_cache=True, cache_suffix='cache'):
     The advantage of caching the symbols in a seperate file is the
     improved speed of reading in the symbols.
 
+    *Changed in 1.3.1*: The :func:`load` function now returns a tuple of
+    three values instead of two. The ``missing_permissions`` element has been
+    added to the end of the tuple.
+
+    .. note::
+
+        The ``missing_permissions`` element of the returned tuple is only
+        True if the *use_cache* is passed True **and** the cache could
+        not be written.
+
     :Returns: ``(symbols_dict, changed)``
     :Raises:  OSError if *filename* does not exist or does not point to a
               file.
@@ -74,6 +84,7 @@ def load(filename, use_cache=True, cache_suffix='cache'):
     load_from_source = True
     original_changed = False
     load_from_cache = False
+    missing_permissions = False
 
     if use_cache and os.path.isfile(cache_name):
         original_changed = utils.file_changed(filename, cache_name)
@@ -115,10 +126,13 @@ def load(filename, use_cache=True, cache_suffix='cache'):
 
         # If the cache should be used, we will now generate it.
         if use_cache:
-            with open(cache_name, 'wb') as cache_fp:
-                json.dump(symbols, cache_fp)
+            try:
+                with open(cache_name, 'wb') as cache_fp:
+                    json.dump(symbols, cache_fp)
+            except IOError as exc:
+                missing_permissions = True
 
-    return symbols, original_changed
+    return symbols, original_changed, missing_permissions
 
 def parse_symbols(string):
     r"""
@@ -198,13 +212,73 @@ class Resource(object):
             #       res.string.IDC_CONTEXTMENU_1())
             container.SetString(*res.string.IDC_CONTEXTMENU_1.both)
 
+    The following attributes are only treated correctly if the :func:`load`
+    function was used to construct the Resource object.
+
     .. attribute:: changed
 
         This attribute is set by the :func:`load` function and is only
-        True when the resource was cached *and* has changed, therefore
-        the cache was rebuilt. When symbol-caching is deactivated,
-        this attribute will always be False.
+        True when the symbols had been cached but the original symbols file
+        has been modified. The resource has been reloaded in that case and
+        the cache re-written (if specified). If symbol-caching is not
+        activated, this field is False always.
+
+        It can be used to recognize the change of a description or symbols
+        header file during development.
+
+        The default value of this field is False.
+
+    .. attribute:: missing_permissions
+
+        This field is True if the program has insufficient permissions to
+        write any of the caches in :func:`load`.
     """
+
+    @classmethod
+    def from_resource_folder(cls, dirname, c4dres, cache=True,
+                             parse_description=False):
+        r"""
+        *New in 1.3.1* Parses a Cinema 4D resource folder structure and
+        its descriptions and returns a :class:`Resource` instance.
+
+        :param dirname: The name of the resource directory to parse. It
+                should contain a ``c4d_symbols.h`` file, otherwise the
+                directory is assumed invalid and the returned Resource
+                object contains no symbols at all.
+        :param c4dres: A :class:`c4d.plugins.GeResource` instance. Can be
+                passed None. This instance will directly correlate to the
+                constructor of the :class:`Resource` class.
+        :param cache: True if the caching should be done, False if not.
+                This parameter is passed to :func:`load`.
+        :param parse_description: If this parameter is passed a True
+                value, the description resources are parsed additionally
+                to the ``c4d_symbols.h`` file.
+        :raise OSError: If *dirname* does not point to a directory.
+        """
+
+        if not os.path.isdir(dirname):
+            raise OSError("'%s' is not a directory." % dirname)
+
+        res = cls(dirname, c4dres, {})
+
+        c4d_symbols = os.path.join(dirname, 'c4d_symbols.h')
+        if not os.path.isfile(c4d_symbols):
+            return res
+
+        symbols, changed, missing_permissions = load(c4d_symbols, cache)
+        res.add_symbols(symbols)
+        res.changed |= changed
+
+        if parse_description:
+            files = glob.glob(os.path.join(dirname, 'description', '*.h'))
+            for filename in files:
+                res, changed, perms = load(filename, cache)
+                res.add_symbols(symbols)
+                res.changed |= changed
+                missing_permissions |= perms
+
+        res.missing_permissions = missing_permissions
+        return res
 
     def __init__(self, dirname, c4dres, symbols={}):
         super(Resource, self).__init__()
@@ -213,6 +287,7 @@ class Resource(object):
         self.string = StringLoader(self)
         self.symbols = symbols
         self.changed = False
+        self.missing_permissions = False
 
     def __getattr__(self, name):
         return self.symbols[name]
@@ -276,10 +351,10 @@ class Resource(object):
 
         res_symbols.update(symbols)
 
-    def new_symbols(self, *symbols):   
+    def new_symbols(self, *symbols):
         r"""
         *New in 1.3.0*. Adds new symbols to the :class:`Resource` instance.
-        Each element in the *\*symbols* parameter may be a string or a tuple.   
+        Each element in the *\*symbols* parameter may be a string or a tuple.
         If it's a tuple, the name of the symbol is the first name, otherwise
         it will be the string itself. The second element in the tuple must be
         the value.
@@ -376,7 +451,7 @@ class ResourceString(object):
     def __call__(self, *args):
         r"""
         Wrapper for the :func:`c4d.plugins.GeLoadString` function for
-        loading the actual string from the resource.    
+        loading the actual string from the resource.
         """
 
         string = self.c4dres.LoadString(self.id)

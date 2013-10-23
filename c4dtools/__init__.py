@@ -2,18 +2,18 @@
 #
 # Copyright (c) 2012-2013, Niklas Rosenstein
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
-# are met: 
-# 
+# are met:
+#
 # 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer. 
+#    notice, this list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice, this list of conditions and the following disclaimer in
 #    the documentation and/or other materials provided with the
-#    distribution. 
-# 
+#    distribution.
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -26,7 +26,7 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 # The views and conclusions contained in the software and
 # documentation are those of the authors and should not be interpreted
 # as representing official policies,  either expressed or implied, of
@@ -41,7 +41,7 @@ Cinema 4D. The most significant feature is the cached parsing of dialog
 symbols, see :func:`c4dtools.prepare`.
 """
 
-__version__ = (1, 3, 0, 'final')
+__version__ = (1, 3, 1)
 __author__ = {'name': 'Niklas Rosenstein',
               'email': 'rosensteinniklas@gmail.com'}
 
@@ -148,26 +148,11 @@ def prepare(filename=None, c4dres=None, cache=True,
     if not os.path.isabs(path.lib):
         path.lib = os.path.join(path.root, path.lib)
 
-    path.c4d_symbols = os.path.join(path.res, 'c4d_symbols.h')
-    path.description = os.path.join(path.res, 'description')
-
     imp = importer.Importer(store_modules=imp_store_modules)
-
     if os.path.isdir(path.lib):
         imp.add(path.lib)
 
-    symbols_container = resource.Resource(path.res, c4dres, {})
+    res = resource.Resource.from_resource_folder(path.res, c4dres, cache,
+                                                 parse_description)
+    return (res, imp)
 
-    if os.path.isfile(path.c4d_symbols):
-        symbols, changed = resource.load(path.c4d_symbols, cache)
-        symbols_container.add_symbols(symbols)
-        symbols_container.changed |= changed
-
-    if parse_description:
-        files = glob.glob(os.path.join(path.description, '*.h'))
-        for filename in files:
-            symbols, changed = resource.load(filename, cache)
-            symbols_container.add_symbols(symbols)
-            symbols_container.changed |= changed
-
-    return (symbols_container, imp)
