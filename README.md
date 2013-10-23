@@ -1,5 +1,4 @@
-c4dtools - Scripting Utilities for the Cinema 4D Python API
-===========================================================
+## c4dtools - Py4D Programming Utilities
 
 `c4dtools` is a lightweight library providing convenient classes and functions
 that play nice with the Cinema 4D Python API. The most important tools are the
@@ -11,13 +10,13 @@ be cached by default (resulting in a file called c4d_symbols.cache, encoded
 in JSON format) to speed-up loading of the symbols. If the original c4d_symbols.h
 file is changed, the cache is rebuilt.
 
-## For Cinema 4D User
+### For Cinema 4D User
 
 The `c4dtools` is **not a plugin**. It is "add on" code that can be used by devlopers
 to make their life easier. A plugin that relies on this library requires you to install
 `c4dtools` before it can be used (the plugin will not even register to Cinema4D).
 
-### Installation
+#### Installation
 
 The `c4dtools` library is casual Python package. For the Python interpreter
 embedded into Cinema 4D to find it, you need to install it into the preferences
@@ -34,13 +33,13 @@ folder of your Cinema 4D installation.
 To install a new version of the library, simply delete the old `c4dtools` folder
 and paste the new one.
 
-### Alternative Installation
+#### Alternative Installation
 
 Add a directory to the `PYTHONPATH` environment variable where you put in the
 `c4dtools` library folder. Again, the library folder is *only* the one containing
 all the `*.py` files.
 
-## Example Code
+### Example Code
 
 ```python
 import c4d
@@ -127,7 +126,7 @@ if __name__ == '__main__':
     MyCommand().register()
 ```
 
-## Important notice for developers
+### Important notice for developers
 
 When you as a developer are relying on the fact that the user has installed
 the `c4dtools` library on his local machine (as described above), you're fine
@@ -140,13 +139,13 @@ It's a bit more tricky to deliver the library *with* a plugin. You as a
 developer have to ensure that the library imported from your plugin's local
 folder does not reside in `sys.modules` !!
 
-### Why?
+#### Why?
 
 The version you are delivering with your plugin might be older than the
 version another plugin requires. If your plugin is loaded before the other,
 it is importing a version of the library it can not run with.
 
-### How to fix?
+#### How to fix?
 
 It's just a six-liner actually, the middle-part is just for demonstrational
 purpose.
@@ -178,7 +177,7 @@ res, _ = c4dtools.prepare(__file__, __res__)
 Note: We're omitting the second value returned by `c4dtools.prepare()` since we do
 not need an Importer (we're doing it manually in the snippet above).
 
-## License
+### License
 
 The `c4dtools` library is licensed under the Simplified BSD License since
 version 1.1.0. It was licensed under the GNU General Public License before.
