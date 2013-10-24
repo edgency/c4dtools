@@ -69,7 +69,7 @@ def change_suffix(filename, new_suffix):
 def file_changed(original, copy):
     r"""
     Returns True when the filename pointed by *original* was modified
-    before the last time *copy* was modified, False otherwise. 
+    before the last time *copy* was modified, False otherwise.
     """
 
     return os.path.getmtime(original) > os.path.getmtime(copy)
@@ -368,9 +368,7 @@ def join_polygon_objects(objects, doc):
     doc.SetActiveObject(None)
     pred = None
     for obj in objects:
-        mat = obj.GetMg()
         obj = obj.GetClone(c4d.COPYFLAGS_NO_HIERARCHY)
-        obj.SetMl(mat)
 
         doc.InsertObject(obj, None, pred)
         obj.SetBit(c4d.BIT_ACTIVE)
