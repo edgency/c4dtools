@@ -162,7 +162,7 @@ def parse_symbols(string):
                 value = last_value + 1
 
             name = name.strip()
-            if name:
+            if name and name not in symbols:
                 last_value = value
                 symbols[name] = value
 
