@@ -585,7 +585,7 @@ def move_object_axis(obj, new_matrix=c4d.Matrix()):
         child.SetMl(mat * child.GetMl())
     obj.SetMl(new_matrix)
 
-# Backwards compatibility <= 1.3.0
+# Backwards compatibility < 1.3.1
 join_polygon_objects = connect_objects
 move_axis = move_object_axis
 bl_iterator = iter_baselist
