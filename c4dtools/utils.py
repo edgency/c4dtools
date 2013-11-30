@@ -451,6 +451,15 @@ def document_to_poly(doc, polygonize=True):
 
     return merge_objects(iter_all(), doc=pass_doc)
 
+def triangulate(obj):
+    r""" *New in 1.3.1*. Triangulate the :class:`c4d.PolygonObject` *obj*.
+    Affects the origin passed object directly. Returns True if the command
+    was successful, False if not. """
+
+    result = c4d.utils.SendModelingCommand(
+            c4d.MCOMMAND_TRIANGULATE, list=[obj])
+    return result
+
 def serial_info():
     r""" *New in 1.2.7*. Returns serial-information of the user. Returns
     ``(sinfo, is_multi)``. *is_multi* indicates whether the *sinfo* is a
