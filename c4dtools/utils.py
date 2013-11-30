@@ -331,68 +331,100 @@ def current_state_to_object(op, container=c4d.BaseContainer()):
 
     return result
 
-def join_polygon_objects(objects, doc):
+def connect_objects(objects, doc, insert=True, clone=True, and_delete=False,
+                    i_am_safe=False):
     r"""
-    Joins the passed objects by using the Cinema 4D Connect + Delete
-    command. *doc* must be a document that will be used temporarily.
-    It must be inserted in Cinema 4D's document list!
+    Joins the passed objects by using the Cinema 4D Connect Objects or
+    Connect + Delete command (depending on the *and_delete*  argument). If
+    *i_am_safe* is False and *doc* is not in the documents list of Cinema 4D,
+    a ValueError is raised. A ValueError is also raised if *objects* is an
+    empty sequence or iterable.
 
-    One should not pass the document the objects are stored in, since
-    this would mess up the undo chain.
+    If *insert* is True, the objects in *objects* are inserted into the
+    specified *doc* before executing the command. False can be passed for
+    this argument if it is garuanteed that all *objects* are already in
+    the specified document.
 
-    *Changed in 1.3.0*: The second argument is no more a matrix but
-    a :class:`c4d.documents.BaseDocument` that will be used temporarily.
+    If *clone* is True and *insert* is True, the objects are cloned before
+    inserting them to the document. Note that the Connect + Delete command
+    deletes the objects from the document after connecting them.
+
+    If *and_delete* is True, the Connect + Delete command is used instead
+    of the Connect Objects command. Usually always specified True when
+    specifieng True for the *clone* parameter.
+
+    .. warning::
+
+        *doc* must be a document that will be used temporarily and needs to
+        be inserted in Cinema 4D's document list already **before** calling
+        this function. The function will check if the document is actually
+        in the document list unless *i_am_safe* is True.
+
+    .. note::
+
+        Unless you throw *doc* away anyway, it is not recommended to pass
+        the original document to this function. :func:`c4c.CallCommand` is
+        used to re-produce the Connect + Delete command, and it will add
+        additional undo-steps to the specified document, and this might not
+        be what you want.
+
+    - *Changed in 1.3.0*: The second argument is no more a matrix but
+      a :class:`c4d.documents.BaseDocument` that will be used temporarily.
+    - *Changed in 1.3.1*: Added *insert*, *clone* and *i_am_safe* argument.
+      Renamed to connect_objects().
     """
 
-    # Create a list of unique tags for the object.
-    new_tags = []
-    tags = []
-    [tags.extend(obj.GetTags()) for obj in objects]
-    for tag in tags:
-        # Skip variable tags as they do not match the new
-        # number of datasets anymore.
-        if tag.CheckType(c4d.Tvariable):
-            continue
+    # Check if the document is inserted in the Cinema 4D documents
+    # list of the caller is not 100 percent shure about it.
+    if not i_am_safe:
+        curr_doc = c4d.documents.GetFirstDocument()
+        found = False
+        while curr_doc and not found:
+            if curr_doc == doc:
+                found = True
+            else:
+                curr_doc = curr_doc.GetNext()
 
-        # Check if such a tag already exists.
-        exists = False
-        for ex_tag in new_tags:
-            if ex_tag.CheckType(tag.GetType()):
-                exists = ex_tag.GetDataInstance() == tag.GetDataInstance()
-                if exists:
-                    break
+        if not found:
+            raise ValueError('join_polygon_objects() with an absent document.')
 
-        if not exists:
-            new_tags.append(tag.GetClone(c4d.COPYFLAGS_0))
+    # The function can not operate on an empty sequence/iterable of
+    # BaseObject instances.
+    objects = tuple(objects)
+    if not objects:
+        raise ValueError('join_polygon_objects() on empty sequence/iterable')
 
+    # Insert all objects from the specified list of objects
     doc.SetActiveObject(None)
     pred = None
     for obj in objects:
-        obj = obj.GetClone(c4d.COPYFLAGS_NO_HIERARCHY)
+        if insert:
+            if clone:
+                obj = obj.GetClone(c4d.COPYFLAGS_NO_HIERARCHY)
 
-        doc.InsertObject(obj, None, pred)
+            doc.InsertObject(obj, None, pred)
+            pred = obj
+
         obj.SetBit(c4d.BIT_ACTIVE)
-        pred = obj
 
     doc.Message(c4d.MSG_CHANGE)
 
-    # To make the call-command work.
+    # Set the document as the active document to make the CallCommand
+    # succeed, and then invoke it.
     c4d.documents.SetActiveDocument(doc)
-    c4d.CallCommand(16768) # Connect + Delete
+    cmdid = 12144 # Connect Objects
+    if and_delete: cmdid = 16768 # Connect + Delete
+    c4d.CallCommand(cmdid)
 
+    # Retrieve the one active object from the document, which is the result
+    # fot the Connect + Delete command, and remove it from the temporary one.
     obj = doc.GetActiveObject()
+    if obj: obj.Remove()
 
-    # Remove all tags from the object.
-    for tag in obj.GetTags():
-        if not tag.CheckType(c4d.Tvariable):
-            tag.Remove()
-
-    # Insert the new tags.
-    for tag in reversed(new_tags):
-        obj.InsertTag(tag)
-
-    obj.Remove()
     return obj
+
+# Backwards compatibility for <= 1.3.0
+join_polygon_objects = connect_objects
 
 def serial_info():
     r"""
@@ -1085,6 +1117,64 @@ class PolygonObjectInfo(object):
         self.midpoints = midpoints
         self.pointcount = len(points)
         self.polycount = len(polygons)
+
+class TempDoc(object):
+    r""" *New in 1.3.1*
+
+    Wrapper for a temporary document container. Creates a new empty
+    document or can be initialized with an existing document and automatically
+    inserts it into the Cinema 4D document list. If the TempDoc gets deleted
+    or flushed, the document is removed from the document list again. """
+
+    def __init__(self, doc=None):
+        super(TempDoc, self).__init__()
+        self._doc = None
+        self.init(doc)
+
+    def __del__(self):
+        self.flush()
+
+    def init(self, doc=None):
+        r""" Initialize the TempDoc with a new :class:`c4d.documents.BaseDocument`
+        instance. The previous document is flushed. """
+
+        self.flush()
+        if not doc: doc = c4d.documents.BaseDocument()
+        c4d.documents.InsertBaseDocument(doc)
+        self._doc = doc
+
+    def get(self):
+        r""" Return the internal document. """
+
+        return self._doc
+
+    def flush(self):
+        r""" Flushes the internal document and removes it from the document
+        list. """
+
+        if self._doc:
+            c4d.documents.KillDocument(self._doc)
+        self._doc = None
+
+    def release(self):
+        r""" Release the internal document without removing it from the
+        document list. """
+
+        doc = self._doc
+        self._doc = None
+        return doc
+
+    def connect_objects(self, objects, insert=True, clone=True,
+                        and_delete=False):
+        r""" Shortcut for the :func:`connect_objects` function where the
+        TempDoc will be used automatically. Raises a RuntimeError if the
+        TempDoc is not initialized. """
+
+        if not self._doc:
+            raise RuntimeError('TempDoc not initialized.')
+
+        return connect_objects(objects, self._doc, insert, clone,
+                               and_delete, i_am_safe=True)
 
 
 # Backwards compatibility for < 1.3.0
