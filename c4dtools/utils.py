@@ -399,9 +399,13 @@ def connect_objects(objects, doc, insert=True, clone=True, and_delete=False,
     pred = None
     for obj in objects:
         if insert:
+            mg = obj.GetMg()
             if clone:
                 obj = obj.GetClone(c4d.COPYFLAGS_NO_HIERARCHY)
+            else:
+                obj.Remove()
 
+            obj.SetMl(mg)
             doc.InsertObject(obj, None, pred)
             pred = obj
 
