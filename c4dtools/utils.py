@@ -432,16 +432,28 @@ def merge_objects(objects, doc=None):
     temp_doc = TempDoc()
     return temp_doc.connect_objects(objects, insert=True, clone=True)
 
-def document_to_poly(doc, polygonize=True):
+def document_to_poly(doc, polygonize=True, waste_doc=False):
     r""" *New in 1.3.1*.
 
     Convert a complete :class:`c4d.document.BaseDocument` object into a
     single polygon object. The specified *doc* will be polygonized before
-    merging all its objects if *polygonize* is True. """
+    merging all its objects if *polygonize* is True. If *waste_doc* is True,
+    it indicates that the document *doc* can be wasted (resulting in a more
+    efficient handling).
+
+    .. note::
+
+        Internally, if *polygonize* is True, *waste_doc* will be True
+        anyway, because :meth:`c4d.documents.BaseDocument.Polygonize` returns
+        a new document and that can be wasted safely.
+    """
+
+    if polygonize:
+        waste_doc = True
+        doc = doc.Polygonize()
 
     pass_doc = None
-    if polygonize:
-        doc = doc.Polygonize()
+    if waste_doc:
         pass_doc = doc
 
     def iter_all():
