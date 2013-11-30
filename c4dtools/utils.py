@@ -423,17 +423,38 @@ def connect_objects(objects, doc, insert=True, clone=True, and_delete=False,
 
     return obj
 
-# Backwards compatibility for <= 1.3.0
-join_polygon_objects = connect_objects
+def merge_objects(objects, doc=None):
+    r""" *New in 1.3.1*.
+
+    Shortcut for using the :meth:`connect_objects` function. Simply merges all
+    objects in the iterable *objects* into one polygon object. """
+
+    temp_doc = TempDoc()
+    return temp_doc.connect_objects(objects, insert=True, clone=True)
+
+def document_to_poly(doc, polygonize=True):
+    r""" *New in 1.3.1*.
+
+    Convert a complete :class:`c4d.document.BaseDocument` object into a
+    single polygon object. The specified *doc* will be polygonized before
+    merging all its objects if *polygonize* is True. """
+
+    pass_doc = None
+    if polygonize:
+        doc = doc.Polygonize()
+        pass_doc = doc
+
+    def iter_all():
+        for obj in doc.GetObjects():
+            for o in iter_tree(obj):
+                yield o
+
+    return merge_objects(iter_all(), doc=pass_doc)
 
 def serial_info():
-    r"""
-    *New in 1.2.7*.
-
-    Returns serial-information of the user. Returns ``(sinfo, is_multi)``.
-    *is_multi* indicates whether the *sinfo* is a multilicense information
-    or not.
-    """
+    r""" *New in 1.2.7*. Returns serial-information of the user. Returns
+    ``(sinfo, is_multi)``. *is_multi* indicates whether the *sinfo* is a
+    multilicense information or not. """
 
     is_multi = True
     sinfo = c4d.GeGetSerialInfo(c4d.SERIALINFO_MULTILICENSE)
@@ -442,9 +463,8 @@ def serial_info():
         sinfo = c4d.GeGetSerialInfo(c4d.SERIALINFO_CINEMA4D)
     return sinfo, is_multi
 
-def get_shader_bitmap(shader, irs=None):
-    r"""
-    A bitmap can be retrieved from a :class:`c4d.BaseShader` instance of
+def render_shader_bitmap(shader, irs=None):
+    r""" A bitmap can be retrieved from a :class:`c4d.BaseShader` instance of
     type ``Xbitmap`` using its :meth:`~c4d.BaseShader.GetBitmap` method.
     This method must however be wrapped in calls to
     :func:`~c4d.BaseShader.InitRender` and :func:`~c4d.BaseShader.FreeRender`.
@@ -453,7 +473,9 @@ def get_shader_bitmap(shader, irs=None):
     the bitmap and frees it.
 
     :Return: :class:`c4d.BaseBitmap` or ``None``.
-    """
+
+    - *Changed in 1.3.1*: Renamed from get_shader_bitmap. """
+
     if not irs:
         irs = render.InitRenderStruct()
     if shader.InitRender(irs) != c4d.INITRENDERRESULT_OK:
@@ -463,9 +485,8 @@ def get_shader_bitmap(shader, irs=None):
     shader.FreeRender()
     return bitmap
 
-def get_material_objects(doc):
-    r"""
-    *New in 1.2.6*.
+def assoc_mats_with_objects(doc):
+    r""" *New in 1.2.6*.
 
     This function goes through the complete object hierarchy of the
     passed :class:`c4d.BaseDocument` and all materials with the objects
@@ -478,7 +499,8 @@ def get_material_objects(doc):
 
     :param doc: :class:`c4d.BaseDocument`
     :return: :class:`AtomDict`
-    """
+
+    - *Changed in 1.3.1*: Renamed from get_material_objects. """
 
     data = AtomDict()
 
@@ -498,27 +520,27 @@ def get_material_objects(doc):
 
     return data
 
-def get_real_descid(descid, level=0):
-    r"""
-    *New in 1.2.9*. Returns the integer description id of the passed
-    :class:`c4d.DescID` object at a certain level.
+def iter_tree(obj, include_first=True):
+    r""" *New in 1.3.1*. Iterate over the complete tree of an
+    :class:`c4d.BaseList2D` instance. If *include_first* is True, the
+    passed *obj* is included in the iterate sequence. """
 
-    :param descid: :class:`c4d.DescID`
-    :param level: The level of the integer id to obtain. May be a negative
-            value to subscript from the right-hand side.
-    """
+    if include_first:
+        yield obj
 
-    if level < 0:
-        index = descid.GetDepth() + index
-    return descid[level].id
+    for child in obj.GetChildren():
+        for o in iter_tree(child, True):
+            yield o
 
-def bl_iterator(obj, safe=False):
+def iter_baselist(obj, safe=False):
     r"""
     *New in 1.2.8*. Yields the passed object and all following objects
     in the hierarchy (retrieved via :func:`~c4d.BaseList2D.GetNext`). When
     the *safe* parameter is True, the next object will be retrieved before
     yielding to allow the yielded object to be moved in the hierarchy and
     iteration continues as if the object was not moved in hierarchy.
+
+    - *Changed in 1.3.1*: Renamed from bl_iterator.
     """
 
     if safe:
@@ -543,7 +565,7 @@ def iter_inexclude(inexclude, doc=None):
         object = inexclude.ObjectFromIndex(doc, i)
         if object: yield object
 
-def move_axis(obj, new_matrix=c4d.Matrix()):
+def move_object_axis(obj, new_matrix=c4d.Matrix()):
     r"""
     *New in 1.3.0*: Normalize the axis of an object by adjusting the local
     matrix of the child objects and, if *obj* is a polygon object, it's
@@ -562,6 +584,13 @@ def move_axis(obj, new_matrix=c4d.Matrix()):
     for child in obj.GetChildren():
         child.SetMl(mat * child.GetMl())
     obj.SetMl(new_matrix)
+
+# Backwards compatibility <= 1.3.0
+join_polygon_objects = connect_objects
+move_axis = move_object_axis
+bl_iterator = iter_baselist
+get_shader_bitmap = render_shader_bitmap
+get_material_objects = assoc_mats_with_objects
 
 # =============================================================================
 #                                Utility classes
